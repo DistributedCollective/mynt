@@ -1,9 +1,9 @@
 pragma solidity ^0.5.17;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20Detailed.sol";
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/ownership/Ownable.sol";
 import "../interfaces/IApproveAndCall.sol";
+import "./ERC20Permit.sol";
 
 /**
  * @title Token
@@ -12,7 +12,7 @@ import "../interfaces/IApproveAndCall.sol";
  * mint and burn functions.
  */
 
-contract SovrynDollarToken is ERC20, ERC20Detailed, Ownable {
+contract SovrynDollarToken is ERC20Permit, ERC20Detailed, Ownable {
     // events
 
     /**
@@ -20,12 +20,12 @@ contract SovrynDollarToken is ERC20, ERC20Detailed, Ownable {
      * @param _newMyntAssetProxy                    Address of new Mynt mAsset proxy.
      * @param _newMyntAssetImplementation           Address of new Mynt mAsset implementation.
      */
-    event MyntProxyConfigChanged(address indexed _newMyntAssetProxy,  address indexed _newMyntAssetImplementation);
+    event MyntAssetConfigChanged(address indexed _newMyntAssetProxy,  address indexed _newMyntAssetImplementation);
 
     /**
      * @dev Emitted when Mynt Basket Manager config is changed.
-     * @param _newMyntBasketManagerProxy                    Address of new Mynt mAsset proxy.
-     * @param _newMyntBasketManagerImplementation           Address of new Mynt mAsset implementation.
+     * @param _newMyntBasketManagerProxy                    Address of new Mynt Basket Manager proxy.
+     * @param _newMyntBasketManagerImplementation           Address of new Mynt Basket Manager implementation.
      */
     event MyntBasketManagerConfigChanged(address indexed _newMyntBasketManagerProxy,  address indexed _newMyntBasketManagerImplementation);
 
@@ -38,7 +38,7 @@ contract SovrynDollarToken is ERC20, ERC20Detailed, Ownable {
 
     // modifiers
     modifier onlyMyntAssetProxy() {
-      require(msg.sender == myntAssetProxy, "unathorized mAsset proxy");
+      require(msg.sender == myntAssetProxy, "DLLR:unathorized mAsset proxy");
       _;
     }
 
@@ -55,9 +55,9 @@ contract SovrynDollarToken is ERC20, ERC20Detailed, Ownable {
      */
     function setMyntAssetConfig(address _myntAssetProxy, address _myntAssetImplementation) external onlyOwner {
         require(_myntAssetProxy != address(0) && _myntAssetImplementation != address(0), "invalid address");
-        myntAssetProxy = _myntAssetImplementation;
+        myntAssetProxy = _myntAssetProxy;
         myntAssetImplementation = _myntAssetImplementation;
-        emit MyntProxyConfigChanged(myntAssetProxy, myntAssetImplementation);
+        emit MyntAssetConfigChanged(myntAssetProxy, myntAssetImplementation);
     }
 
      /**
@@ -139,6 +139,30 @@ contract SovrynDollarToken is ERC20, ERC20Detailed, Ownable {
     }
 
     /**
+     * @notice transfer utilizing EIP-2612, to reduce the additional sending transaction for doing the approval to the spender.
+     *
+     * @notice destination cannot be:
+     * - Zero address.
+     * - DDLR contract address.
+     * - Sovryn Mynt mAsset proxy & implementation address.
+     * - Sovryn Mynt Basket Manager proxy & implementation address.
+     *
+     * @dev By calling this function, the allowance will be overwritten by the total amount.
+     *
+     * @param _from Sender of the token.
+     * @param _to Recipient of the token.
+     * @param _amount The amount of the token that will be transferred.
+     * @param _deadline Expiration time of the signature.
+     * @param _v Last 1 byte of ECDSA signature.
+     * @param _r First 32 bytes of ECDSA signature.
+     * @param _s 32 bytes after _r in ECDSA signature.
+     */
+    function transferWithPermit(address _from, address _to, uint256 _amount, uint256 _deadline, uint8 _v, bytes32 _r, bytes32 _s) external {
+        permit(_from, msg.sender, _amount, _deadline, _v, _r, _s);
+        transferFrom(_from, _to, _amount);
+    }
+
+    /**
      * @notice Approves and then calls the receiving contract.
      * Useful to encapsulate sending tokens to a contract in one call.
      * Solidity has no native way to send tokens to contracts.
@@ -150,8 +174,8 @@ contract SovrynDollarToken is ERC20, ERC20Detailed, Ownable {
     function approveAndCall(
         address _spender,
         uint256 _amount,
-        bytes memory _data
-    ) public {
+        bytes calldata _data
+    ) external {
         approve(_spender, _amount);
         IApproveAndCall(_spender).receiveApproval(msg.sender, _amount, address(this), _data);
     }
