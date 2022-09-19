@@ -1,0 +1,48 @@
+{
+  "Migrations": {
+    "address": "0xe489a8AEb98635B2ee72D0609Fcc2eA59e9C6820"
+  },
+  "ETHs_MassetProxy": {
+    "address": "0x4BF113905d7F69202106F613308bb02C84AaDF2F",
+    "initialized": true
+  },
+  "ETHs_BasketManager": {
+    "address": "0xBD3c0f456fBfB76aF2E5E4Aabe87859bcbCD0eEa"
+  },
+  "ETHs_Token": {
+    "address": "0x1D931Bf8656d795E50eF6D639562C5bD8Ac2B78f"
+  },
+  "ETHs_Masset": {
+    "address": "0xD97Fa81CB0D8f031b1A5E6da71BEcdefCe6DB015"
+  },
+  "XUSD_MassetProxy": {
+    "address": "0x1440d19436bEeaF8517896bffB957a88EC95a00F",
+    "initialized": true
+  },
+  "XUSD_BasketManager": {
+    "address": "0xee8EA85FeBA403cf0E44699597Cd6276512469E4"
+  },
+  "XUSD_Token": {
+    "address": "0xb5999795BE0EbB5bAb23144AA5FD6A02D080299F"
+  },
+  "XUSD_Masset": {
+    "address": "0xad624f56f80cDb5E1b37d314981672e24F0917EA"
+  },
+  "BNBs_MassetProxy": {
+    "address": "0xafD905Fe2EdBF5A7367A73B0F1e6a62Cb5E27D3e",
+    "initialized": true
+  },
+  "BNBs_BasketManager": {
+    "address": "0xbabFEdC4E3D0410eeC576F0a635D761630458Fe6"
+  },
+  "BNBs_Token": {
+    "address": "0x6D9659bdF5b1A1dA217f7BbAf7dBAF8190E2e71B"
+  },
+  "BNBs_Masset": {
+    "address": "0x5A179147b2497ccE569227a006E7eBA990B4DF55"
+  },
+  "MyntToken": {
+    "address": "0xf1E5a63e58631fB253d03Dc702451aA0B33D09f8",
+    "initialized": true
+  }
+}
