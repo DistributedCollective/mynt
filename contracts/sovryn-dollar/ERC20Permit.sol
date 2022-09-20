@@ -21,7 +21,7 @@ contract ERC20Permit is ERC20, IERC20Permit {
     bytes32 private constant NAME_HASH = keccak256("Sovryn Dollar");
     bytes32 private constant VERSION_HASH = keccak256("1");
 
-    bytes32 private PERMIT_TYPEHASH = keccak256("Permit(address owner,address spender,uint256 val ue,uint256 nonce,uint256 deadline)");
+    bytes32 public constant PERMIT_TYPEHASH = keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
 
     /**
      * @dev See {IERC20Permit-permit}.

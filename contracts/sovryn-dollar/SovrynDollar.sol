@@ -189,7 +189,7 @@ contract SovrynDollarToken is ERC20Permit, ERC20Detailed, Ownable {
 
         require(
             _recipient != myntAssetProxy && _recipient != myntAssetImplementation && _recipient != myntBasketManagerProxy && _recipient != myntBasketManagerImplementation,
-            "DLLR: Invalid address. Cannot transfer DLLR directly to a Sovryn Mynt protocol address."
+            "DLLR: Invalid address. Cannot transfer DLLR directly to a Sovryn Mynt protocol address"
         );
     }
 }
