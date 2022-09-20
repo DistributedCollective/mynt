@@ -17,11 +17,22 @@ const NOT_OWNER_EXCEPTION = "VM Exception while processing transaction: reverted
 const tokenName = "Sovryn Dollar";
 const tokenSymbol = "DLLR";
 const decimals = 18;
+const maxDeadline = MAX_UINT256;
+const name = "Sovryn Dollar";
+const version = "1";
+
+const buildData = (chainId, verifyingContract, from, spender, amount, nonce, deadline = maxDeadline) => ({
+    primaryType: "Permit",
+    types: { EIP712Domain, Permit },
+    domain: { name, version, chainId, verifyingContract },
+    message: { owner: from, spender, value: amount, nonce, deadline }
+});
 
 contract("SovrynDollarToken", async (accounts) => {
     const [owner, user, myntAssetProxy, myntAssetImplementation, myntBasketManagerProxy, myntBasketManagerImplementation] = accounts;
 
     let token: SovrynDollarTokenInstance;
+    let chainId;
 
     beforeEach("before all", async () => {
         token = await SovrynDollarToken.new({ from: owner });
@@ -286,21 +297,10 @@ contract("SovrynDollarToken", async (accounts) => {
     });
 
     describe("permit", async () => {
-        const name = "Sovryn Dollar";
-        const version = "1";
         const ownerWallet = Wallet.generate();
         const spenderWallet = Wallet.generate();
-        const owner = ownerWallet.getAddressString();
+        const ownerPermit = ownerWallet.getAddressString();
         const spender = spenderWallet.getAddressString();
-        const maxDeadline = MAX_UINT256;
-        let chainId;
-
-        const buildData = (chainId, verifyingContract, from, spender, amount, nonce, deadline = maxDeadline) => ({
-            primaryType: "Permit",
-            types: { EIP712Domain, Permit },
-            domain: { name, version, chainId, verifyingContract },
-            message: { owner: from, spender, value: amount, nonce, deadline }
-        });
 
         before(async () => {
             chainId = await token.getChainID();
@@ -311,32 +311,32 @@ contract("SovrynDollarToken", async (accounts) => {
                 const deadline = MAX_UINT256;
 
                 const firstValue = toWei("100");
-                const firstNonce = await token.nonces(owner);
+                const firstNonce = await token.nonces(ownerPermit);
 
-                const firstData = buildData(chainId, token.address, owner, spender, firstValue, firstNonce, deadline) as any;
+                const firstData = buildData(chainId, token.address, ownerPermit, spender, firstValue, firstNonce, deadline) as any;
                 const firstSignature = signTypedMessage(ownerWallet.getPrivateKey(), { data: firstData });
 
                 const { v } = fromRpcSig(firstSignature);
                 const { r, s }: any = fromRpcSig(firstSignature);
 
                 // incorrect amount
-                await expectRevert(token.permit(owner, spender, toWei("500"), deadline, v, r, s), "DLLR:INVALID_SIGNATURE");
+                await expectRevert(token.permit(ownerPermit, spender, toWei("500"), deadline, v, r, s), "DLLR:INVALID_SIGNATURE");
             });
 
             it("signature expired", async () => {
                 const deadline = new BN(1);
 
                 const firstValue = toWei("100");
-                const firstNonce = await token.nonces(owner);
+                const firstNonce = await token.nonces(ownerPermit);
 
-                const firstData = buildData(chainId, token.address, owner, spender, firstValue, firstNonce, deadline) as any;
+                const firstData = buildData(chainId, token.address, ownerPermit, spender, firstValue, firstNonce, deadline) as any;
                 const firstSignature = signTypedMessage(ownerWallet.getPrivateKey(), { data: firstData });
 
                 const { v } = fromRpcSig(firstSignature);
                 const { r, s }: any = fromRpcSig(firstSignature);
 
                 // incorrect amount
-                await expectRevert(token.permit(owner, spender, firstValue, deadline, v, r, s), "DLLR:AUTH_EXPIRED");
+                await expectRevert(token.permit(ownerPermit, spender, firstValue, deadline, v, r, s), "DLLR:AUTH_EXPIRED");
             });
         });
 
@@ -354,53 +354,46 @@ contract("SovrynDollarToken", async (accounts) => {
                 const deadline = MAX_UINT256;
 
                 const firstValue = toWei("100");
-                const firstNonce = await token.nonces(owner);
+                const firstNonce = await token.nonces(ownerPermit);
 
-                const firstData = buildData(chainId, token.address, owner, spender, firstValue, firstNonce, deadline) as any;
+                const firstData = buildData(chainId, token.address, ownerPermit, spender, firstValue, firstNonce, deadline) as any;
                 const firstSignature = signTypedMessage(ownerWallet.getPrivateKey(), { data: firstData });
 
-                var { v } = fromRpcSig(firstSignature);
-                var { r, s }: any = fromRpcSig(firstSignature);
-
-                const firstReceipt = await token.permit(owner, spender, firstValue, deadline, v, r, s);
+                const firstECDSASig = fromRpcSig(firstSignature);
+                const firstReceipt = await token.permit(ownerPermit, spender, firstValue, deadline, firstECDSASig.v, firstECDSASig.r as any, firstECDSASig.s as any);
                 expectEvent(firstReceipt, "Approval", {
-                    owner: toChecksumAddress(owner),
+                    owner: toChecksumAddress(ownerPermit),
                     spender: toChecksumAddress(spender),
                     value: firstValue
                 });
-                expect((await token.allowance(owner, spender)).toString()).to.equal(firstValue);
-                expect((await token.nonces(owner)).toString()).to.equal("1");
+                expect((await token.allowance(ownerPermit, spender)).toString()).to.equal(firstValue);
+                expect((await token.nonces(ownerPermit)).toString()).to.equal("1");
 
                 const secondValue = toWei("500");
-                const secondNonce = await token.nonces(owner);
+                const secondNonce = await token.nonces(ownerPermit);
 
-                const secondData = buildData(chainId, token.address, owner, spender, secondValue, secondNonce, deadline) as any;
+                const secondData = buildData(chainId, token.address, ownerPermit, spender, secondValue, secondNonce, deadline) as any;
                 const secondSignature = signTypedMessage(ownerWallet.getPrivateKey(), { data: secondData });
 
-                var { v } = fromRpcSig(secondSignature);
-                var { r, s }: any = fromRpcSig(secondSignature);
+                const secondECDSASig = fromRpcSig(secondSignature);
 
-                const secondReceipt = await token.permit(owner, spender, secondValue, deadline, v, r, s);
+                const secondReceipt = await token.permit(ownerPermit, spender, secondValue, deadline, secondECDSASig.v, secondECDSASig.r as any, secondECDSASig.s as any);
                 expectEvent(secondReceipt, "Approval", {
-                    owner: toChecksumAddress(owner),
+                    owner: toChecksumAddress(ownerPermit),
                     spender: toChecksumAddress(spender),
                     value: secondValue
                 });
-                expect((await token.allowance(owner, spender)).toString()).to.equal(secondValue);
-                expect((await token.nonces(owner)).toString()).to.equal("2");
+                expect((await token.allowance(ownerPermit, spender)).toString()).to.equal(secondValue);
+                expect((await token.nonces(ownerPermit)).toString()).to.equal("2");
             });
         });
     });
 
     describe("transferWithPermit", async () => {
-        const name = "Sovryn Dollar";
-        const version = "1";
         const ownerWallet = Wallet.generate();
         const spenderWallet = Wallet.generate();
-        const owner = ownerWallet.getAddressString();
+        const ownerPermit = ownerWallet.getAddressString();
         const spender = spenderWallet.getAddressString();
-        const maxDeadline = MAX_UINT256;
-        let chainId;
 
         before(async () => {
             chainId = await token.getChainID();
@@ -412,30 +405,23 @@ contract("SovrynDollarToken", async (accounts) => {
             });
         });
 
-        const buildData = (chainId, verifyingContract, from, spender, amount, nonce, deadline = maxDeadline) => ({
-            primaryType: "Permit",
-            types: { EIP712Domain, Permit },
-            domain: { name, version, chainId, verifyingContract },
-            message: { owner: from, spender, value: amount, nonce, deadline }
-        });
-
         context("transferWithPermit should fail", async () => {
             it("when signature expired", async () => {
                 const deadline = new BN(1);
                 const amount = toWei("100");
-                const nonce = await token.nonces(owner);
-                const data = buildData(chainId, token.address, owner, spender, amount, nonce, deadline) as any;
+                const nonce = await token.nonces(ownerPermit);
+                const data = buildData(chainId, token.address, ownerPermit, spender, amount, nonce, deadline) as any;
                 const signature = signTypedMessage(ownerWallet.getPrivateKey(), { data });
                 const { v } = fromRpcSig(signature);
                 const { r, s }: any = fromRpcSig(signature);
-                await expectRevert(token.transferWithPermit(owner, spender, amount, deadline, v, r, s), "DLLR:AUTH_EXPIRED");
+                await expectRevert(token.transferWithPermit(ownerPermit, spender, amount, deadline, v, r, s), "DLLR:AUTH_EXPIRED");
             });
 
             it("when recipient is zero address", async () => {
                 const deadline = MAX_UINT256;
                 const amount = toWei("100");
-                const nonce = await token.nonces(owner);
-                const data = buildData(chainId, token.address, owner, spender, amount, nonce, deadline) as any;
+                const nonce = await token.nonces(ownerPermit);
+                const data = buildData(chainId, token.address, ownerPermit, spender, amount, nonce, deadline) as any;
                 const signature = signTypedMessage(ownerWallet.getPrivateKey(), { data });
                 const { v } = fromRpcSig(signature);
                 const { r, s }: any = fromRpcSig(signature);
@@ -447,7 +433,7 @@ contract("SovrynDollarToken", async (accounts) => {
                 const account = await ethers.provider.getSigner(spender);
                 const tokenInstance = await ethers.getContractAt("SovrynDollarToken", token.address, account);
                 await expectRevert(
-                    tokenInstance.transferWithPermit(owner, ZERO_ADDRESS, amount, deadline.toString(), v, r, s),
+                    tokenInstance.transferWithPermit(ownerPermit, ZERO_ADDRESS, amount, deadline.toString(), v, r, s),
                     "DLLR: Invalid address. Cannot transfer DLLR directly to the DLLR contract or the null address"
                 );
             });
@@ -455,8 +441,8 @@ contract("SovrynDollarToken", async (accounts) => {
             it("when recipient is DLLR contract address", async () => {
                 const deadline = MAX_UINT256;
                 const amount = toWei("100");
-                const nonce = await token.nonces(owner);
-                const data = buildData(chainId, token.address, owner, spender, amount, nonce, deadline) as any;
+                const nonce = await token.nonces(ownerPermit);
+                const data = buildData(chainId, token.address, ownerPermit, spender, amount, nonce, deadline) as any;
                 const signature = signTypedMessage(ownerWallet.getPrivateKey(), { data });
                 const { v } = fromRpcSig(signature);
                 const { r, s }: any = fromRpcSig(signature);
@@ -468,7 +454,7 @@ contract("SovrynDollarToken", async (accounts) => {
                 const account = await ethers.provider.getSigner(spender);
                 const tokenInstance = await ethers.getContractAt("SovrynDollarToken", token.address, account);
                 await expectRevert(
-                    tokenInstance.transferWithPermit(owner, token.address, amount, deadline.toString(), v, r, s),
+                    tokenInstance.transferWithPermit(ownerPermit, token.address, amount, deadline.toString(), v, r, s),
                     "DLLR: Invalid address. Cannot transfer DLLR directly to the DLLR contract or the null address"
                 );
             });
@@ -476,8 +462,8 @@ contract("SovrynDollarToken", async (accounts) => {
             it("when recipient is mynt mAsset proxy address", async () => {
                 const deadline = MAX_UINT256;
                 const amount = toWei("100");
-                const nonce = await token.nonces(owner);
-                const data = buildData(chainId, token.address, owner, spender, amount, nonce, deadline) as any;
+                const nonce = await token.nonces(ownerPermit);
+                const data = buildData(chainId, token.address, ownerPermit, spender, amount, nonce, deadline) as any;
                 const signature = signTypedMessage(ownerWallet.getPrivateKey(), { data });
                 const { v } = fromRpcSig(signature);
                 const { r, s }: any = fromRpcSig(signature);
@@ -489,7 +475,7 @@ contract("SovrynDollarToken", async (accounts) => {
                 const account = await ethers.provider.getSigner(spender);
                 const tokenInstance = await ethers.getContractAt("SovrynDollarToken", token.address, account);
                 await expectRevert(
-                    tokenInstance.transferWithPermit(owner, myntAssetProxy, amount, deadline.toString(), v, r, s),
+                    tokenInstance.transferWithPermit(ownerPermit, myntAssetProxy, amount, deadline.toString(), v, r, s),
                     "DLLR: Invalid address. Cannot transfer DLLR directly to a Sovryn Mynt protocol address"
                 );
             });
@@ -497,8 +483,8 @@ contract("SovrynDollarToken", async (accounts) => {
             it("when recipient is mynt mAsset implementation address", async () => {
                 const deadline = MAX_UINT256;
                 const amount = toWei("100");
-                const nonce = await token.nonces(owner);
-                const data = buildData(chainId, token.address, owner, spender, amount, nonce, deadline) as any;
+                const nonce = await token.nonces(ownerPermit);
+                const data = buildData(chainId, token.address, ownerPermit, spender, amount, nonce, deadline) as any;
                 const signature = signTypedMessage(ownerWallet.getPrivateKey(), { data });
                 const { v } = fromRpcSig(signature);
                 const { r, s }: any = fromRpcSig(signature);
@@ -510,7 +496,7 @@ contract("SovrynDollarToken", async (accounts) => {
                 const account = await ethers.provider.getSigner(spender);
                 const tokenInstance = await ethers.getContractAt("SovrynDollarToken", token.address, account);
                 await expectRevert(
-                    tokenInstance.transferWithPermit(owner, myntAssetImplementation, amount, deadline.toString(), v, r, s),
+                    tokenInstance.transferWithPermit(ownerPermit, myntAssetImplementation, amount, deadline.toString(), v, r, s),
                     "DLLR: Invalid address. Cannot transfer DLLR directly to a Sovryn Mynt protocol address"
                 );
             });
@@ -518,8 +504,8 @@ contract("SovrynDollarToken", async (accounts) => {
             it("when recipient is mynt basket manager proxy address", async () => {
                 const deadline = MAX_UINT256;
                 const amount = toWei("100");
-                const nonce = await token.nonces(owner);
-                const data = buildData(chainId, token.address, owner, spender, amount, nonce, deadline) as any;
+                const nonce = await token.nonces(ownerPermit);
+                const data = buildData(chainId, token.address, ownerPermit, spender, amount, nonce, deadline) as any;
                 const signature = signTypedMessage(ownerWallet.getPrivateKey(), { data });
                 const { v } = fromRpcSig(signature);
                 const { r, s }: any = fromRpcSig(signature);
@@ -531,7 +517,7 @@ contract("SovrynDollarToken", async (accounts) => {
                 const account = await ethers.provider.getSigner(spender);
                 const tokenInstance = await ethers.getContractAt("SovrynDollarToken", token.address, account);
                 await expectRevert(
-                    tokenInstance.transferWithPermit(owner, myntBasketManagerProxy, amount, deadline.toString(), v, r, s),
+                    tokenInstance.transferWithPermit(ownerPermit, myntBasketManagerProxy, amount, deadline.toString(), v, r, s),
                     "DLLR: Invalid address. Cannot transfer DLLR directly to a Sovryn Mynt protocol address"
                 );
             });
@@ -539,8 +525,8 @@ contract("SovrynDollarToken", async (accounts) => {
             it("when recipient is mynt basket manager implementation address", async () => {
                 const deadline = MAX_UINT256;
                 const amount = toWei("100");
-                const nonce = await token.nonces(owner);
-                const data = buildData(chainId, token.address, owner, spender, amount, nonce, deadline) as any;
+                const nonce = await token.nonces(ownerPermit);
+                const data = buildData(chainId, token.address, ownerPermit, spender, amount, nonce, deadline) as any;
                 const signature = signTypedMessage(ownerWallet.getPrivateKey(), { data });
                 const { v } = fromRpcSig(signature);
                 const { r, s }: any = fromRpcSig(signature);
@@ -552,17 +538,16 @@ contract("SovrynDollarToken", async (accounts) => {
                 const account = await ethers.provider.getSigner(spender);
                 const tokenInstance = await ethers.getContractAt("SovrynDollarToken", token.address, account);
                 await expectRevert(
-                    tokenInstance.transferWithPermit(owner, myntBasketManagerImplementation, amount, deadline.toString(), v, r, s),
+                    tokenInstance.transferWithPermit(ownerPermit, myntBasketManagerImplementation, amount, deadline.toString(), v, r, s),
                     "DLLR: Invalid address. Cannot transfer DLLR directly to a Sovryn Mynt protocol address"
                 );
             });
 
             it("if sender got insufficient balance", async () => {
                 const deadline = MAX_UINT256;
-                const initialOwnerBalance = toWei("1000000");
                 const amount = toWei("100");
-                const nonce = await token.nonces(owner);
-                const data = buildData(chainId, token.address, owner, spender, amount, nonce, deadline) as any;
+                const nonce = await token.nonces(ownerPermit);
+                const data = buildData(chainId, token.address, ownerPermit, spender, amount, nonce, deadline) as any;
                 const signature = signTypedMessage(ownerWallet.getPrivateKey(), { data });
                 const { v } = fromRpcSig(signature);
                 const { r, s }: any = fromRpcSig(signature);
@@ -575,7 +560,7 @@ contract("SovrynDollarToken", async (accounts) => {
                 const account = await ethers.provider.getSigner(spender);
                 const tokenInstance = await ethers.getContractAt("SovrynDollarToken", token.address, account);
                 await expectRevert(
-                    tokenInstance.transferWithPermit(owner, user, amount, deadline.toString(), v, r, s),
+                    tokenInstance.transferWithPermit(ownerPermit, user, amount, deadline.toString(), v, r, s),
                     "ERC20: transfer amount exceeds balance'"
                 );
             });
@@ -586,8 +571,8 @@ contract("SovrynDollarToken", async (accounts) => {
                 const deadline = MAX_UINT256;
                 const initialOwnerBalance = toWei("1000000");
                 const amount = toWei("100");
-                const nonce = await token.nonces(owner);
-                const data = buildData(chainId, token.address, owner, spender, amount, nonce, deadline) as any;
+                const nonce = await token.nonces(ownerPermit);
+                const data = buildData(chainId, token.address, ownerPermit, spender, amount, nonce, deadline) as any;
                 const signature = signTypedMessage(ownerWallet.getPrivateKey(), { data });
                 const { v } = fromRpcSig(signature);
                 const { r, s }: any = fromRpcSig(signature);
@@ -597,21 +582,21 @@ contract("SovrynDollarToken", async (accounts) => {
                     params: [spender]
                 });
 
-                await token.mint(owner, initialOwnerBalance, { from: myntAssetProxy });
+                await token.mint(ownerPermit, initialOwnerBalance, { from: myntAssetProxy });
 
                 const userInitialBalance = await token.balanceOf(user);
-                const ownerInitialBalance = await token.balanceOf(owner);
-                const spenderInitialAllowance = await token.allowance(owner, spender);
+                const ownerInitialBalance = await token.balanceOf(ownerPermit);
+                const spenderInitialAllowance = await token.allowance(ownerPermit, spender);
                 expect(userInitialBalance.toString()).to.equal("0");
                 expect(spenderInitialAllowance.toString()).to.equal("0");
 
                 const account = await ethers.provider.getSigner(spender);
                 const tokenInstance = await ethers.getContractAt("SovrynDollarToken", token.address, account);
-                await tokenInstance.transferWithPermit(owner, user, amount, deadline.toString(), v, r, s);
+                await tokenInstance.transferWithPermit(ownerPermit, user, amount, deadline.toString(), v, r, s);
 
                 const userLatestBalance = await token.balanceOf(user);
-                const ownerLatestBalance = await token.balanceOf(owner);
-                const spenderLatestAllowance = await token.allowance(owner, spender);
+                const ownerLatestBalance = await token.balanceOf(ownerPermit);
+                const spenderLatestAllowance = await token.allowance(ownerPermit, spender);
                 expect(userLatestBalance.toString()).to.equal(amount);
                 expect(spenderLatestAllowance.toString()).to.equal("0");
                 expect(ownerLatestBalance.toString()).to.equal(ownerInitialBalance.sub(new BN(amount)).toString());
