@@ -16,7 +16,7 @@ contract("FeesVault", async (accounts) => {
 
     const [user1, user2, owner] = accounts;
 
-    before("before all", async () => { });
+    before("before all", async () => {});
 
     describe("initialize", async () => {
         beforeEach(async () => {
@@ -27,7 +27,7 @@ contract("FeesVault", async (accounts) => {
             it("when all params are valid", async () => {
                 await feesVault.initialize({ from: owner });
 
-                expect((await feesVault.owner())).to.eq(owner, "owner should be settled");
+                expect(await feesVault.owner()).to.eq(owner, "owner should be settled");
             });
         });
 
@@ -36,7 +36,7 @@ contract("FeesVault", async (accounts) => {
                 await feesVault.initialize();
                 await expectRevert(
                     feesVault.initialize(),
-                    "VM Exception while processing transaction: reverted with reason string 'already initialized'",
+                    "VM Exception while processing transaction: reverted with reason string 'already initialized'"
                 );
             });
         });

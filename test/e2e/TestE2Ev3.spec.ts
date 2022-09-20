@@ -4,7 +4,7 @@ import envSetup from "@utils/env_setup";
 import { tokens } from "@utils/tools";
 import { FEE_PRECISION } from "@utils/constants";
 import { StandardAccounts } from "@utils/standardAccounts";
-import { Instances, isDevelopmentNetwork } from 'migrations/utils/addresses';
+import { Instances, isDevelopmentNetwork } from "migrations/utils/addresses";
 import { setNetwork, getDeployed, clearState } from "migrations/utils/state";
 import { FeesManagerInstance, MassetV3Instance, BasketManagerV3Instance } from "types/generated";
 import { DeploymentTags } from "migrations/utils/DeploymentTags";
@@ -76,10 +76,7 @@ contract("version 3 E2E test", async (accounts) => {
         const basset1BalanceAfterDeposit = await basset1Token.balanceOf(sa.default);
         const massetBalanceAfterDeposit = await token.balanceOf(sa.default);
 
-        expect(basset1BalanceAfterDeposit).bignumber.to.eq(
-            initialUserBasset1Balance.sub(depositAmount),
-            "tokens should be transfered"
-        );
+        expect(basset1BalanceAfterDeposit).bignumber.to.eq(initialUserBasset1Balance.sub(depositAmount), "tokens should be transfered");
         expect(await token.balanceOf(feesVaultAddress)).bignumber.to.eq(
             initialFeesVaultBalance.add(depositFee),
             "deposit fee should be charged"
@@ -106,10 +103,7 @@ contract("version 3 E2E test", async (accounts) => {
 
         const reminder = massetsToTake.sub(takenMassets);
 
-        expect(basset1BalanceAfterRedeem).bignumber.to.eq(
-            basset1BalanceAfterDeposit.add(redeemedBassets),
-            "tokens should be transfered"
-        );
+        expect(basset1BalanceAfterRedeem).bignumber.to.eq(basset1BalanceAfterDeposit.add(redeemedBassets), "tokens should be transfered");
         expect(await token.balanceOf(feesVaultAddress)).bignumber.to.eq(
             initialFeesVaultBalance.add(depositFee).add(redeemFee),
             "withdrawal fee should be charged"
@@ -120,14 +114,15 @@ contract("version 3 E2E test", async (accounts) => {
             "masset balance is invalid"
         );
 
-        const sumOfVaults = depositFee
-            .add(redeemFee);
+        const sumOfVaults = depositFee.add(redeemFee);
 
-        const initialSumOfFunds = (await basketManager.convertBassetToMassetQuantity(basset1, initialUserBasset1Balance))[0]
-            .add(initialUserMassetBalance);
+        const initialSumOfFunds = (await basketManager.convertBassetToMassetQuantity(basset1, initialUserBasset1Balance))[0].add(
+            initialUserMassetBalance
+        );
 
-        const sumOfUserFundsAfterRedeem = (await basketManager.convertBassetToMassetQuantity(basset1, basset1BalanceAfterRedeem))[0]
-            .add(massetBalanceAfterRedeem);
+        const sumOfUserFundsAfterRedeem = (await basketManager.convertBassetToMassetQuantity(basset1, basset1BalanceAfterRedeem))[0].add(
+            massetBalanceAfterRedeem
+        );
 
         expect(initialSumOfFunds).bignumber.to.eq(
             sumOfUserFundsAfterRedeem.add(sumOfVaults),

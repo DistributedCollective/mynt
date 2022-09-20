@@ -12,7 +12,7 @@ const BasketManagerV3 = artifacts.require("BasketManagerV3");
 
 const { expect } = envSetup.configure();
 
-const tokens = (amount: string | number): BN => toWei(new BN(amount), 'ether');
+const tokens = (amount: string | number): BN => toWei(new BN(amount), "ether");
 
 contract("BasketManagerV3", async (accounts) => {
     const [owner, user, massetMock] = accounts;
@@ -149,7 +149,7 @@ contract("BasketManagerV3", async (accounts) => {
                     expect(result).to.equal(true);
                 });
 
-                it('with zero minimum and full withdrawal', async () => {
+                it("with zero minimum and full withdrawal", async () => {
                     await mockToken1.giveMe(tokens(10), { from: massetMock });
 
                     await basketManager.setRange(bassets[0], 0, 1000, { from: owner });
@@ -167,7 +167,7 @@ contract("BasketManagerV3", async (accounts) => {
                     expect(result).to.equal(false);
                 });
 
-                it('with non-zero minimum and full withdrawal', async () => {
+                it("with non-zero minimum and full withdrawal", async () => {
                     await mockToken1.giveMe(tokens(10), { from: massetMock });
 
                     await basketManager.setRange(bassets[0], 10, 1000, { from: owner });
@@ -371,18 +371,30 @@ contract("BasketManagerV3", async (accounts) => {
 
                 await expectEvent(receipt, "BassetAdded", { basset: mockToken1.address });
 
-                await expectEvent.inTransaction(tx, BasketManagerV3, "FactorChanged", { basset: mockToken1.address, factor: '1' }, {});
-                await expectEvent.inTransaction(tx, BasketManagerV3, "BridgeChanged", { basset: mockToken1.address, bridge: ZERO_ADDRESS }, {});
-                await expectEvent.inTransaction(tx, BasketManagerV3, "RangeChanged", { basset: mockToken1.address, min: '10', max: '100' }, {});
+                await expectEvent.inTransaction(tx, BasketManagerV3, "FactorChanged", { basset: mockToken1.address, factor: "1" }, {});
+                await expectEvent.inTransaction(
+                    tx,
+                    BasketManagerV3,
+                    "BridgeChanged",
+                    { basset: mockToken1.address, bridge: ZERO_ADDRESS },
+                    {}
+                );
+                await expectEvent.inTransaction(
+                    tx,
+                    BasketManagerV3,
+                    "RangeChanged",
+                    { basset: mockToken1.address, min: "10", max: "100" },
+                    {}
+                );
                 await expectEvent.inTransaction(tx, BasketManagerV3, "PausedChanged", { basset: mockToken1.address, paused: false }, {});
 
                 const { 0: min, 1: max } = await basketManager.getRange(mockToken1.address);
 
-                expect(min.toString()).to.equal('10');
-                expect(max.toString()).to.equal('100');
-                expect((await basketManager.getFactor(mockToken1.address)).toString()).to.equal('1');
+                expect(min.toString()).to.equal("10");
+                expect(max.toString()).to.equal("100");
+                expect((await basketManager.getFactor(mockToken1.address)).toString()).to.equal("1");
                 expect((await basketManager.getBridge(mockToken1.address)).toString()).to.equal(ZERO_ADDRESS);
-                expect((await basketManager.getPaused(mockToken1.address))).to.equal(false);
+                expect(await basketManager.getPaused(mockToken1.address)).to.equal(false);
             });
         });
     });
@@ -403,8 +415,8 @@ contract("BasketManagerV3", async (accounts) => {
             await expectEvent.inTransaction(tx, BasketManagerV3, "BassetAdded", { basset: bassets[0] });
             await expectEvent.inTransaction(tx, BasketManagerV3, "BassetAdded", { basset: bassets[1] });
 
-            expect((await basketManager.isValidBasset(bassets[0]))).to.equal(true);
-            expect((await basketManager.isValidBasset(bassets[1]))).to.equal(true);
+            expect(await basketManager.isValidBasset(bassets[0])).to.equal(true);
+            expect(await basketManager.isValidBasset(bassets[1])).to.equal(true);
         });
     });
 
@@ -441,7 +453,7 @@ contract("BasketManagerV3", async (accounts) => {
 
         context("should succeed", async () => {
             it("when factor is 1", async () => {
-                const factor = new BN('1');
+                const factor = new BN("1");
                 const { receipt } = await basketManager.setFactor(mockToken1.address, factor, { from: owner });
                 const setFactor = await basketManager.getFactor(mockToken1.address);
 
@@ -450,7 +462,7 @@ contract("BasketManagerV3", async (accounts) => {
             });
 
             it("when factor is a power of 10", async () => {
-                const factor = new BN('1000');
+                const factor = new BN("1000");
                 await basketManager.setFactor(mockToken1.address, factor, { from: owner });
                 const setFactor = await basketManager.getFactor(mockToken1.address);
 
@@ -458,7 +470,7 @@ contract("BasketManagerV3", async (accounts) => {
             });
 
             it("when factor is negative", async () => {
-                const factor = new BN('-100000');
+                const factor = new BN("-100000");
                 await basketManager.setFactor(mockToken1.address, factor, { from: owner });
                 const setFactor = await basketManager.getFactor(mockToken1.address);
 

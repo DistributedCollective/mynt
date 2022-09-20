@@ -26,7 +26,7 @@ contract("FeesManager", async (accounts) => {
 
     standardAccounts = new StandardAccounts(accounts);
 
-    before("before all", async () => { });
+    before("before all", async () => {});
 
     describe("initialize", async () => {
         beforeEach(async () => {
@@ -49,7 +49,7 @@ contract("FeesManager", async (accounts) => {
                 await feesManager.initialize(1, 2, 3, 4);
                 await expectRevert(
                     feesManager.initialize(5, 6, 7, 8),
-                    "VM Exception while processing transaction: reverted with reason string 'already initialized'",
+                    "VM Exception while processing transaction: reverted with reason string 'already initialized'"
                 );
             });
         });
@@ -67,7 +67,8 @@ contract("FeesManager", async (accounts) => {
 
         context("should fail", async () => {
             it("when it's not called by admin", async () => {
-                const revertMessage = "VM Exception while processing transaction: reverted with reason string 'InitializableOwnable: caller is not the owner'";
+                const revertMessage =
+                    "VM Exception while processing transaction: reverted with reason string 'InitializableOwnable: caller is not the owner'";
 
                 await expectRevert(feesManager.setDepositFee(2, { from: standardAccounts.other }), revertMessage);
                 await expectRevert(feesManager.setDepositBridgeFee(2, { from: standardAccounts.other }), revertMessage);
@@ -90,7 +91,6 @@ contract("FeesManager", async (accounts) => {
 
         context("should succeed", async () => {
             it("when amount is correct", async () => {
-
                 let tx: Truffle.TransactionResponse<Truffle.AnyEvent>;
 
                 tx = await feesManager.setDepositFee(standardFees.deposit, { from: admin });
@@ -147,7 +147,7 @@ contract("FeesManager", async (accounts) => {
             expect(await feesManager.calculateDepositBridgeFee(amount)).bignumber.to.eq("19");
         });
 
-        it ("calculates fee corretly for redeem", async () => {
+        it("calculates fee corretly for redeem", async () => {
             let amount = 1000000;
 
             expect(await feesManager.calculateRedeemFee(amount)).bignumber.to.eq("30000");
@@ -156,8 +156,6 @@ contract("FeesManager", async (accounts) => {
             amount = 999;
             expect(await feesManager.calculateRedeemFee(amount)).bignumber.to.eq("29");
             expect(await feesManager.calculateRedeemBridgeFee(amount)).bignumber.to.eq("39");
-        
         });
     });
 });
-

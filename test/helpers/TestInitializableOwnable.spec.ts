@@ -34,10 +34,7 @@ contract("InitializableOwnable", async (accounts) => {
             it("when it's called second time", async () => {
                 await initializableOwnableWrapper.initialize({ from: owner });
 
-                await expectRevert.unspecified(
-                    initializableOwnableWrapper.initialize({ from: user }),
-                    "already initialized",
-                );
+                await expectRevert.unspecified(initializableOwnableWrapper.initialize({ from: user }), "already initialized");
             });
         });
     });
@@ -78,10 +75,7 @@ contract("InitializableOwnable", async (accounts) => {
             it("when it's not called by owner", async () => {
                 await initializableOwnableWrapper.initialize({ from: owner });
 
-                await expectRevert(
-                    initializableOwnableWrapper.transferOwnership(user, { from: user }),
-                    "caller is not the owner",
-                );
+                await expectRevert(initializableOwnableWrapper.transferOwnership(user, { from: user }), "caller is not the owner");
             });
 
             it("when new owner is zero address", async () => {
@@ -89,7 +83,7 @@ contract("InitializableOwnable", async (accounts) => {
 
                 await expectRevert(
                     initializableOwnableWrapper.transferOwnership(ZERO_ADDRESS, { from: owner }),
-                    "new owner is the zero address",
+                    "new owner is the zero address"
                 );
             });
         });

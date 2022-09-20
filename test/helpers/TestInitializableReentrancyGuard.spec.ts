@@ -22,7 +22,7 @@ contract("InitializableReentrancyGuard", async (accounts) => {
                 await initializableReentrancyMock.initialize({ from: owner });
 
                 await initializableReentrancyMock.runClientMethod(nonReentrantMock.address, {
-                    from: owner,
+                    from: owner
                 });
             });
         });
@@ -38,9 +38,9 @@ contract("InitializableReentrancyGuard", async (accounts) => {
                 await initializableReentrancyMock.initialize({ from: owner });
                 await expectRevert(
                     initializableReentrancyMock.runClientMethod(reentrantMock.address, {
-                        from: owner,
+                        from: owner
                     }),
-                    "reentrant call",
+                    "reentrant call"
                 );
             });
 
@@ -49,9 +49,9 @@ contract("InitializableReentrancyGuard", async (accounts) => {
 
                 await expectRevert(
                     initializableReentrancyMock.runClientMethod(nonReentrantMock.address, {
-                        from: owner,
+                        from: owner
                     }),
-                    "reentrant call",
+                    "reentrant call"
                 );
             });
         });

@@ -10,17 +10,15 @@ export const createToken = async (massetAddress: string) => {
 };
 
 export type CreateBasketV3Args = {
-    massetAddress: string,
-    txDetails?: Truffle.TransactionDetails
+    massetAddress: string;
+    txDetails?: Truffle.TransactionDetails;
 };
 
-export type UpgradeBasketToV4Args = Omit<CreateBasketV3Args, 'massetAddress'>;
+export type UpgradeBasketToV4Args = Omit<CreateBasketV3Args, "massetAddress">;
 
 export const RATIO_PRECISION = 1000;
 
-export const createBasketManagerV3 = async (
-    config: CreateBasketV3Args
-): Promise<BasketManagerV3Instance> => {
+export const createBasketManagerV3 = async (config: CreateBasketV3Args): Promise<BasketManagerV3Instance> => {
     const { massetAddress, txDetails } = config;
 
     const basketManagerV3 = await BasketManagerV3.new(txDetails);

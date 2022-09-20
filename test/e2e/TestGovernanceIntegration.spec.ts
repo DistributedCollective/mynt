@@ -6,7 +6,7 @@ import { ZERO_ADDRESS } from "@utils/constants";
 import { TransferOwnershipParams } from "scripts/tasks/transferOwnership";
 import { blockTimestampSimple, mineBlock, wait, waitOrMineBlocks } from "scripts/utils/time";
 import { DeploymentTags } from "migrations/utils/DeploymentTags";
-import { Instances, isDevelopmentNetwork } from 'migrations/utils/addresses';
+import { Instances, isDevelopmentNetwork } from "migrations/utils/addresses";
 import { setNetwork, getDeployed, clearState, getInfo } from "migrations/utils/state";
 import { ERC20MintableInstance, StakingInstance } from "types/generated";
 
@@ -20,7 +20,16 @@ const Timelock = artifacts.require("Timelock");
 const { expect } = envSetup.configure();
 const logger = new Logs().showInConsole(true);
 
-enum ProposalState { Pending, Active, Canceled, Defeated, Succeeded, Queued, Expired, Executed };
+enum ProposalState {
+    Pending,
+    Active,
+    Canceled,
+    Defeated,
+    Succeeded,
+    Queued,
+    Expired,
+    Executed
+}
 const instance: Instances = "MYNT";
 
 contract("Governance", async (accounts) => {
@@ -49,9 +58,7 @@ contract("Governance", async (accounts) => {
 
             // transfer ownership of selected contracts
             const contractsList: TransferOwnershipParams = {
-                contracts: [
-                    `${instance}_BasketManagerV3`
-                ],
+                contracts: [`${instance}_BasketManagerV3`],
                 instance
             };
             await run("transferOwnership", contractsList);
@@ -61,7 +68,7 @@ contract("Governance", async (accounts) => {
             const tokenAddress = await staking.SOVToken();
             token = await ERC20Mintable.at(tokenAddress);
 
-            await token.mint(owner, '10000000000000000', { from: owner });
+            await token.mint(owner, "10000000000000000", { from: owner });
         }
     });
 
@@ -80,7 +87,7 @@ contract("Governance", async (accounts) => {
         const basketManagerAddress: string = await getInfo(`${instance}_BasketManagerV3`, "address");
 
         const stakeAmount = 1000000;
-        const stakeUntilDate = Math.floor(Date.now() / 1000) + (60 * 60 * 24 * 7 * 3);
+        const stakeUntilDate = Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7 * 3;
 
         const stake = async (address: string, amount: number): Promise<void> => {
             await token.transfer(address, amount, { from: owner });
@@ -98,10 +105,12 @@ contract("Governance", async (accounts) => {
         const values = [0];
         const newBasset = await Token.new("TEST", "TST", 18);
         const signatures = ["addBasset(address,int256,address,uint256,uint256,bool)"];
-        const calldatas = [web3.eth.abi.encodeParameters(
-            ["address", "int256", "address", "uint256", "uint256", "bool"],
-            [newBasset.address, 1, ZERO_ADDRESS, 0, 1000, false]
-        )];
+        const calldatas = [
+            web3.eth.abi.encodeParameters(
+                ["address", "int256", "address", "uint256", "uint256", "bool"],
+                [newBasset.address, 1, ZERO_ADDRESS, 0, 1000, false]
+            )
+        ];
 
         await governorAlpha.propose(targets, values, signatures, calldatas, "test propsal");
         const latestProposal = await governorAlpha.latestProposalIds(owner);
@@ -149,7 +158,6 @@ contract("Governance", async (accounts) => {
             logger.info(`Waiting ${delay} seconds to surpass delay`);
             await wait(delay * 1000);
         }
-
 
         await governorAlpha.execute(latestProposal);
 

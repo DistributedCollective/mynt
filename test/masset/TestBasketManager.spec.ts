@@ -28,7 +28,9 @@ contract("BasketManager", async (accounts) => {
         let mockToken2;
         let mockToken3;
         let mockToken4;
-        let bassets; let factors; let bridges;
+        let bassets;
+        let factors;
+        let bridges;
         before(async () => {
             masset = await Masset.new();
             mockToken1 = await MockERC20.new("", "", 18, sa.dummy1, 1);
@@ -48,13 +50,13 @@ contract("BasketManager", async (accounts) => {
             it("when bassets missing", async () => {
                 await expectRevert(
                     BasketManager.new([], factors, bridges),
-                    "VM Exception while processing transaction: reverted with reason string 'some basset required'",
+                    "VM Exception while processing transaction: reverted with reason string 'some basset required'"
                 );
             });
             it("when factors missing", async () => {
                 await expectRevert(
                     BasketManager.new(bassets, [], bridges),
-                    "VM Exception while processing transaction: reverted with reason string 'factor array length mismatch'",
+                    "VM Exception while processing transaction: reverted with reason string 'factor array length mismatch'"
                 );
             });
         });

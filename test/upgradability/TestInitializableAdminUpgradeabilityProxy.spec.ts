@@ -3,7 +3,13 @@ import { expectRevert, expectEvent } from "@openzeppelin/test-helpers";
 import envSetup from "@utils/env_setup";
 import { ZERO_ADDRESS } from "@utils/constants";
 import { StandardAccounts } from "@utils/standardAccounts";
-import { IMockImplementationInstance, InitializableAdminUpgradeabilityProxyInstance, MockDependencyInstance, MockProxyImplementation1Instance, MockProxyImplementation2Instance } from "types/generated";
+import {
+    IMockImplementationInstance,
+    InitializableAdminUpgradeabilityProxyInstance,
+    MockDependencyInstance,
+    MockProxyImplementation1Instance,
+    MockProxyImplementation2Instance
+} from "types/generated";
 
 const MockDependency = artifacts.require("MockDependency");
 const MockProxyImplementation1 = artifacts.require("MockProxyImplementation1");
@@ -77,11 +83,7 @@ contract("InitializableAdminUpgradeabilityProxy", async (accounts) => {
             let currImplementationVersion: string;
             const initdata: string = proxyImplementation.contract.methods.initialize(dependencyContract.address).encodeABI();
 
-            await adminUpgradeabilityProxy.methods["initialize(address,address,bytes)"](
-                proxyImplementation.address,
-                sa.governor,
-                initdata,
-            );
+            await adminUpgradeabilityProxy.methods["initialize(address,address,bytes)"](proxyImplementation.address, sa.governor, initdata);
 
             const admin = await adminUpgradeabilityProxy.admin();
             expect(admin).to.eq(sa.governor, "proper admin should be set");
@@ -118,14 +120,10 @@ const initProxy = async (
     proxy: InitializableAdminUpgradeabilityProxyInstance
 ): Promise<MockProxyImplementation1Instance> => {
     const dependencyContract = await MockDependency.new();
-    
+
     const initdata: string = implementation.contract.methods.initialize(dependencyContract.address).encodeABI();
 
-    await proxy.methods["initialize(address,address,bytes)"](
-        implementation.address,
-        admin,
-        initdata,
-    );
+    await proxy.methods["initialize(address,address,bytes)"](implementation.address, admin, initdata);
 
     const implementationThroughProxy = await MockProxyImplementation1.at(proxy.address);
 
