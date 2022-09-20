@@ -2,13 +2,13 @@ import { expectRevert, expectEvent } from "@openzeppelin/test-helpers";
 import { toWei, toChecksumAddress } from "web3-utils";
 import { SovrynDollarTokenInstance } from "types/generated";
 import { MAX_UINT256, ZERO_ADDRESS } from "@utils/constants";
-import { blockTimestampExact } from "../../scripts/utils/time";
 import Wallet from "ethereumjs-wallet";
 import { fromRpcSig } from "ethereumjs-util";
 import { signTypedMessage } from "eth-sig-util";
-import { EIP712Domain, Permit, PERMIT_TYPEHASH, domainSeparator } from "../helpers/EIP712";
 import BN from "bn.js";
 import { network, ethers } from "hardhat";
+import { EIP712Domain, Permit, PERMIT_TYPEHASH, domainSeparator } from "../helpers/EIP712";
+import { blockTimestampExact } from "../../scripts/utils/time";
 
 const SovrynDollarToken = artifacts.require("SovrynDollarToken");
 const MockApprovalReceiver = artifacts.require("MockApprovalReceiver");
@@ -316,8 +316,8 @@ contract("SovrynDollarToken", async (accounts) => {
                 const firstData = buildData(chainId, token.address, owner, spender, firstValue, firstNonce, deadline) as any;
                 const firstSignature = signTypedMessage(ownerWallet.getPrivateKey(), { data: firstData });
 
-                var { v } = fromRpcSig(firstSignature);
-                var { r, s }: any = fromRpcSig(firstSignature);
+                const { v } = fromRpcSig(firstSignature);
+                const { r, s }: any = fromRpcSig(firstSignature);
 
                 // incorrect amount
                 await expectRevert(token.permit(owner, spender, toWei("500"), deadline, v, r, s), "DLLR:INVALID_SIGNATURE");
@@ -332,8 +332,8 @@ contract("SovrynDollarToken", async (accounts) => {
                 const firstData = buildData(chainId, token.address, owner, spender, firstValue, firstNonce, deadline) as any;
                 const firstSignature = signTypedMessage(ownerWallet.getPrivateKey(), { data: firstData });
 
-                var { v } = fromRpcSig(firstSignature);
-                var { r, s }: any = fromRpcSig(firstSignature);
+                const { v } = fromRpcSig(firstSignature);
+                const { r, s }: any = fromRpcSig(firstSignature);
 
                 // incorrect amount
                 await expectRevert(token.permit(owner, spender, firstValue, deadline, v, r, s), "DLLR:AUTH_EXPIRED");

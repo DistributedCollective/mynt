@@ -20,7 +20,7 @@ const Permit = [
 
 async function domainSeparator(name, version, chainId, verifyingContract) {
     return (
-        "0x" + TypedDataUtils.hashStruct("EIP712Domain", { name, version, chainId, verifyingContract }, { EIP712Domain }).toString("hex")
+        `0x${  TypedDataUtils.hashStruct("EIP712Domain", { name, version, chainId, verifyingContract }, { EIP712Domain }).toString("hex")}`
     );
 }
 
