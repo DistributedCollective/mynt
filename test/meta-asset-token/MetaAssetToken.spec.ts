@@ -1,6 +1,6 @@
 import { expectRevert, expectEvent } from "@openzeppelin/test-helpers";
 import { toWei, toChecksumAddress } from "web3-utils";
-import { SovrynDollarTokenInstance } from "types/generated";
+import { MetaAssetTokenInstance } from "types/generated";
 import { MAX_UINT256, ZERO_ADDRESS } from "@utils/constants";
 import Wallet from "ethereumjs-wallet";
 import { fromRpcSig } from "ethereumjs-util";
@@ -8,9 +8,8 @@ import { signTypedMessage } from "eth-sig-util";
 import BN from "bn.js";
 import { network, ethers } from "hardhat";
 import { EIP712Domain, Permit, PERMIT_TYPEHASH, domainSeparator } from "../helpers/EIP712";
-import { blockTimestampExact } from "../../scripts/utils/time";
 
-const SovrynDollarToken = artifacts.require("SovrynDollarToken");
+const MetaAssetToken = artifacts.require("MetaAssetToken");
 const MockApprovalReceiver = artifacts.require("MockApprovalReceiver");
 const NOT_OWNER_EXCEPTION = "VM Exception while processing transaction: reverted with reason string 'Ownable: caller is not the owner";
 
@@ -28,14 +27,14 @@ const buildData = (chainId, verifyingContract, from, spender, amount, nonce, dea
     message: { owner: from, spender, value: amount, nonce, deadline }
 });
 
-contract("SovrynDollarToken", async (accounts) => {
+contract("MetaAssetToken", async (accounts) => {
     const [owner, user, myntAssetProxy, myntAssetImplementation, myntBasketManagerProxy, myntBasketManagerImplementation] = accounts;
 
-    let token: SovrynDollarTokenInstance;
+    let token: MetaAssetTokenInstance;
     let chainId;
 
     beforeEach("before all", async () => {
-        token = await SovrynDollarToken.new({ from: owner });
+        token = await MetaAssetToken.new(tokenName, tokenSymbol, { from: owner });
         await token.setMyntAssetConfig(myntAssetProxy, myntAssetImplementation, { from: owner });
         await token.setMyntBasketManagerConfig(myntBasketManagerProxy, myntBasketManagerImplementation, { from: owner });
     });
@@ -431,7 +430,7 @@ contract("SovrynDollarToken", async (accounts) => {
                     params: [spender]
                 });
                 const account = await ethers.provider.getSigner(spender);
-                const tokenInstance = await ethers.getContractAt("SovrynDollarToken", token.address, account);
+                const tokenInstance = await ethers.getContractAt("MetaAssetToken", token.address, account);
                 await expectRevert(
                     tokenInstance.transferWithPermit(ownerPermit, ZERO_ADDRESS, amount, deadline.toString(), v, r, s),
                     "DLLR: Invalid address. Cannot transfer DLLR directly to the DLLR contract or the null address"
@@ -452,7 +451,7 @@ contract("SovrynDollarToken", async (accounts) => {
                     params: [spender]
                 });
                 const account = await ethers.provider.getSigner(spender);
-                const tokenInstance = await ethers.getContractAt("SovrynDollarToken", token.address, account);
+                const tokenInstance = await ethers.getContractAt("MetaAssetToken", token.address, account);
                 await expectRevert(
                     tokenInstance.transferWithPermit(ownerPermit, token.address, amount, deadline.toString(), v, r, s),
                     "DLLR: Invalid address. Cannot transfer DLLR directly to the DLLR contract or the null address"
@@ -473,7 +472,7 @@ contract("SovrynDollarToken", async (accounts) => {
                     params: [spender]
                 });
                 const account = await ethers.provider.getSigner(spender);
-                const tokenInstance = await ethers.getContractAt("SovrynDollarToken", token.address, account);
+                const tokenInstance = await ethers.getContractAt("MetaAssetToken", token.address, account);
                 await expectRevert(
                     tokenInstance.transferWithPermit(ownerPermit, myntAssetProxy, amount, deadline.toString(), v, r, s),
                     "DLLR: Invalid address. Cannot transfer DLLR directly to a Sovryn Mynt protocol address"
@@ -494,7 +493,7 @@ contract("SovrynDollarToken", async (accounts) => {
                     params: [spender]
                 });
                 const account = await ethers.provider.getSigner(spender);
-                const tokenInstance = await ethers.getContractAt("SovrynDollarToken", token.address, account);
+                const tokenInstance = await ethers.getContractAt("MetaAssetToken", token.address, account);
                 await expectRevert(
                     tokenInstance.transferWithPermit(ownerPermit, myntAssetImplementation, amount, deadline.toString(), v, r, s),
                     "DLLR: Invalid address. Cannot transfer DLLR directly to a Sovryn Mynt protocol address"
@@ -515,7 +514,7 @@ contract("SovrynDollarToken", async (accounts) => {
                     params: [spender]
                 });
                 const account = await ethers.provider.getSigner(spender);
-                const tokenInstance = await ethers.getContractAt("SovrynDollarToken", token.address, account);
+                const tokenInstance = await ethers.getContractAt("MetaAssetToken", token.address, account);
                 await expectRevert(
                     tokenInstance.transferWithPermit(ownerPermit, myntBasketManagerProxy, amount, deadline.toString(), v, r, s),
                     "DLLR: Invalid address. Cannot transfer DLLR directly to a Sovryn Mynt protocol address"
@@ -536,7 +535,7 @@ contract("SovrynDollarToken", async (accounts) => {
                     params: [spender]
                 });
                 const account = await ethers.provider.getSigner(spender);
-                const tokenInstance = await ethers.getContractAt("SovrynDollarToken", token.address, account);
+                const tokenInstance = await ethers.getContractAt("MetaAssetToken", token.address, account);
                 await expectRevert(
                     tokenInstance.transferWithPermit(ownerPermit, myntBasketManagerImplementation, amount, deadline.toString(), v, r, s),
                     "DLLR: Invalid address. Cannot transfer DLLR directly to a Sovryn Mynt protocol address"
@@ -558,7 +557,7 @@ contract("SovrynDollarToken", async (accounts) => {
                 });
 
                 const account = await ethers.provider.getSigner(spender);
-                const tokenInstance = await ethers.getContractAt("SovrynDollarToken", token.address, account);
+                const tokenInstance = await ethers.getContractAt("MetaAssetToken", token.address, account);
                 await expectRevert(
                     tokenInstance.transferWithPermit(ownerPermit, user, amount, deadline.toString(), v, r, s),
                     "ERC20: transfer amount exceeds balance'"
@@ -591,7 +590,7 @@ contract("SovrynDollarToken", async (accounts) => {
                 expect(spenderInitialAllowance.toString()).to.equal("0");
 
                 const account = await ethers.provider.getSigner(spender);
-                const tokenInstance = await ethers.getContractAt("SovrynDollarToken", token.address, account);
+                const tokenInstance = await ethers.getContractAt("MetaAssetToken", token.address, account);
                 await tokenInstance.transferWithPermit(ownerPermit, user, amount, deadline.toString(), v, r, s);
 
                 const userLatestBalance = await token.balanceOf(user);

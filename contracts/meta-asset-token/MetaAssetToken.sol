@@ -12,7 +12,7 @@ import "./ERC20Permit.sol";
  * mint and burn functions.
  */
 
-contract SovrynDollarToken is ERC20Permit, ERC20Detailed, Ownable {
+contract MetaAssetToken is ERC20Permit, ERC20Detailed, Ownable {
     // events
 
     /**
@@ -45,8 +45,7 @@ contract SovrynDollarToken is ERC20Permit, ERC20Detailed, Ownable {
     /**
      * @notice Constructor called on deployment, initiates the contract.
      */
-    // constructor(string memory _domainName) ERC20("Sovryn Dollar", "DLLR") ERC20Permit(_domainName) {}
-    constructor() public ERC20Detailed("Sovryn Dollar", "DLLR", 18) {}
+    constructor(string memory _tokenName, string memory _symbol) public ERC20Detailed(_tokenName, _symbol, 18) {}
 
     /**
      * @notice setMyntAssetConfig sets the Mynt mAsset proxy & implementation address
