@@ -1,6 +1,14 @@
-# .prettierrc
-printWidth: 140
-parser: typescript
-tabWidth: 4
-trailingComma: none
-arrowParens: always
+{
+  "overrides": [
+    {
+      "files": ["contracts/**/*.sol", "test/*.ts", "types/generated/*.ts", "types/*.ts", "artifacts/*.ts"],
+      "options": {
+        "printWidth": 99,
+        "tabWidth": 4,
+        "useTabs": false,
+        "singleQuote": false,
+        "bracketSpacing": true
+      }
+    }
+  ]
+}
