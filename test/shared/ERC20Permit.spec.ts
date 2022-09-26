@@ -1,7 +1,5 @@
-/* eslint-disable */
-
-import { BN, expectRevert, expectEvent, time, constants } from "@openzeppelin/test-helpers";
-const { MAX_UINT256, ZERO_ADDRESS, ZERO_BYTES32 } = constants;
+import { BN, expectRevert, time, constants } from "@openzeppelin/test-helpers";
+const { MAX_UINT256 } = constants;
 
 const { fromRpcSig } = require('ethereumjs-util');
 const ethSigUtil = require('eth-sig-util');
@@ -9,10 +7,10 @@ const Wallet = require('ethereumjs-wallet').default;
 
 const ERC20PermitMock = artifacts.require('MockERC20Permit');
 
-const { EIP712Domain, Permit, domainSeparator } = require('../helpers/eip712');
+const { EIP712Domain, Permit, domainSeparator } = require('../helpers/EIP712');
 
 contract('ERC20Permit', function (accounts) {
-  const [ initialHolder, spender, recipient, other ] = accounts;
+  const [ initialHolder, spender] = accounts;
 
   const name = 'Sovryn Dollar';
   const symbol = 'DLLR';
