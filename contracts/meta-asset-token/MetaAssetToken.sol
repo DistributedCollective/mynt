@@ -3,7 +3,7 @@ pragma solidity ^0.5.17;
 import "@openzeppelin/contracts/token/ERC20/ERC20Detailed.sol";
 import "@openzeppelin/contracts/ownership/Ownable.sol";
 import "../interfaces/IApproveAndCall.sol";
-import "./ERC20Permit.sol";
+import "../shared/ERC20Permit.sol";
 
 /**
  * @title Token

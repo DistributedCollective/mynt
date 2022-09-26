@@ -5,7 +5,6 @@ import "solidity-coverage";
 import "@nomiclabs/hardhat-waffle";
 import "@nomiclabs/hardhat-ethers"
 import "@nomiclabs/hardhat-truffle5";
-import "@nomiclabs/hardhat-web3";
 import "@tenderly/hardhat-tenderly";
 import "hardhat-deploy";
 import "ts-node/register";

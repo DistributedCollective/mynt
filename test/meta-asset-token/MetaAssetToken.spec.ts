@@ -397,11 +397,11 @@ contract("MetaAssetToken", async (accounts) => {
         before(async () => {
             chainId = await token.getChainID();
             // funding spender wallet
-            await web3.eth.sendTransaction({
-                from: accounts[5],
+            const funder = await ethers.provider.getSigner(owner);
+            await funder.sendTransaction({
                 to: spender,
-                value: toWei("10")
-            });
+                value: toWei("10"),
+            })
         });
 
         context("transferWithPermit should fail", async () => {
