@@ -19,7 +19,7 @@ import "scripts/tasks/transferAdmin";
 const config: HardhatUserConfig = {
     networks: {
         development: {
-            url: "http://127.0.0.1:7545",
+            url: "http://127.0.0.1:8545",
             saveDeployments: false
         },
         hardhat: {

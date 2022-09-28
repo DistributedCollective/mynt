@@ -5,5 +5,6 @@ export enum DeploymentTags {
     Governance = 'governance',
     MyntToken = 'myntToken',
     FishToken = 'fishToken',
-    Migration = 'migration'
+    Migration = 'migration',
+    MetaAssetToken = 'metaAssetToken',
 }
