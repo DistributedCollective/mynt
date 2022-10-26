@@ -42,6 +42,20 @@ contract MetaAssetToken is ERC20Permit, ERC20Detailed, Ownable {
       _;
     }
 
+    modifier requireValidRecipient(address _recipient) {
+        require(
+            _recipient != address(0) && _recipient != address(this),
+            "DLLR: Invalid address. Cannot transfer DLLR directly to the DLLR contract or the null address"
+        );
+
+        require(
+            _recipient != myntAssetProxy && _recipient != myntAssetImplementation && _recipient != myntBasketManagerProxy && _recipient != myntBasketManagerImplementation,
+            "DLLR: Invalid address. Cannot transfer DLLR directly to a Sovryn Mynt protocol address"
+        );
+
+        _;
+    }
+
     /**
      * @notice Constructor called on deployment, initiates the contract.
      */
@@ -106,8 +120,7 @@ contract MetaAssetToken is ERC20Permit, ERC20Detailed, Ownable {
      *
      * @return true / false.
      */
-    function transfer(address _recipient, uint256 _amount) public returns (bool) {
-        _requireValidRecipient(_recipient);
+    function transfer(address _recipient, uint256 _amount) public requireValidRecipient(_recipient) returns (bool) {
         _transfer(_msgSender(), _recipient, _amount);
         return true;
     }
@@ -126,8 +139,7 @@ contract MetaAssetToken is ERC20Permit, ERC20Detailed, Ownable {
      *
      * @return true / false.
      */
-    function transferFrom(address _from, address _to, uint256 _amount) public returns (bool) {
-        _requireValidRecipient(_to);
+    function transferFrom(address _from, address _to, uint256 _amount) public requireValidRecipient(_to) returns (bool) {
         _approve(
             _from,
             msg.sender,
@@ -156,7 +168,7 @@ contract MetaAssetToken is ERC20Permit, ERC20Detailed, Ownable {
      * @param _r First 32 bytes of ECDSA signature.
      * @param _s 32 bytes after _r in ECDSA signature.
      */
-    function transferWithPermit(address _from, address _to, uint256 _amount, uint256 _deadline, uint8 _v, bytes32 _r, bytes32 _s) external {
+    function transferWithPermit(address _from, address _to, uint256 _amount, uint256 _deadline, uint8 _v, bytes32 _r, bytes32 _s) external requireValidRecipient(_to) {
         permit(_from, msg.sender, _amount, _deadline, _v, _r, _s);
         transferFrom(_from, _to, _amount);
     }
@@ -177,18 +189,5 @@ contract MetaAssetToken is ERC20Permit, ERC20Detailed, Ownable {
     ) external {
         approve(_spender, _amount);
         IApproveAndCall(_spender).receiveApproval(msg.sender, _amount, address(this), _data);
-    }
-
-    /** Internal function */
-    function _requireValidRecipient(address _recipient) private view {
-        require(
-            _recipient != address(0) && _recipient != address(this),
-            "DLLR: Invalid address. Cannot transfer DLLR directly to the DLLR contract or the null address"
-        );
-
-        require(
-            _recipient != myntAssetProxy && _recipient != myntAssetImplementation && _recipient != myntBasketManagerProxy && _recipient != myntBasketManagerImplementation,
-            "DLLR: Invalid address. Cannot transfer DLLR directly to a Sovryn Mynt protocol address"
-        );
     }
 }

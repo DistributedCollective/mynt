@@ -19,9 +19,9 @@ const Permit = [
 ];
 
 async function domainSeparator(name, version, chainId, verifyingContract) {
-    return (
-        `0x${  TypedDataUtils.hashStruct("EIP712Domain", { name, version, chainId, verifyingContract }, { EIP712Domain }).toString("hex")}`
-    );
+    return `0x${TypedDataUtils.hashStruct("EIP712Domain", { name, version, chainId, verifyingContract }, { EIP712Domain }).toString(
+        "hex"
+    )}`;
 }
 
 export { EIP712Domain, Permit, PERMIT_TYPEHASH, domainSeparator };

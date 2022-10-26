@@ -359,7 +359,15 @@ contract("MetaAssetToken", async (accounts) => {
                 const firstSignature = signTypedMessage(ownerWallet.getPrivateKey(), { data: firstData });
 
                 const firstECDSASig = fromRpcSig(firstSignature);
-                const firstReceipt = await token.permit(ownerPermit, spender, firstValue, deadline, firstECDSASig.v, firstECDSASig.r as any, firstECDSASig.s as any);
+                const firstReceipt = await token.permit(
+                    ownerPermit,
+                    spender,
+                    firstValue,
+                    deadline,
+                    firstECDSASig.v,
+                    firstECDSASig.r as any,
+                    firstECDSASig.s as any
+                );
                 expectEvent(firstReceipt, "Approval", {
                     owner: toChecksumAddress(ownerPermit),
                     spender: toChecksumAddress(spender),
@@ -376,7 +384,15 @@ contract("MetaAssetToken", async (accounts) => {
 
                 const secondECDSASig = fromRpcSig(secondSignature);
 
-                const secondReceipt = await token.permit(ownerPermit, spender, secondValue, deadline, secondECDSASig.v, secondECDSASig.r as any, secondECDSASig.s as any);
+                const secondReceipt = await token.permit(
+                    ownerPermit,
+                    spender,
+                    secondValue,
+                    deadline,
+                    secondECDSASig.v,
+                    secondECDSASig.r as any,
+                    secondECDSASig.s as any
+                );
                 expectEvent(secondReceipt, "Approval", {
                     owner: toChecksumAddress(ownerPermit),
                     spender: toChecksumAddress(spender),
@@ -400,8 +416,8 @@ contract("MetaAssetToken", async (accounts) => {
             const funder = await ethers.provider.getSigner(owner);
             await funder.sendTransaction({
                 to: spender,
-                value: toWei("10"),
-            })
+                value: toWei("10")
+            });
         });
 
         context("transferWithPermit should fail", async () => {
