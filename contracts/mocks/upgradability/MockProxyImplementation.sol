@@ -42,3 +42,23 @@ contract MockProxyImplementation2 is IMockImplementation {
         return address(dep);
     }
 }
+
+
+contract MockProxyImplementationMetaAssetToken is IMockImplementation {
+    MockDependency private dep;
+
+    function initialize(address _depAddress) public {
+        dep = MockDependency(_depAddress);
+        initialized = true;
+    }
+
+    function getVersion() external pure returns (string memory) {
+        return "1";
+    }
+
+    function getDep () public view returns(address) {
+        return address(dep);
+    }
+
+    function() external payable {}
+}

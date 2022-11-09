@@ -18,7 +18,7 @@ contract ERC20Permit is ERC20, IERC20Permit {
     mapping (address => uint256) private _nonces;
 
     bytes32 private constant EIP712DOMAIN_HASH = keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)");
-    bytes32 private constant NAME_HASH = keccak256("Sovryn Dollar");
+    bytes32 private constant NAME_HASH = keccak256("MetaAsset");
     bytes32 private constant VERSION_HASH = keccak256("1");
 
     bytes32 public constant PERMIT_TYPEHASH = keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
@@ -27,7 +27,7 @@ contract ERC20Permit is ERC20, IERC20Permit {
      * @dev See {IERC20Permit-permit}.
      */
     function permit(address owner, address spender, uint256 value, uint256 deadline, uint8 v, bytes32 r, bytes32 s) public {
-        require(deadline >= block.timestamp, "DLLR:AUTH_EXPIRED");
+        require(deadline >= block.timestamp, "MetaAsset:AUTH_EXPIRED");
 
         bytes32 encodeData = keccak256(abi.encode(PERMIT_TYPEHASH, owner, spender, value, _nonces[owner]++, deadline));
         _validateSignedData(owner, encodeData, v, r, s);
@@ -52,7 +52,7 @@ contract ERC20Permit is ERC20, IERC20Permit {
         );
         address recoveredAddress = ecrecover(digest, v, r, s);
         // Explicitly disallow authorizations for address(0) as ecrecover returns address(0) on malformed messages
-        require(recoveredAddress != address(0) && recoveredAddress == signer, "DLLR:INVALID_SIGNATURE");
+        require(recoveredAddress != address(0) && recoveredAddress == signer, "MetaAsset:INVALID_SIGNATURE");
     }
 
     function DOMAIN_SEPARATOR() public view returns (bytes32) {

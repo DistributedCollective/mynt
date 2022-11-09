@@ -1,6 +1,6 @@
 import { expectRevert, expectEvent } from "@openzeppelin/test-helpers";
 import { toWei, toChecksumAddress } from "web3-utils";
-import { MetaAssetTokenInstance } from "types/generated";
+import { MockMetaAssetTokenInstance, MetaAssetTokenInstance } from "types/generated";
 import { MAX_UINT256, ZERO_ADDRESS } from "@utils/constants";
 import Wallet from "ethereumjs-wallet";
 import { fromRpcSig } from "ethereumjs-util";
@@ -8,16 +8,25 @@ import { signTypedMessage } from "eth-sig-util";
 import BN from "bn.js";
 import { network, ethers } from "hardhat";
 import { EIP712Domain, Permit, PERMIT_TYPEHASH, domainSeparator } from "../helpers/EIP712";
+import {
+    IMockImplementationInstance,
+    InitializableAdminUpgradeabilityProxyInstance,
+    MockProxyImplementationMetaAssetTokenInstance
+} from "types/generated";
 
 const MetaAssetToken = artifacts.require("MetaAssetToken");
+const MockMetaAssetToken = artifacts.require("MockMetaAssetToken");
 const MockApprovalReceiver = artifacts.require("MockApprovalReceiver");
+const InitializableAdminUpgradeabilityProxy = artifacts.require("InitializableAdminUpgradeabilityProxy");
+const MockDependency = artifacts.require("MockDependency");
+const MockProxyImplementation = artifacts.require("MockProxyImplementationMetaAssetToken");
 const NOT_OWNER_EXCEPTION = "VM Exception while processing transaction: reverted with reason string 'Ownable: caller is not the owner";
 
-const tokenName = "Sovryn Dollar";
-const tokenSymbol = "DLLR";
+const tokenName = "Meta Asset Token";
+const tokenSymbol = "MAT";
 const decimals = 18;
 const maxDeadline = MAX_UINT256;
-const name = "Sovryn Dollar";
+const name = "MetaAsset";
 const version = "1";
 
 const buildData = (chainId, verifyingContract, from, spender, amount, nonce, deadline = maxDeadline) => ({
@@ -28,15 +37,40 @@ const buildData = (chainId, verifyingContract, from, spender, amount, nonce, dea
 });
 
 contract("MetaAssetToken", async (accounts) => {
-    const [owner, user, myntAssetProxy, myntAssetImplementation, myntBasketManagerProxy, myntBasketManagerImplementation] = accounts;
+    const [owner, user] = accounts;
 
     let token: MetaAssetTokenInstance;
+    let mockToken: MockMetaAssetTokenInstance;
     let chainId;
+    let proxyImplementation: MockProxyImplementationMetaAssetTokenInstance;
+    let adminUpgradeabilityProxy: InitializableAdminUpgradeabilityProxyInstance;
+    let admin: string;
+    let assetProxy: string;
+    let assetImplementation: string;
+    let basketManagerProxy: string;
+    let basketManagerImplementation: string;
+    let assetProxyInstance: MockProxyImplementationMetaAssetTokenInstance;
+    let basketManagerProxyInstance: MockProxyImplementationMetaAssetTokenInstance;
 
     beforeEach("before all", async () => {
+        admin = owner;
+
+        proxyImplementation = await MockProxyImplementation.new();
+        adminUpgradeabilityProxy = await InitializableAdminUpgradeabilityProxy.new({ from: owner });
+        assetProxyInstance = await initProxy(admin, proxyImplementation, adminUpgradeabilityProxy);
+        assetProxy = assetProxyInstance.address;
+        assetImplementation = proxyImplementation.address;
+
+        proxyImplementation = await MockProxyImplementation.new();
+        adminUpgradeabilityProxy = await InitializableAdminUpgradeabilityProxy.new({ from: owner });
+        basketManagerProxyInstance = await initProxy(admin, proxyImplementation, adminUpgradeabilityProxy);
+        basketManagerProxy = basketManagerProxyInstance.address;
+        basketManagerImplementation = proxyImplementation.address;
+
         token = await MetaAssetToken.new(tokenName, tokenSymbol, { from: owner });
-        await token.setMyntAssetConfig(myntAssetProxy, myntAssetImplementation, { from: owner });
-        await token.setMyntBasketManagerConfig(myntBasketManagerProxy, myntBasketManagerImplementation, { from: owner });
+        mockToken = await MockMetaAssetToken.new(tokenName, tokenSymbol, accounts[8], accounts[9], { from: owner });
+        await token.setAssetProxy(assetProxy, { from: owner });
+        await token.setBasketManagerProxy(basketManagerProxy, { from: owner });
     });
 
     describe("deployment", async () => {
@@ -53,63 +87,58 @@ contract("MetaAssetToken", async (accounts) => {
         });
     });
 
-    describe("setMyntAssetConfig", async () => {
+    describe("setAssetProxy", async () => {
         context("should fail", async () => {
             it("when it's not called by owner", async () => {
-                await expectRevert(token.setMyntAssetConfig(myntAssetProxy, myntAssetImplementation, { from: user }), NOT_OWNER_EXCEPTION);
+                await expectRevert(token.setAssetProxy(assetProxy, { from: user }), NOT_OWNER_EXCEPTION);
             });
         });
         context("should succeed", async () => {
             it("when called by owner", async () => {
-                const tx = await token.setMyntAssetConfig(myntAssetProxy, myntAssetImplementation, { from: owner });
+                const tx = await token.setAssetProxy(assetProxy, { from: owner });
 
-                expectEvent(tx, "MyntAssetConfigChanged", {
-                    _newMyntAssetProxy: myntAssetProxy,
-                    _newMyntAssetImplementation: myntAssetImplementation
+                expectEvent(tx, "AssetProxyChanged", {
+                    _newAssetProxy: assetProxy
                 });
 
-                const [newMyntAssetProxyPromised, newMyntAssetImplementationPromised] = await Promise.all([
-                    token.myntAssetProxy(),
-                    token.myntAssetImplementation()
+                const [newAssetProxyPromised, newAssetImplementationPromised] = await Promise.all([
+                    token.assetProxy(),
+                    token.assetImplementation()
                 ]);
-                expect(newMyntAssetProxyPromised).to.equal(myntAssetProxy);
-                expect(newMyntAssetImplementationPromised).to.equal(myntAssetImplementation);
+                expect(newAssetProxyPromised).to.equal(assetProxy);
+                expect(newAssetImplementationPromised).to.equal(assetImplementation);
             });
         });
     });
 
-    describe("setMyntBasketManagerConfig", async () => {
+    describe("setBasketManagerProxy", async () => {
         context("should fail", async () => {
             it("when it's not called by owner", async () => {
-                await expectRevert(
-                    token.setMyntBasketManagerConfig(myntBasketManagerProxy, myntBasketManagerImplementation, { from: user }),
-                    NOT_OWNER_EXCEPTION
-                );
+                await expectRevert(token.setBasketManagerProxy(basketManagerProxy, { from: user }), NOT_OWNER_EXCEPTION);
             });
         });
         context("should succeed", async () => {
             it("when called by owner", async () => {
-                const tx = await token.setMyntBasketManagerConfig(myntBasketManagerProxy, myntBasketManagerImplementation, { from: owner });
+                const tx = await token.setBasketManagerProxy(basketManagerProxy, { from: owner });
 
-                expectEvent(tx, "MyntBasketManagerConfigChanged", {
-                    _newMyntBasketManagerProxy: myntBasketManagerProxy,
-                    _newMyntBasketManagerImplementation: myntBasketManagerImplementation
+                expectEvent(tx, "BasketManagerProxyChanged", {
+                    _newBasketManagerProxy: basketManagerProxy
                 });
 
-                const [newMyntBasketManagerProxyPromised, newMyntBasketManagerImplementationPromised] = await Promise.all([
-                    token.myntBasketManagerProxy(),
-                    token.myntBasketManagerImplementation()
+                const [newBasketManagerProxyPromised, newBasketManagerImplementationPromised] = await Promise.all([
+                    token.basketManagerProxy(),
+                    token.basketManagerImplementation()
                 ]);
-                expect(newMyntBasketManagerProxyPromised).to.equal(myntBasketManagerProxy);
-                expect(newMyntBasketManagerImplementationPromised).to.equal(myntBasketManagerImplementation);
+                expect(newBasketManagerProxyPromised).to.equal(basketManagerProxy);
+                expect(newBasketManagerImplementationPromised).to.equal(basketManagerImplementation);
             });
         });
     });
 
     describe("mint", async () => {
         context("should fail", async () => {
-            it("when it's not called by mynt mAsset proxy", async () => {
-                await expectRevert(token.mint(user, toWei("100"), { from: user }), "DLLR:unathorized mAsset proxy");
+            it("when it's not called by mAsset proxy", async () => {
+                await expectRevert(token.mint(user, toWei("100"), { from: user }), "MetaAsset:unauthorized mAsset proxy");
             });
         });
 
@@ -119,7 +148,10 @@ contract("MetaAssetToken", async (accounts) => {
                 const initialBalance = await token.balanceOf(user);
                 expect(initialBalance.toString()).to.equal("0");
 
-                const tx = await token.mint(user, mintAmount, { from: myntAssetProxy });
+                assetProxy = accounts[5];
+                await token.setAssetProxy(accounts[5]);
+
+                const tx = await token.mint(user, mintAmount, { from: assetProxy });
                 expectEvent(tx, "Transfer", { from: ZERO_ADDRESS, to: user, value: mintAmount });
 
                 const latestBalance = await token.balanceOf(user);
@@ -131,20 +163,23 @@ contract("MetaAssetToken", async (accounts) => {
     describe("burn", async () => {
         context("should fail", async () => {
             it("when it's not called by presale or by a user", async () => {
-                await expectRevert(token.burn(user, toWei("50"), { from: owner }), "DLLR:unathorized mAsset proxy");
+                await expectRevert(token.burn(user, toWei("50"), { from: owner }), "MetaAsset:unauthorized mAsset proxy");
             });
         });
 
         context("should succeed", async () => {
-            it("when it's called by mynt mAsset proxy", async () => {
+            it("when it's called by mAsset proxy", async () => {
+                assetProxy = accounts[5];
+                await token.setAssetProxy(accounts[5]);
+
                 const amount = toWei("50");
-                await token.mint(user, amount, { from: myntAssetProxy });
+                await token.mint(user, amount, { from: assetProxy });
 
                 // amount after mint
                 const initialBalance = await token.balanceOf(user);
                 expect(initialBalance.toString()).to.equal(amount);
 
-                const tx = await token.burn(user, amount, { from: myntAssetProxy });
+                const tx = await token.burn(user, amount, { from: assetProxy });
                 expectEvent(tx, "Transfer", { from: user, to: ZERO_ADDRESS, value: amount });
 
                 // amount after burn
@@ -159,53 +194,57 @@ contract("MetaAssetToken", async (accounts) => {
             it("when recipient is zero address", async () => {
                 await expectRevert(
                     token.transfer(ZERO_ADDRESS, toWei("100"), { from: owner }),
-                    "DLLR: Invalid address. Cannot transfer DLLR directly to the DLLR contract or the null address"
+                    "MetaAsset: Invalid address. Cannot transfer MetaAsset directly to the MetaAsset contract or the null address"
                 );
             });
 
-            it("when recipient is DLLR contract address", async () => {
+            it("when recipient is MetaAsset contract address", async () => {
                 await expectRevert(
                     token.transfer(token.address, toWei("100"), { from: owner }),
-                    "DLLR: Invalid address. Cannot transfer DLLR directly to the DLLR contract or the null address"
+                    "MetaAsset: Invalid address. Cannot transfer MetaAsset directly to the MetaAsset contract or the null address"
                 );
             });
 
-            it("when recipient is mynt mAsset proxy address", async () => {
+            it("when recipient is mAsset proxy address", async () => {
                 await expectRevert(
-                    token.transfer(myntAssetProxy, toWei("100"), { from: owner }),
-                    "DLLR: Invalid address. Cannot transfer DLLR directly to a Sovryn Mynt protocol address"
+                    token.transfer(assetProxy, toWei("100"), { from: owner }),
+                    "MetaAsset: Invalid address. Cannot transfer MetaAsset directly to a Sovryn protocol address"
                 );
             });
 
-            it("when recipient is mynt mAsset implementation address", async () => {
+            it("when recipient is mAsset implementation address", async () => {
                 await expectRevert(
-                    token.transfer(myntAssetImplementation, toWei("100"), { from: owner }),
-                    "DLLR: Invalid address. Cannot transfer DLLR directly to a Sovryn Mynt protocol address"
+                    token.transfer(assetImplementation, toWei("100"), { from: owner }),
+                    "MetaAsset: Invalid address. Cannot transfer MetaAsset directly to a Sovryn protocol address"
                 );
             });
 
-            it("when recipient is mynt basket manager proxy address", async () => {
+            it("when recipient is basket manager proxy address", async () => {
                 await expectRevert(
-                    token.transfer(myntAssetProxy, toWei("100"), { from: owner }),
-                    "DLLR: Invalid address. Cannot transfer DLLR directly to a Sovryn Mynt protocol address"
+                    token.transfer(assetProxy, toWei("100"), { from: owner }),
+                    "MetaAsset: Invalid address. Cannot transfer MetaAsset directly to a Sovryn protocol address"
                 );
             });
 
-            it("when recipient is mynt basket manager implementation address", async () => {
+            it("when recipient is basket manager implementation address", async () => {
                 await expectRevert(
-                    token.transfer(myntBasketManagerImplementation, toWei("100"), { from: owner }),
-                    "DLLR: Invalid address. Cannot transfer DLLR directly to a Sovryn Mynt protocol address"
+                    token.transfer(basketManagerImplementation, toWei("100"), { from: owner }),
+                    "MetaAsset: Invalid address. Cannot transfer MetaAsset directly to a Sovryn protocol address"
                 );
             });
         });
 
         context("should succeed", async () => {
             it("transfer to valid recipient", async () => {
+                token = mockToken;
+                assetProxy = accounts[5];
+                await token.setAssetProxy(accounts[5]);
+
                 const amount = toWei("100");
                 const initialBalance = await token.balanceOf(user);
                 expect(initialBalance.toString()).to.equal("0");
 
-                const tx = await token.mint(user, amount, { from: myntAssetProxy });
+                const tx = await token.mint(user, amount, { from: assetProxy });
                 expectEvent(tx, "Transfer", { from: ZERO_ADDRESS, to: user, value: amount });
 
                 const balanceAfterMint = await token.balanceOf(user);
@@ -228,53 +267,57 @@ contract("MetaAssetToken", async (accounts) => {
             it("when recipient is zero address", async () => {
                 await expectRevert(
                     token.transferFrom(user, ZERO_ADDRESS, toWei("100"), { from: owner }),
-                    "DLLR: Invalid address. Cannot transfer DLLR directly to the DLLR contract or the null address"
+                    "MetaAsset: Invalid address. Cannot transfer MetaAsset directly to the MetaAsset contract or the null address"
                 );
             });
 
-            it("when recipient is DLLR contract address", async () => {
+            it("when recipient is MetaAsset contract address", async () => {
                 await expectRevert(
                     token.transferFrom(user, token.address, toWei("100"), { from: owner }),
-                    "DLLR: Invalid address. Cannot transfer DLLR directly to the DLLR contract or the null address"
+                    "MetaAsset: Invalid address. Cannot transfer MetaAsset directly to the MetaAsset contract or the null address"
                 );
             });
 
-            it("when recipient is mynt mAsset proxy address", async () => {
+            it("when recipient is mAsset proxy address", async () => {
                 await expectRevert(
-                    token.transferFrom(user, myntAssetProxy, toWei("100"), { from: owner }),
-                    "DLLR: Invalid address. Cannot transfer DLLR directly to a Sovryn Mynt protocol address"
+                    token.transferFrom(user, assetProxy, toWei("100"), { from: owner }),
+                    "MetaAsset: Invalid address. Cannot transfer MetaAsset directly to a Sovryn protocol address"
                 );
             });
 
-            it("when recipient is mynt mAsset implementation address", async () => {
+            it("when recipient is mAsset implementation address", async () => {
                 await expectRevert(
-                    token.transferFrom(user, myntAssetImplementation, toWei("100"), { from: owner }),
-                    "DLLR: Invalid address. Cannot transfer DLLR directly to a Sovryn Mynt protocol address"
+                    token.transferFrom(user, assetImplementation, toWei("100"), { from: owner }),
+                    "MetaAsset: Invalid address. Cannot transfer MetaAsset directly to a Sovryn protocol address"
                 );
             });
 
-            it("when recipient is mynt basket manager proxy address", async () => {
+            it("when recipient is basket manager proxy address", async () => {
                 await expectRevert(
-                    token.transferFrom(user, myntAssetProxy, toWei("100"), { from: owner }),
-                    "DLLR: Invalid address. Cannot transfer DLLR directly to a Sovryn Mynt protocol address"
+                    token.transferFrom(user, assetProxy, toWei("100"), { from: owner }),
+                    "MetaAsset: Invalid address. Cannot transfer MetaAsset directly to a Sovryn protocol address"
                 );
             });
 
-            it("when recipient is mynt basket manager implementation address", async () => {
+            it("when recipient is basket manager implementation address", async () => {
                 await expectRevert(
-                    token.transferFrom(user, myntBasketManagerImplementation, toWei("100"), { from: owner }),
-                    "DLLR: Invalid address. Cannot transfer DLLR directly to a Sovryn Mynt protocol address"
+                    token.transferFrom(user, basketManagerImplementation, toWei("100"), { from: owner }),
+                    "MetaAsset: Invalid address. Cannot transfer MetaAsset directly to a Sovryn protocol address"
                 );
             });
         });
 
         context("should succeed", async () => {
             it("transferFrom to valid recipient", async () => {
+                token = mockToken;
+                assetProxy = accounts[5];
+                await token.setAssetProxy(accounts[5]);
+
                 const amount = toWei("100");
                 const initialBalance = await token.balanceOf(user);
                 expect(initialBalance.toString()).to.equal("0");
 
-                const tx = await token.mint(user, amount, { from: myntAssetProxy });
+                const tx = await token.mint(user, amount, { from: assetProxy });
                 expectEvent(tx, "Transfer", { from: ZERO_ADDRESS, to: user, value: amount });
 
                 const balanceAfterMint = await token.balanceOf(user);
@@ -319,7 +362,7 @@ contract("MetaAssetToken", async (accounts) => {
                 const { r, s }: any = fromRpcSig(firstSignature);
 
                 // incorrect amount
-                await expectRevert(token.permit(ownerPermit, spender, toWei("500"), deadline, v, r, s), "DLLR:INVALID_SIGNATURE");
+                await expectRevert(token.permit(ownerPermit, spender, toWei("500"), deadline, v, r, s), "MetaAsset:INVALID_SIGNATURE");
             });
 
             it("signature expired", async () => {
@@ -335,7 +378,7 @@ contract("MetaAssetToken", async (accounts) => {
                 const { r, s }: any = fromRpcSig(firstSignature);
 
                 // incorrect amount
-                await expectRevert(token.permit(ownerPermit, spender, firstValue, deadline, v, r, s), "DLLR:AUTH_EXPIRED");
+                await expectRevert(token.permit(ownerPermit, spender, firstValue, deadline, v, r, s), "MetaAsset:AUTH_EXPIRED");
             });
         });
 
@@ -418,6 +461,12 @@ contract("MetaAssetToken", async (accounts) => {
                 to: spender,
                 value: toWei("10")
             });
+
+            // funding assetProxy address
+            await funder.sendTransaction({
+                to: assetProxy,
+                value: toWei("10")
+            });
         });
 
         context("transferWithPermit should fail", async () => {
@@ -429,7 +478,7 @@ contract("MetaAssetToken", async (accounts) => {
                 const signature = signTypedMessage(ownerWallet.getPrivateKey(), { data });
                 const { v } = fromRpcSig(signature);
                 const { r, s }: any = fromRpcSig(signature);
-                await expectRevert(token.transferWithPermit(ownerPermit, spender, amount, deadline, v, r, s), "DLLR:AUTH_EXPIRED");
+                await expectRevert(token.transferWithPermit(ownerPermit, spender, amount, deadline, v, r, s), "MetaAsset:AUTH_EXPIRED");
             });
 
             it("when recipient is zero address", async () => {
@@ -449,11 +498,11 @@ contract("MetaAssetToken", async (accounts) => {
                 const tokenInstance = await ethers.getContractAt("MetaAssetToken", token.address, account);
                 await expectRevert(
                     tokenInstance.transferWithPermit(ownerPermit, ZERO_ADDRESS, amount, deadline.toString(), v, r, s),
-                    "DLLR: Invalid address. Cannot transfer DLLR directly to the DLLR contract or the null address"
+                    "MetaAsset: Invalid address. Cannot transfer MetaAsset directly to the MetaAsset contract or the null address"
                 );
             });
 
-            it("when recipient is DLLR contract address", async () => {
+            it("when recipient is MetaAsset contract address", async () => {
                 const deadline = MAX_UINT256;
                 const amount = toWei("100");
                 const nonce = await token.nonces(ownerPermit);
@@ -470,11 +519,11 @@ contract("MetaAssetToken", async (accounts) => {
                 const tokenInstance = await ethers.getContractAt("MetaAssetToken", token.address, account);
                 await expectRevert(
                     tokenInstance.transferWithPermit(ownerPermit, token.address, amount, deadline.toString(), v, r, s),
-                    "DLLR: Invalid address. Cannot transfer DLLR directly to the DLLR contract or the null address"
+                    "MetaAsset: Invalid address. Cannot transfer MetaAsset directly to the MetaAsset contract or the null address"
                 );
             });
 
-            it("when recipient is mynt mAsset proxy address", async () => {
+            it("when recipient is mAsset proxy address", async () => {
                 const deadline = MAX_UINT256;
                 const amount = toWei("100");
                 const nonce = await token.nonces(ownerPermit);
@@ -490,12 +539,12 @@ contract("MetaAssetToken", async (accounts) => {
                 const account = await ethers.provider.getSigner(spender);
                 const tokenInstance = await ethers.getContractAt("MetaAssetToken", token.address, account);
                 await expectRevert(
-                    tokenInstance.transferWithPermit(ownerPermit, myntAssetProxy, amount, deadline.toString(), v, r, s),
-                    "DLLR: Invalid address. Cannot transfer DLLR directly to a Sovryn Mynt protocol address"
+                    tokenInstance.transferWithPermit(ownerPermit, assetProxy, amount, deadline.toString(), v, r, s),
+                    "MetaAsset: Invalid address. Cannot transfer MetaAsset directly to a Sovryn protocol address"
                 );
             });
 
-            it("when recipient is mynt mAsset implementation address", async () => {
+            it("when recipient is mAsset implementation address", async () => {
                 const deadline = MAX_UINT256;
                 const amount = toWei("100");
                 const nonce = await token.nonces(ownerPermit);
@@ -511,12 +560,12 @@ contract("MetaAssetToken", async (accounts) => {
                 const account = await ethers.provider.getSigner(spender);
                 const tokenInstance = await ethers.getContractAt("MetaAssetToken", token.address, account);
                 await expectRevert(
-                    tokenInstance.transferWithPermit(ownerPermit, myntAssetImplementation, amount, deadline.toString(), v, r, s),
-                    "DLLR: Invalid address. Cannot transfer DLLR directly to a Sovryn Mynt protocol address"
+                    tokenInstance.transferWithPermit(ownerPermit, assetImplementation, amount, deadline.toString(), v, r, s),
+                    "MetaAsset: Invalid address. Cannot transfer MetaAsset directly to a Sovryn protocol address"
                 );
             });
 
-            it("when recipient is mynt basket manager proxy address", async () => {
+            it("when recipient is basket manager proxy address", async () => {
                 const deadline = MAX_UINT256;
                 const amount = toWei("100");
                 const nonce = await token.nonces(ownerPermit);
@@ -532,12 +581,12 @@ contract("MetaAssetToken", async (accounts) => {
                 const account = await ethers.provider.getSigner(spender);
                 const tokenInstance = await ethers.getContractAt("MetaAssetToken", token.address, account);
                 await expectRevert(
-                    tokenInstance.transferWithPermit(ownerPermit, myntBasketManagerProxy, amount, deadline.toString(), v, r, s),
-                    "DLLR: Invalid address. Cannot transfer DLLR directly to a Sovryn Mynt protocol address"
+                    tokenInstance.transferWithPermit(ownerPermit, basketManagerProxy, amount, deadline.toString(), v, r, s),
+                    "MetaAsset: Invalid address. Cannot transfer MetaAsset directly to a Sovryn protocol address"
                 );
             });
 
-            it("when recipient is mynt basket manager implementation address", async () => {
+            it("when recipient is basket manager implementation address", async () => {
                 const deadline = MAX_UINT256;
                 const amount = toWei("100");
                 const nonce = await token.nonces(ownerPermit);
@@ -553,8 +602,8 @@ contract("MetaAssetToken", async (accounts) => {
                 const account = await ethers.provider.getSigner(spender);
                 const tokenInstance = await ethers.getContractAt("MetaAssetToken", token.address, account);
                 await expectRevert(
-                    tokenInstance.transferWithPermit(ownerPermit, myntBasketManagerImplementation, amount, deadline.toString(), v, r, s),
-                    "DLLR: Invalid address. Cannot transfer DLLR directly to a Sovryn Mynt protocol address"
+                    tokenInstance.transferWithPermit(ownerPermit, basketManagerImplementation, amount, deadline.toString(), v, r, s),
+                    "MetaAsset: Invalid address. Cannot transfer MetaAsset directly to a Sovryn protocol address"
                 );
             });
 
@@ -596,8 +645,11 @@ contract("MetaAssetToken", async (accounts) => {
                     method: "hardhat_impersonateAccount",
                     params: [spender]
                 });
+                assetProxy = accounts[5];
+                await token.setAssetProxy(accounts[5]);
+                await token.mint(ownerPermit, initialOwnerBalance, { from: assetProxy });
 
-                await token.mint(ownerPermit, initialOwnerBalance, { from: myntAssetProxy });
+                await token.setAssetProxy(assetProxyInstance.address);
 
                 const userInitialBalance = await token.balanceOf(user);
                 const ownerInitialBalance = await token.balanceOf(ownerPermit);
@@ -637,3 +689,19 @@ contract("MetaAssetToken", async (accounts) => {
         });
     });
 });
+
+const initProxy = async (
+    admin: string,
+    implementation: IMockImplementationInstance,
+    proxy: InitializableAdminUpgradeabilityProxyInstance
+): Promise<MockProxyImplementationMetaAssetTokenInstance> => {
+    const dependencyContract = await MockDependency.new();
+
+    const initdata: string = implementation.contract.methods.initialize(dependencyContract.address).encodeABI();
+
+    await proxy.methods["initialize(address,address,bytes)"](implementation.address, admin, initdata);
+
+    const implementationThroughProxy = await MockProxyImplementation.at(proxy.address);
+
+    return implementationThroughProxy;
+};

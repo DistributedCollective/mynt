@@ -13,8 +13,8 @@ const ERC20PermitMock = artifacts.require("MockERC20Permit");
 contract("ERC20Permit", function(accounts) {
     const [initialHolder, spender] = accounts;
 
-    const name = "Sovryn Dollar";
-    const symbol = "DLLR";
+    const name = "MetaAsset";
+    const symbol = "MAT";
     const version = "1";
 
     const initialSupply = new BN(100);
@@ -69,7 +69,7 @@ contract("ERC20Permit", function(accounts) {
 
             await this.token.permit(owner, spender, value, maxDeadline, v, r, s);
 
-            await expectRevert(this.token.permit(owner, spender, value, maxDeadline, v, r, s), "DLLR:INVALID_SIGNATURE");
+            await expectRevert(this.token.permit(owner, spender, value, maxDeadline, v, r, s), "MetaAsset:INVALID_SIGNATURE");
         });
 
         it("rejects other signature", async function() {
@@ -78,7 +78,7 @@ contract("ERC20Permit", function(accounts) {
             const signature = signTypedMessage(otherWallet.getPrivateKey(), { data });
             const { v, r, s } = fromRpcSig(signature);
 
-            await expectRevert(this.token.permit(owner, spender, value, maxDeadline, v, r, s), "DLLR:INVALID_SIGNATURE");
+            await expectRevert(this.token.permit(owner, spender, value, maxDeadline, v, r, s), "MetaAsset:INVALID_SIGNATURE");
         });
 
         it("rejects expired permit", async function() {
@@ -88,7 +88,7 @@ contract("ERC20Permit", function(accounts) {
             const signature = signTypedMessage(wallet.getPrivateKey(), { data });
             const { v, r, s } = fromRpcSig(signature);
 
-            await expectRevert(this.token.permit(owner, spender, value, deadline, v, r, s), "DLLR:AUTH_EXPIRED");
+            await expectRevert(this.token.permit(owner, spender, value, deadline, v, r, s), "MetaAsset:AUTH_EXPIRED");
         });
     });
 });

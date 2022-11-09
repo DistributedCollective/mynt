@@ -10,26 +10,22 @@ const MetaAssetToken = artifacts.require("MetaAssetToken");
 const logger = new Logs().showInConsole(true);
 
 const deployFunc = async ({ network, deployments, getUnnamedAccounts }: HardhatRuntimeEnvironment) => {
-    logger.info("Deploying Meta asset (Sovryn Dollar) token...");
+    logger.info("Deploying Meta asset token...");
     setNetwork(network.name);
 
     const { deploy } = deployments;
     const [default_] = await getUnnamedAccounts();
 
     /// @todo update the value for mainnet deployment
-    let myntAssetProxy = "";
-    let myntAssetImpl = "";
-    let myntBasketManagerProxy = "";
-    let myntBasketManagerImpl = "";
+    let assetProxy = "";
+    let basketManagerProxy = "";
 
     if(isDevelopmentNetwork(network.name)) {
-      myntAssetProxy = default_;
-      myntAssetImpl = default_;
-      myntBasketManagerProxy = default_;
-      myntBasketManagerImpl = default_;
+      assetProxy = default_;
+      basketManagerProxy = default_;
     }
 
-    const metaAssetTokenArgs = contractConstructorArgs<MetaAssetTokenContract>("Sovryn Dollar", "DLLR");
+    const metaAssetTokenArgs = contractConstructorArgs<MetaAssetTokenContract>("MetaAsset", "MAT");
     const metaAssetToken = await conditionalDeploy({
         contract: MetaAssetToken,
         key: "MetaAssetToken",
@@ -40,11 +36,11 @@ const deployFunc = async ({ network, deployments, getUnnamedAccounts }: HardhatR
     logger.info(`Deployed at: ${metaAssetToken.address}`);
 
     await conditionalInitialize("MetaAssetToken", async () => {
-        logger.info(`Setting mynt asset config to: proxy: ${myntAssetProxy}, impl: ${myntAssetImpl}`);
-        await metaAssetToken.setMyntAssetConfig(myntAssetProxy, myntAssetImpl);
+        logger.info(`Setting asset proxy to: ${assetProxy}`);
+        await metaAssetToken.setAssetProxy(assetProxy);
 
-        logger.info(`Setting mynt basket manager config to: proxy: ${myntBasketManagerProxy}, impl: ${myntBasketManagerImpl}`);
-        await metaAssetToken.setMyntBasketManagerConfig(myntBasketManagerProxy, myntBasketManagerImpl);
+        logger.info(`Setting basket manager proxy to: ${basketManagerProxy}`);
+        await metaAssetToken.setBasketManagerProxy(basketManagerProxy);
     });
 
     logger.success("Migration completed");
