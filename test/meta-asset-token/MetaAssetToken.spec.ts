@@ -1,6 +1,8 @@
 import { expectRevert, expectEvent } from "@openzeppelin/test-helpers";
 import { toWei, toChecksumAddress } from "web3-utils";
-import { MockMetaAssetTokenInstance, MetaAssetTokenInstance ,
+import {
+    MockMetaAssetTokenInstance,
+    MetaAssetTokenInstance,
     IMockImplementationInstance,
     InitializableAdminUpgradeabilityProxyInstance,
     MockProxyImplementationMetaAssetTokenInstance
@@ -12,7 +14,6 @@ import { signTypedMessage } from "eth-sig-util";
 import BN from "bn.js";
 import { network, ethers } from "hardhat";
 import { EIP712Domain, Permit, PERMIT_TYPEHASH, domainSeparator } from "../helpers/EIP712";
-
 
 const MetaAssetToken = artifacts.require("MetaAssetToken");
 const MockMetaAssetToken = artifacts.require("MockMetaAssetToken");
@@ -37,7 +38,7 @@ const buildData = (chainId, verifyingContract, from, spender, amount, nonce, dea
 });
 
 contract("MetaAssetToken", async (accounts) => {
-    const [owner, user] = accounts;
+    const [owner, user, newAssetProxy] = accounts;
 
     let token: MetaAssetTokenInstance;
     let mockToken: MockMetaAssetTokenInstance;
@@ -148,8 +149,8 @@ contract("MetaAssetToken", async (accounts) => {
                 const initialBalance = await token.balanceOf(user);
                 expect(initialBalance.toString()).to.equal("0");
 
-                assetProxy = accounts[5];
-                await token.setAssetProxy(accounts[5]);
+                assetProxy = newAssetProxy;
+                await token.setAssetProxy(assetProxy);
 
                 const tx = await token.mint(user, mintAmount, { from: assetProxy });
                 expectEvent(tx, "Transfer", { from: ZERO_ADDRESS, to: user, value: mintAmount });
@@ -169,8 +170,8 @@ contract("MetaAssetToken", async (accounts) => {
 
         context("should succeed", async () => {
             it("when it's called by mAsset proxy", async () => {
-                assetProxy = accounts[5];
-                await token.setAssetProxy(accounts[5]);
+                assetProxy = newAssetProxy;
+                await token.setAssetProxy(assetProxy);
 
                 const amount = toWei("50");
                 await token.mint(user, amount, { from: assetProxy });
@@ -237,8 +238,8 @@ contract("MetaAssetToken", async (accounts) => {
         context("should succeed", async () => {
             it("transfer to valid recipient", async () => {
                 token = mockToken;
-                assetProxy = accounts[5];
-                await token.setAssetProxy(accounts[5]);
+                assetProxy = newAssetProxy;
+                await token.setAssetProxy(assetProxy);
 
                 const amount = toWei("100");
                 const initialBalance = await token.balanceOf(user);
@@ -310,8 +311,8 @@ contract("MetaAssetToken", async (accounts) => {
         context("should succeed", async () => {
             it("transferFrom to valid recipient", async () => {
                 token = mockToken;
-                assetProxy = accounts[5];
-                await token.setAssetProxy(accounts[5]);
+                assetProxy = newAssetProxy;
+                await token.setAssetProxy(assetProxy);
 
                 const amount = toWei("100");
                 const initialBalance = await token.balanceOf(user);
@@ -645,8 +646,8 @@ contract("MetaAssetToken", async (accounts) => {
                     method: "hardhat_impersonateAccount",
                     params: [spender]
                 });
-                assetProxy = accounts[5];
-                await token.setAssetProxy(accounts[5]);
+                assetProxy = newAssetProxy;
+                await token.setAssetProxy(assetProxy);
                 await token.mint(ownerPermit, initialOwnerBalance, { from: assetProxy });
 
                 await token.setAssetProxy(assetProxyInstance.address);
