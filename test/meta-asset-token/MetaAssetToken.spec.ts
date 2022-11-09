@@ -1,6 +1,10 @@
 import { expectRevert, expectEvent } from "@openzeppelin/test-helpers";
 import { toWei, toChecksumAddress } from "web3-utils";
-import { MockMetaAssetTokenInstance, MetaAssetTokenInstance } from "types/generated";
+import { MockMetaAssetTokenInstance, MetaAssetTokenInstance ,
+    IMockImplementationInstance,
+    InitializableAdminUpgradeabilityProxyInstance,
+    MockProxyImplementationMetaAssetTokenInstance
+} from "types/generated";
 import { MAX_UINT256, ZERO_ADDRESS } from "@utils/constants";
 import Wallet from "ethereumjs-wallet";
 import { fromRpcSig } from "ethereumjs-util";
@@ -8,11 +12,7 @@ import { signTypedMessage } from "eth-sig-util";
 import BN from "bn.js";
 import { network, ethers } from "hardhat";
 import { EIP712Domain, Permit, PERMIT_TYPEHASH, domainSeparator } from "../helpers/EIP712";
-import {
-    IMockImplementationInstance,
-    InitializableAdminUpgradeabilityProxyInstance,
-    MockProxyImplementationMetaAssetTokenInstance
-} from "types/generated";
+
 
 const MetaAssetToken = artifacts.require("MetaAssetToken");
 const MockMetaAssetToken = artifacts.require("MockMetaAssetToken");
