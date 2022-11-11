@@ -139,7 +139,7 @@ contract("MetaAssetToken", async (accounts) => {
     describe("mint", async () => {
         context("should fail", async () => {
             it("when it's not called by mAsset proxy", async () => {
-                await expectRevert(token.mint(user, toWei("100"), { from: user }), "MetaAsset:unauthorized mAsset proxy");
+                await expectRevert(token.mint(user, toWei("100"), { from: user }), "DLLR:unauthorized mAsset proxy");
             });
         });
 
@@ -164,7 +164,7 @@ contract("MetaAssetToken", async (accounts) => {
     describe("burn", async () => {
         context("should fail", async () => {
             it("when it's not called by presale or by a user", async () => {
-                await expectRevert(token.burn(user, toWei("50"), { from: owner }), "MetaAsset:unauthorized mAsset proxy");
+                await expectRevert(token.burn(user, toWei("50"), { from: owner }), "DLLR:unauthorized mAsset proxy");
             });
         });
 
@@ -195,42 +195,42 @@ contract("MetaAssetToken", async (accounts) => {
             it("when recipient is zero address", async () => {
                 await expectRevert(
                     token.transfer(ZERO_ADDRESS, toWei("100"), { from: owner }),
-                    "MetaAsset: Invalid address. Cannot transfer MetaAsset directly to the MetaAsset contract or the null address"
+                    "DLLR: Invalid address. Cannot transfer DLLR directly to the DLLR contract or the null address"
                 );
             });
 
             it("when recipient is MetaAsset contract address", async () => {
                 await expectRevert(
                     token.transfer(token.address, toWei("100"), { from: owner }),
-                    "MetaAsset: Invalid address. Cannot transfer MetaAsset directly to the MetaAsset contract or the null address"
+                    "DLLR: Invalid address. Cannot transfer DLLR directly to the DLLR contract or the null address"
                 );
             });
 
             it("when recipient is mAsset proxy address", async () => {
                 await expectRevert(
                     token.transfer(assetProxy, toWei("100"), { from: owner }),
-                    "MetaAsset: Invalid address. Cannot transfer MetaAsset directly to a Sovryn protocol address"
+                    "DLLR: Invalid address. Cannot transfer DLLR directly to a Sovryn protocol address"
                 );
             });
 
             it("when recipient is mAsset implementation address", async () => {
                 await expectRevert(
                     token.transfer(assetImplementation, toWei("100"), { from: owner }),
-                    "MetaAsset: Invalid address. Cannot transfer MetaAsset directly to a Sovryn protocol address"
+                    "DLLR: Invalid address. Cannot transfer DLLR directly to a Sovryn protocol address"
                 );
             });
 
             it("when recipient is basket manager proxy address", async () => {
                 await expectRevert(
                     token.transfer(assetProxy, toWei("100"), { from: owner }),
-                    "MetaAsset: Invalid address. Cannot transfer MetaAsset directly to a Sovryn protocol address"
+                    "DLLR: Invalid address. Cannot transfer DLLR directly to a Sovryn protocol address"
                 );
             });
 
             it("when recipient is basket manager implementation address", async () => {
                 await expectRevert(
                     token.transfer(basketManagerImplementation, toWei("100"), { from: owner }),
-                    "MetaAsset: Invalid address. Cannot transfer MetaAsset directly to a Sovryn protocol address"
+                    "DLLR: Invalid address. Cannot transfer DLLR directly to a Sovryn protocol address"
                 );
             });
         });
@@ -268,42 +268,42 @@ contract("MetaAssetToken", async (accounts) => {
             it("when recipient is zero address", async () => {
                 await expectRevert(
                     token.transferFrom(user, ZERO_ADDRESS, toWei("100"), { from: owner }),
-                    "MetaAsset: Invalid address. Cannot transfer MetaAsset directly to the MetaAsset contract or the null address"
+                    "DLLR: Invalid address. Cannot transfer DLLR directly to the DLLR contract or the null address"
                 );
             });
 
             it("when recipient is MetaAsset contract address", async () => {
                 await expectRevert(
                     token.transferFrom(user, token.address, toWei("100"), { from: owner }),
-                    "MetaAsset: Invalid address. Cannot transfer MetaAsset directly to the MetaAsset contract or the null address"
+                    "DLLR: Invalid address. Cannot transfer DLLR directly to the DLLR contract or the null address"
                 );
             });
 
             it("when recipient is mAsset proxy address", async () => {
                 await expectRevert(
                     token.transferFrom(user, assetProxy, toWei("100"), { from: owner }),
-                    "MetaAsset: Invalid address. Cannot transfer MetaAsset directly to a Sovryn protocol address"
+                    "DLLR: Invalid address. Cannot transfer DLLR directly to a Sovryn protocol address"
                 );
             });
 
             it("when recipient is mAsset implementation address", async () => {
                 await expectRevert(
                     token.transferFrom(user, assetImplementation, toWei("100"), { from: owner }),
-                    "MetaAsset: Invalid address. Cannot transfer MetaAsset directly to a Sovryn protocol address"
+                    "DLLR: Invalid address. Cannot transfer DLLR directly to a Sovryn protocol address"
                 );
             });
 
             it("when recipient is basket manager proxy address", async () => {
                 await expectRevert(
                     token.transferFrom(user, assetProxy, toWei("100"), { from: owner }),
-                    "MetaAsset: Invalid address. Cannot transfer MetaAsset directly to a Sovryn protocol address"
+                    "DLLR: Invalid address. Cannot transfer DLLR directly to a Sovryn protocol address"
                 );
             });
 
             it("when recipient is basket manager implementation address", async () => {
                 await expectRevert(
                     token.transferFrom(user, basketManagerImplementation, toWei("100"), { from: owner }),
-                    "MetaAsset: Invalid address. Cannot transfer MetaAsset directly to a Sovryn protocol address"
+                    "DLLR: Invalid address. Cannot transfer DLLR directly to a Sovryn protocol address"
                 );
             });
         });
@@ -499,7 +499,7 @@ contract("MetaAssetToken", async (accounts) => {
                 const tokenInstance = await ethers.getContractAt("MetaAssetToken", token.address, account);
                 await expectRevert(
                     tokenInstance.transferWithPermit(ownerPermit, ZERO_ADDRESS, amount, deadline.toString(), v, r, s),
-                    "MetaAsset: Invalid address. Cannot transfer MetaAsset directly to the MetaAsset contract or the null address"
+                    "DLLR: Invalid address. Cannot transfer DLLR directly to the DLLR contract or the null address"
                 );
             });
 
@@ -520,7 +520,7 @@ contract("MetaAssetToken", async (accounts) => {
                 const tokenInstance = await ethers.getContractAt("MetaAssetToken", token.address, account);
                 await expectRevert(
                     tokenInstance.transferWithPermit(ownerPermit, token.address, amount, deadline.toString(), v, r, s),
-                    "MetaAsset: Invalid address. Cannot transfer MetaAsset directly to the MetaAsset contract or the null address"
+                    "DLLR: Invalid address. Cannot transfer DLLR directly to the DLLR contract or the null address"
                 );
             });
 
@@ -541,7 +541,7 @@ contract("MetaAssetToken", async (accounts) => {
                 const tokenInstance = await ethers.getContractAt("MetaAssetToken", token.address, account);
                 await expectRevert(
                     tokenInstance.transferWithPermit(ownerPermit, assetProxy, amount, deadline.toString(), v, r, s),
-                    "MetaAsset: Invalid address. Cannot transfer MetaAsset directly to a Sovryn protocol address"
+                    "DLLR: Invalid address. Cannot transfer DLLR directly to a Sovryn protocol address"
                 );
             });
 
@@ -562,7 +562,7 @@ contract("MetaAssetToken", async (accounts) => {
                 const tokenInstance = await ethers.getContractAt("MetaAssetToken", token.address, account);
                 await expectRevert(
                     tokenInstance.transferWithPermit(ownerPermit, assetImplementation, amount, deadline.toString(), v, r, s),
-                    "MetaAsset: Invalid address. Cannot transfer MetaAsset directly to a Sovryn protocol address"
+                    "DLLR: Invalid address. Cannot transfer DLLR directly to a Sovryn protocol address"
                 );
             });
 
@@ -583,7 +583,7 @@ contract("MetaAssetToken", async (accounts) => {
                 const tokenInstance = await ethers.getContractAt("MetaAssetToken", token.address, account);
                 await expectRevert(
                     tokenInstance.transferWithPermit(ownerPermit, basketManagerProxy, amount, deadline.toString(), v, r, s),
-                    "MetaAsset: Invalid address. Cannot transfer MetaAsset directly to a Sovryn protocol address"
+                    "DLLR: Invalid address. Cannot transfer DLLR directly to a Sovryn protocol address"
                 );
             });
 
@@ -604,7 +604,7 @@ contract("MetaAssetToken", async (accounts) => {
                 const tokenInstance = await ethers.getContractAt("MetaAssetToken", token.address, account);
                 await expectRevert(
                     tokenInstance.transferWithPermit(ownerPermit, basketManagerImplementation, amount, deadline.toString(), v, r, s),
-                    "MetaAsset: Invalid address. Cannot transfer MetaAsset directly to a Sovryn protocol address"
+                    "DLLR: Invalid address. Cannot transfer DLLR directly to a Sovryn protocol address"
                 );
             });
 

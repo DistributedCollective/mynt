@@ -35,21 +35,21 @@ contract MetaAssetToken is ERC20Permit, ERC20Detailed, Ownable {
 
     // modifiers
     modifier onlyAssetProxy() {
-      require(msg.sender == assetProxy, "MetaAsset:unauthorized mAsset proxy");
+      require(msg.sender == assetProxy, "DLLR:unauthorized mAsset proxy");
       _;
     }
 
     modifier requireValidRecipient(address _recipient) {
         require(
             _recipient != address(0) && _recipient != address(this),
-            "MetaAsset: Invalid address. Cannot transfer MetaAsset directly to the MetaAsset contract or the null address"
+            "DLLR: Invalid address. Cannot transfer DLLR directly to the DLLR contract or the null address"
         );
 
         address assetImplementation = assetImplementation();
         address basketManagerImplementation = basketManagerImplementation();
         require(
             _recipient != assetProxy && _recipient != assetImplementation && _recipient != basketManagerProxy && _recipient != basketManagerImplementation,
-            "MetaAsset: Invalid address. Cannot transfer MetaAsset directly to a Sovryn protocol address"
+            "DLLR: Invalid address. Cannot transfer DLLR directly to a Sovryn protocol address"
         );
 
         _;
