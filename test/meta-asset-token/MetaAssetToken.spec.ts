@@ -176,9 +176,12 @@ contract("MetaAssetToken", async (accounts) => {
                 const amount = toWei("50");
                 await token.mint(user, amount, { from: assetProxy });
 
+                const totalSupply = await token.totalSupply();
+
                 // amount after mint
                 const initialBalance = await token.balanceOf(user);
                 expect(initialBalance.toString()).to.equal(amount);
+                expect(totalSupply.toString()).to.equal(initialBalance.toString());
 
                 const tx = await token.burn(user, amount, { from: assetProxy });
                 expectEvent(tx, "Transfer", { from: user, to: ZERO_ADDRESS, value: amount });
@@ -186,6 +189,8 @@ contract("MetaAssetToken", async (accounts) => {
                 // amount after burn
                 const latestBalance = await token.balanceOf(user);
                 expect(latestBalance.toString()).to.equal("0");
+
+
             });
         });
     });
