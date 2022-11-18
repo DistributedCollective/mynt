@@ -1,5 +1,6 @@
 import { HardhatUserConfig } from "hardhat/types";
 
+import * as dotenv from 'dotenv'
 import "hardhat-gas-reporter";
 import "solidity-coverage";
 import "@nomiclabs/hardhat-waffle";
@@ -15,6 +16,8 @@ import "hardhat-contract-sizer";
 
 import "scripts/tasks/transferOwnership";
 import "scripts/tasks/transferAdmin";
+
+dotenv.config()
 
 const config: HardhatUserConfig = {
     networks: {
@@ -79,22 +82,14 @@ const config: HardhatUserConfig = {
             gas: 2000000
         },
         rskTestnet: {
-            accounts: {
-                mnemonic: "chimney toss kit now firm true scan laundry hazard buffalo tiny west",
-                initialIndex: 0,
-                count: 31
-            },
+            accounts: [process.env.DEPLOYER_PRIVATE_KEY],
             url: 'https://testnet.sovryn.app/rpc',
             chainId: 31,
             gasPrice: 71680400, // 71GWei,
             timeout: 1e9
         },
         rsk: {
-            accounts: {
-                mnemonic: "chimney toss kit now firm true scan laundry hazard buffalo tiny west",
-                initialIndex: 0,
-                count: 30
-            },
+            accounts: [process.env.DEPLOYER_PRIVATE_KEY],
             url: 'wss://mainnet.sovryn.app/ws',
             chainId: 30,
             gasPrice: 71680400, // 71GWei,

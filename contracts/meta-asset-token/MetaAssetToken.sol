@@ -125,7 +125,7 @@ contract MetaAssetToken is ERC20Permit, ERC20Detailed, Ownable {
      * @notice Only owner who can transfer the token.
      * @notice destination cannot be:
      * - Zero address.
-     * - DDLR contract address.
+     * - DLLR contract address.
      * - Sovryn mAsset proxy & implementation address.
      * - Sovryn Basket Manager proxy & implementation address.
      *
@@ -143,7 +143,7 @@ contract MetaAssetToken is ERC20Permit, ERC20Detailed, Ownable {
      * @notice Only owner who can transfer the token.
      * @notice destination cannot be:
      * - Zero address.
-     * - DDLR contract address.
+     * - DLLR contract address.
      * - Sovryn mAsset proxy & implementation address.
      * - Sovryn Basket Manager proxy & implementation address.
      *
@@ -168,7 +168,7 @@ contract MetaAssetToken is ERC20Permit, ERC20Detailed, Ownable {
      *
      * @notice destination cannot be:
      * - Zero address.
-     * - DDLR contract address.
+     * - DLLR contract address.
      * - Sovryn mAsset proxy & implementation address.
      * - Sovryn Basket Manager proxy & implementation address.
      *
