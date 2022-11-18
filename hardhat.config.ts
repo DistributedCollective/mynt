@@ -82,14 +82,14 @@ const config: HardhatUserConfig = {
             gas: 2000000
         },
         rskTestnet: {
-            accounts: [process.env.DEPLOYER_PRIVATE_KEY],
+            accounts: process.env.DEPLOYER_PRIVATE_KEY ? [process.env.DEPLOYER_PRIVATE_KEY] : [],
             url: 'https://testnet.sovryn.app/rpc',
             chainId: 31,
             gasPrice: 71680400, // 71GWei,
             timeout: 1e9
         },
         rsk: {
-            accounts: [process.env.DEPLOYER_PRIVATE_KEY],
+            accounts: process.env.DEPLOYER_PRIVATE_KEY ? [process.env.DEPLOYER_PRIVATE_KEY] : [],
             url: 'wss://mainnet.sovryn.app/ws',
             chainId: 30,
             gasPrice: 71680400, // 71GWei,
