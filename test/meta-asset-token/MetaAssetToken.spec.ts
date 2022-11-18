@@ -189,8 +189,6 @@ contract("MetaAssetToken", async (accounts) => {
                 // amount after burn
                 const latestBalance = await token.balanceOf(user);
                 expect(latestBalance.toString()).to.equal("0");
-
-
             });
         });
     });
