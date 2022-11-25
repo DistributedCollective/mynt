@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.5.17;
+pragma solidity 0.8.17;
 
 import "../interfaces/IERC20Permit.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
@@ -14,7 +14,7 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
  * need to send a transaction, and thus is not required to hold Ether at all.
  *
  */
-contract ERC20Permit is ERC20, IERC20Permit {
+abstract contract ERC20Permit is ERC20, IERC20Permit {
     mapping (address => uint256) private _nonces;
 
     bytes32 private constant EIP712DOMAIN_HASH = keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)");
@@ -67,7 +67,7 @@ contract ERC20Permit is ERC20, IERC20Permit {
         );
     }
 
-    function getChainID() public pure returns (uint256) {
+    function getChainID() public view returns (uint256) {
         uint256 id;
         assembly {
             id := chainid()

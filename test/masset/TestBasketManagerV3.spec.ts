@@ -345,7 +345,7 @@ contract("BasketManagerV3", async (accounts) => {
             it("when it's not called by the owner", async () => {
                 await expectRevert(
                     basketManager.addBasset(mockToken1.address, 1, ZERO_ADDRESS, 10, 100, false, { from: user }),
-                    "VM Exception while processing transaction: reverted with reason string 'InitializableOwnable: caller is not the owner'"
+                    "VM Exception while processing transaction: reverted with reason string 'Ownable: caller is not the owner'"
                 );
             });
 
@@ -493,7 +493,7 @@ contract("BasketManagerV3", async (accounts) => {
             it("when it's not called by the owner", async () => {
                 await expectRevert(
                     basketManager.removeBasset(mockToken1.address, { from: user }),
-                    "VM Exception while processing transaction: reverted with reason string 'InitializableOwnable: caller is not the owner'"
+                    "VM Exception while processing transaction: reverted with reason string 'Ownable: caller is not the owner'"
                 );
             });
 

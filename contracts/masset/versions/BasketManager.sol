@@ -1,6 +1,7 @@
-pragma solidity ^0.5.17;
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.17;
 
-import { SafeMath } from "@openzeppelin/contracts/math/SafeMath.sol";
+import { SafeMath } from "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
 contract BasketManager {
 
@@ -17,7 +18,7 @@ contract BasketManager {
     }
 
     // external
-    constructor(address[] memory _bassets, int256[] memory _factors, address[] memory _bridges) public {
+    constructor(address[] memory _bassets, int256[] memory _factors, address[] memory _bridges) {
         require(_bassets.length > 0, "some basset required");
         require(_bassets.length == _factors.length, "factor array length mismatch");
         require(_bridges.length == _factors.length, "bridge array length mismatch");
@@ -40,11 +41,11 @@ contract BasketManager {
         return _isValidBasset(_basset);
     }
 
-    function checkBasketBalanceForDeposit(address _basset, uint256 _bassetQuantity) external view returns(bool) {
+    function checkBasketBalanceForDeposit(address _basset, uint256) external view returns(bool) {
         return _isValidBasset(_basset);
     }
 
-    function checkBasketBalanceForWithdrawal(address _basset, uint256 _bassetQuantity) external view returns(bool) {
+    function checkBasketBalanceForWithdrawal(address _basset, uint256) external view returns(bool) {
         return _isValidBasset(_basset);
     }
 

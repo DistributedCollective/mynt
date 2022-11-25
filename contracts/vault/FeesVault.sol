@@ -1,17 +1,18 @@
-pragma solidity ^0.5.17;
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.17;
 
-import { InitializableOwnable } from "../helpers/InitializableOwnable.sol";
-import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 /**
  * @title FeesVault
  * @dev Contract is used to store fees.
  */
-contract FeesVault is InitializableOwnable {
+contract FeesVault is OwnableUpgradeable {
     using SafeERC20 for IERC20;
 
-    function initialize() external {
-        _initialize();
+    function initialize() external initializer {
+        __Ownable_init_unchained();
     }
 
     /**

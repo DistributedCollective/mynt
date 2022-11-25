@@ -1,8 +1,8 @@
-pragma solidity ^0.5.17;
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.17;
 
-import "@openzeppelin/contracts/token/ERC20/ERC20Detailed.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "@openzeppelin/contracts/ownership/Ownable.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "../interfaces/IApproveAndCall.sol";
 
 /**
@@ -12,7 +12,7 @@ import "../interfaces/IApproveAndCall.sol";
  * mint and burn functions.
  */
 
-contract MyntToken is ERC20, ERC20Detailed, Ownable {
+contract MyntToken is ERC20, Ownable {
     // events
 
     /**
@@ -35,7 +35,7 @@ contract MyntToken is ERC20, ERC20Detailed, Ownable {
     /**
      * @notice Constructor called on deployment, initiates the contract.
      */
-    constructor() public ERC20Detailed("Sovryn Mynt", "MYNT", 18) {}
+    constructor() ERC20("Sovryn Mynt", "MYNT") {}
 
     /**
      * @notice setMarketMaker sets the token's market maker address

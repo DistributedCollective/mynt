@@ -95,7 +95,7 @@ contract("MassetV3", async (accounts) => {
                 await masset.initialize(basketManagerObj.basketManager.address, token.address, false);
                 await expectRevert(
                     masset.initialize(basketManagerObj.basketManager.address, token.address, false),
-                    "VM Exception while processing transaction: reverted with reason string 'already initialized'"
+                    "VM Exception while processing transaction: reverted with reason string 'Initializable: contract is already initialized'"
                 );
             });
         });
@@ -191,9 +191,11 @@ contract("MassetV3", async (accounts) => {
                 );
             });
             it("if amount is greater than the balance", async () => {
+                await basketManagerObj.mockToken1.approve(masset.address, 100000);
+
                 await expectRevert(
                     masset.mint(basketManagerObj.mockToken1.address, 100000),
-                    "VM Exception while processing transaction: reverted with reason string 'SafeERC20: low-level call failed'"
+                    "VM Exception while processing transaction: reverted with reason string 'ERC20: transfer amount exceeds balance'"
                 );
             });
         });

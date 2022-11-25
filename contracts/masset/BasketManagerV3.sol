@@ -1,8 +1,9 @@
-pragma solidity ^0.5.17;
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.17;
 
-import { SafeMath } from "@openzeppelin/contracts/math/SafeMath.sol";
+import { SafeMath } from "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import { InitializableOwnable } from "../helpers/InitializableOwnable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
 
 /**
@@ -13,7 +14,7 @@ import { InitializableOwnable } from "../helpers/InitializableOwnable.sol";
  * to adjust precisions or set/get parameters: bridge, factor, range and paused.
  */
 
-contract BasketManagerV3 is InitializableOwnable {
+contract BasketManagerV3 is OwnableUpgradeable {
 
     using SafeMath for uint256;
 
@@ -113,11 +114,12 @@ contract BasketManagerV3 is InitializableOwnable {
    * @dev Contract initializer.
    * @param _masset     Address of the mAsset contract.
    */
-    function initialize(address _masset) external {
+    function initialize(address _masset) external initializer {
         require(masset == address(0), "already initialized");
-        _initialize();
         masset = _masset;
         version = "3.0";
+
+        __Ownable_init_unchained();
     }
 
     // Methods for Masset logic
@@ -183,7 +185,8 @@ contract BasketManagerV3 is InitializableOwnable {
      *      Since the ratio may cause fractions, the bAsset is adjusted to match nearest non fraction amount and returned.
      * @param _basset           Address of bAsset.
      * @param _bassetQuantity   Amount of bAssets to check.
-     * @return Calculated amount of mAssets and Adjusted amount of bAssets.
+     * @return massetQuantity Calculated amount of mAssets.
+     * @return bassetQuantity Calculated amount of Adjusted amount of bAssets.
      */
     function convertBassetToMassetQuantity(
         address _basset,
@@ -205,7 +208,8 @@ contract BasketManagerV3 is InitializableOwnable {
      *      Since the ratio may cause fractions, the mAsset is adjusted to match nearest non fraction amount and returned.
      * @param _basset           Address of bAsset.
      * @param _massetQuantity   Amount of mAssets to check.
-     * @return Calculated amount of bAssets and Adjusted amount of mAssets.
+     * @return bassetQuantity Calculated amount of Adjusted amount of bAssets.
+     * @return massetQuantity Calculated amount of mAssets.
      */
     function convertMassetToBassetQuantity(
         address _basset,
@@ -225,7 +229,7 @@ contract BasketManagerV3 is InitializableOwnable {
 
     /**
      * @dev Calculates total mAsset balance.
-     * @return Calculated total balance.
+     * @return total Calculated total balance.
      */
     function getTotalMassetBalance() public view returns (uint256 total) {
         for(uint i=0; i<bassetsArray.length; i++) {
@@ -325,7 +329,7 @@ contract BasketManagerV3 is InitializableOwnable {
     /**
      * @dev Returns true if the number is power of ten.
      * @param x     Number to be checked.
-     * @return      Is the number power of ten.
+     * @return      result Is the number power of ten.
      */
     function isPowerOfTen(int256 x) public pure returns (bool result) {
         uint256 number;

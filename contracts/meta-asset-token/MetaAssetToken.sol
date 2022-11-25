@@ -1,7 +1,7 @@
-pragma solidity ^0.5.17;
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.17;
 
-import "@openzeppelin/contracts/token/ERC20/ERC20Detailed.sol";
-import "@openzeppelin/contracts/ownership/Ownable.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "../interfaces/IApproveAndCall.sol";
 import "../interfaces/IProxy.sol";
 import "../shared/ERC20Permit.sol";
@@ -13,7 +13,7 @@ import "../shared/ERC20Permit.sol";
  * mint and burn functions.
  */
 
-contract MetaAssetToken is ERC20Permit, ERC20Detailed, Ownable {
+contract MetaAssetToken is ERC20Permit, Ownable {
     // events
 
     /**
@@ -45,10 +45,10 @@ contract MetaAssetToken is ERC20Permit, ERC20Detailed, Ownable {
             "DLLR: Invalid address. Cannot transfer DLLR directly to the DLLR contract or the null address"
         );
 
-        address assetImplementation = assetImplementation();
-        address basketManagerImplementation = basketManagerImplementation();
+        address _assetImplementation = assetImplementation();
+        address _basketManagerImplementation = basketManagerImplementation();
         require(
-            _recipient != assetProxy && _recipient != assetImplementation && _recipient != basketManagerProxy && _recipient != basketManagerImplementation,
+            _recipient != assetProxy && _recipient != _assetImplementation && _recipient != basketManagerProxy && _recipient != _basketManagerImplementation,
             "DLLR: Invalid address. Cannot transfer DLLR directly to a Sovryn protocol address"
         );
 
@@ -58,14 +58,14 @@ contract MetaAssetToken is ERC20Permit, ERC20Detailed, Ownable {
     /**
      * @notice Constructor called on deployment, initiates the contract.
      */
-    constructor(string memory _tokenName, string memory _symbol) public ERC20Detailed(_tokenName, _symbol, 18) {}
+    constructor(string memory _tokenName, string memory _symbol) ERC20(_tokenName, _symbol) {}
 
     /**
      * @dev getter function of asset implementation address
      *
      * @return asset implementation address
      */
-    function assetImplementation() public view returns(address) {
+    function assetImplementation() public virtual view returns(address) {
         return IProxy(assetProxy).implementation();
     }
 
@@ -74,7 +74,7 @@ contract MetaAssetToken is ERC20Permit, ERC20Detailed, Ownable {
      *
      * @return basket manager implementation address
      */
-    function basketManagerImplementation() public view returns(address) {
+    function basketManagerImplementation() public virtual view returns(address) {
         return IProxy(basketManagerProxy).implementation();
     }
 
@@ -134,7 +134,7 @@ contract MetaAssetToken is ERC20Permit, ERC20Detailed, Ownable {
      *
      * @return true / false.
      */
-    function transfer(address _recipient, uint256 _amount) public requireValidRecipient(_recipient) returns (bool) {
+    function transfer(address _recipient, uint256 _amount) public override requireValidRecipient(_recipient) returns (bool) {
         _transfer(_msgSender(), _recipient, _amount);
         return true;
     }
@@ -153,11 +153,11 @@ contract MetaAssetToken is ERC20Permit, ERC20Detailed, Ownable {
      *
      * @return true / false.
      */
-    function transferFrom(address _from, address _to, uint256 _amount) public requireValidRecipient(_to) returns (bool) {
+    function transferFrom(address _from, address _to, uint256 _amount) public override requireValidRecipient(_to) returns (bool) {
         _approve(
             _from,
             msg.sender,
-            allowance(_from, msg.sender).sub(_amount, "ERC20: transfer amount exceeds allowance")
+            allowance(_from, msg.sender) - _amount
         );
         _transfer(_from, _to, _amount);
         return true;

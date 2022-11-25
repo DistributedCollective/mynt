@@ -1,4 +1,5 @@
-pragma solidity ^0.5.17;
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.17;
 
 import "../../meta-asset-token/MetaAssetToken.sol";
 
@@ -12,12 +13,12 @@ contract MockMetaAssetToken is MetaAssetToken {
     string memory _symbol,
     address _assetImplementation,
     address _basketManagerImplementation
-  ) public MetaAssetToken(_tokenName, _symbol) {
+  ) MetaAssetToken(_tokenName, _symbol) {
     assetImpl = _assetImplementation;
     basketManagerImpl = _basketManagerImplementation;
   }
 
-  function assetImplementation() public view returns(address) {
+  function assetImplementation() public override view returns(address) {
       return assetImpl;
   }
 
@@ -26,7 +27,7 @@ contract MockMetaAssetToken is MetaAssetToken {
      *
      * @return basket manager implementation address
      */
-  function basketManagerImplementation() public view returns(address) {
+  function basketManagerImplementation() public override view returns(address) {
       return basketManagerImpl;
   }
 }

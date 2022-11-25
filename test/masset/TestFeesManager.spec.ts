@@ -49,7 +49,7 @@ contract("FeesManager", async (accounts) => {
                 await feesManager.initialize(1, 2, 3, 4);
                 await expectRevert(
                     feesManager.initialize(5, 6, 7, 8),
-                    "VM Exception while processing transaction: reverted with reason string 'already initialized'"
+                    "VM Exception while processing transaction: reverted with reason string 'Initializable: contract is already initialized'"
                 );
             });
         });
@@ -68,7 +68,7 @@ contract("FeesManager", async (accounts) => {
         context("should fail", async () => {
             it("when it's not called by admin", async () => {
                 const revertMessage =
-                    "VM Exception while processing transaction: reverted with reason string 'InitializableOwnable: caller is not the owner'";
+                    "VM Exception while processing transaction: reverted with reason string 'Ownable: caller is not the owner'";
 
                 await expectRevert(feesManager.setDepositFee(2, { from: standardAccounts.other }), revertMessage);
                 await expectRevert(feesManager.setDepositBridgeFee(2, { from: standardAccounts.other }), revertMessage);

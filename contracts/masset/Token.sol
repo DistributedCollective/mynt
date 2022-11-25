@@ -1,8 +1,8 @@
-pragma solidity ^0.5.17;
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.17;
 
-import "@openzeppelin/contracts/token/ERC20/ERC20Detailed.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "@openzeppelin/contracts/ownership/Ownable.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
 /**
  * @title Token
@@ -11,16 +11,24 @@ import "@openzeppelin/contracts/ownership/Ownable.sol";
  * mint and burn functions.
  */
 
-contract Token is ERC20, ERC20Detailed, Ownable {
+contract Token is ERC20, Ownable {
+
+    uint8 private _decimals;
 
     /**
      * @notice Constructor called on deployment, initiates the contract.
      * @param _name The name of the token.
      * @param _symbol The symbol of the token.
-     * @param _decimals The decimals of the token.
+     * @param _decimalsValue The decimals of the token.
      * */
-    constructor(string memory _name, string memory _symbol, uint8 _decimals) public
-    ERC20Detailed(_name, _symbol, _decimals) {}
+    constructor(string memory _name, string memory _symbol, uint8 _decimalsValue)
+    ERC20(_name, _symbol) {
+        _decimals = _decimalsValue;
+    }
+
+    function decimals() public view virtual override returns (uint8) {
+        return _decimals;
+    }
 
     /**
      * @notice Creates new tokens and sends them to the recipient.

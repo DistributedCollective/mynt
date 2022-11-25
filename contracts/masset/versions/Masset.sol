@@ -1,17 +1,18 @@
-pragma solidity ^0.5.17;
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.17;
 pragma experimental ABIEncoderV2;
 
-import { SafeMath } from "@openzeppelin/contracts/math/SafeMath.sol";
+import { SafeMath } from "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { IERC777Recipient } from "@openzeppelin/contracts/token/ERC777/IERC777Recipient.sol";
-import { IERC1820Registry } from "@openzeppelin/contracts/introspection/IERC1820Registry.sol";
-import { InitializableOwnable } from "../../helpers/InitializableOwnable.sol";
-import { InitializableReentrancyGuard } from "../../helpers/InitializableReentrancyGuard.sol";
+import { IERC1820Registry } from "@openzeppelin/contracts/utils/introspection/IERC1820Registry.sol";
 import { IBridge } from "../IBridge.sol";
 import { BasketManager } from "./BasketManager.sol";
 import "../Token.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 
-contract Masset is IERC777Recipient, InitializableOwnable, InitializableReentrancyGuard {
+contract Masset is IERC777Recipient, OwnableUpgradeable, ReentrancyGuardUpgradeable {
 
     using SafeMath for uint256;
 
@@ -66,14 +67,14 @@ contract Masset is IERC777Recipient, InitializableOwnable, InitializableReentran
     function initialize(
         address _basketManagerAddress,
         address _tokenAddress,
-        bool _registerAsERC777RecipientFlag) public {
+        bool _registerAsERC777RecipientFlag) public initializer {
 
         require(address(basketManager) == address(0) && address(token) == address(0), "already initialized");
         require(_basketManagerAddress != address(0), "invalid basket manager");
         require(_tokenAddress != address(0), "invalid token");
 
-        InitializableOwnable._initialize();
-        InitializableReentrancyGuard._initialize();
+        __Ownable_init_unchained();
+        __ReentrancyGuard_init_unchained();
 
         basketManager = BasketManager(_basketManagerAddress);
         token = Token(_tokenAddress);
@@ -163,7 +164,7 @@ contract Masset is IERC777Recipient, InitializableOwnable, InitializableReentran
      *      relative mAsset quantity from the sender. Sender also incurs a small mAsset fee, if any.
      * @param _bAsset           Address of the bAsset to redeem
      * @param _massetQuantity   Units of the masset to redeem
-     * @return massetMinted     Relative number of mAsset units burned to pay for the bAssets
+     * @return massetRedeemed     Relative number of mAsset units burned to pay for the bAssets
      */
     function redeem(
         address _bAsset,
@@ -178,7 +179,7 @@ contract Masset is IERC777Recipient, InitializableOwnable, InitializableReentran
      * @param _bAsset           Address of the bAsset to redeem
      * @param _massetQuantity   Units of the masset to redeem
      * @param _recipient        Address to credit with withdrawn bAssets
-     * @return massetMinted     Relative number of mAsset units burned to pay for the bAssets
+     * @return massetRedeemed     Relative number of mAsset units burned to pay for the bAssets
      */
     function redeemTo(
         address _bAsset,
@@ -234,7 +235,7 @@ contract Masset is IERC777Recipient, InitializableOwnable, InitializableReentran
      * @param _massetQuantity   Units of the masset to redeem
      * @param _recipient        Address to credit with withdrawn bAssets
      * @param _bridgeAddress    This is ignored and is left here for backward compatibility with the FE
-     * @return massetMinted     Relative number of mAsset units burned to pay for the bAssets
+     * @return massetRedeemed     Relative number of mAsset units burned to pay for the bAssets
      */
     function redeemToBridge(
         address _basset,
@@ -253,7 +254,7 @@ contract Masset is IERC777Recipient, InitializableOwnable, InitializableReentran
      * @param _basset           Address of the bAsset to redeem
      * @param _massetQuantity   Units of the masset to redeem
      * @param _recipient        Address to credit with withdrawn bAssets
-     * @return massetMinted     Relative number of mAsset units burned to pay for the bAssets
+     * @return massetRedeemed     Relative number of mAsset units burned to pay for the bAssets
      */
     function redeemToBridge(
         address _basset,

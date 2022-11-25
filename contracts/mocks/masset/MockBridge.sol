@@ -1,4 +1,5 @@
-pragma solidity ^0.5.17;
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.17;
 
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { MassetV3 } from "../../masset/MassetV3.sol";
@@ -7,8 +8,8 @@ contract MockBridge {
     function receiveTokensAt(
         address tokenToUse,
         uint256 amount,
-        address receiver,
-        bytes calldata extraData
+        address,
+        bytes calldata
     ) external returns(bool) {
         require(IERC20(tokenToUse).transferFrom(msg.sender, address(this), amount), "transfer failed");
 

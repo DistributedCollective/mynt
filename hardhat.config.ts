@@ -13,17 +13,21 @@ import "tsconfig-paths/register";
 import "hardhat-typechain";
 import "hardhat-docgen";
 import "hardhat-contract-sizer";
-
-import "scripts/tasks/transferOwnership";
-import "scripts/tasks/transferAdmin";
+import "@openzeppelin/hardhat-upgrades";
 
 dotenv.config()
 
 const config: HardhatUserConfig = {
+    namedAccounts: {
+        deployer: {
+            default: 0,
+        },
+    },
     networks: {
         development: {
+            accounts: process.env.DEPLOYER_PRIVATE_KEY ? [process.env.DEPLOYER_PRIVATE_KEY] : [],
             url: "http://127.0.0.1:8545",
-            saveDeployments: false
+            // saveDeployments: false
         },
         hardhat: {
             live: false,
@@ -97,17 +101,29 @@ const config: HardhatUserConfig = {
         }
     },
     solidity: {
-        version: "0.5.17",
-        settings: {
-            optimizer: {
-                enabled: true,
-                runs: 200
-            }
-        }
+        compilers: [
+            {
+                version: "0.5.17",
+                settings: {
+                    optimizer: {
+                        enabled: true,
+                        runs: 200
+                    }
+                }
+            },
+            {
+                version: "0.8.17",
+                settings: {
+                    optimizer: {
+                        enabled: true,
+                        runs: 200
+                    }
+                }
+            },
+          ],
     },
     paths: {
         artifacts: "./build/contracts",
-        deploy: "./migrations",
         deployments: "./deployments",
         sources: './contracts'
     },

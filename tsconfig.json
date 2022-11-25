@@ -25,6 +25,7 @@
     "./types/interfaces.d.ts",
     "./types/**/*.ts",
     "./test/*.ts",
+    "./typechain",
     "./scripts/**/*.ts",
     "./test/**/*.ts",
     "./test-utils/*.ts",

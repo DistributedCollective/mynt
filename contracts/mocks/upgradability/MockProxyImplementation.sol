@@ -1,17 +1,17 @@
-pragma solidity ^0.5.17;
+pragma solidity 0.8.17;
 
 contract MockDependency {
     string public desc = "mock dependency contract";
 }
 
-contract IMockImplementation {
+abstract contract IMockImplementation {
     bool initialized = false;
 
     function isInitialized() public view returns(bool) {
         return initialized;
     }
 
-    function getVersion() external pure returns(string memory);
+    function getVersion() external virtual pure returns(string memory);
 }
 
 contract MockProxyImplementation1 is IMockImplementation {
@@ -22,7 +22,7 @@ contract MockProxyImplementation1 is IMockImplementation {
         initialized = true;
     }
 
-    function getVersion() external pure returns (string memory) {
+    function getVersion() external override pure returns (string memory) {
         return "1";
     }
 
@@ -34,7 +34,7 @@ contract MockProxyImplementation1 is IMockImplementation {
 contract MockProxyImplementation2 is IMockImplementation {
     MockDependency private dep;
 
-    function getVersion() external pure returns (string memory) {
+    function getVersion() external override pure returns (string memory) {
         return "2";
     }
 
@@ -52,7 +52,7 @@ contract MockProxyImplementationMetaAssetToken is IMockImplementation {
         initialized = true;
     }
 
-    function getVersion() external pure returns (string memory) {
+    function getVersion() external override pure returns (string memory) {
         return "1";
     }
 
@@ -60,5 +60,5 @@ contract MockProxyImplementationMetaAssetToken is IMockImplementation {
         return address(dep);
     }
 
-    function() external payable {}
+    fallback() external payable {}
 }

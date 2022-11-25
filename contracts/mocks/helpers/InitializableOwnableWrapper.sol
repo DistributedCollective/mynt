@@ -1,9 +1,10 @@
-pragma solidity ^0.5.17;
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.17;
 
-import { InitializableOwnable } from "../../helpers/InitializableOwnable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
-contract InitializableOwnableWrapper is InitializableOwnable {
-    function initialize() public {
-        _initialize();
+contract InitializableOwnableWrapper is OwnableUpgradeable {
+    function initialize() public initializer {
+        __Ownable_init_unchained();
     }
 }

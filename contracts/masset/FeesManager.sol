@@ -1,14 +1,15 @@
-pragma solidity 0.5.17;
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.17;
 pragma experimental ABIEncoderV2;
 
-import { SafeMath } from "@openzeppelin/contracts/math/SafeMath.sol";
-import { InitializableOwnable } from "../helpers/InitializableOwnable.sol";
+import { SafeMath } from "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
 /**
  * @title FeesManager
  * @dev Contract is responsible for fees calculations.
  */
-contract FeesManager is InitializableOwnable {
+contract FeesManager is OwnableUpgradeable {
     using SafeMath for uint256;
 
     // State
@@ -64,9 +65,8 @@ contract FeesManager is InitializableOwnable {
         uint256 _depositBridgeFee,
         uint256 _withdrawalFee,
         uint256 _withdrawalBridgeFee
-    ) external {
-        InitializableOwnable._initialize();
-
+    ) external initializer {
+        __Ownable_init_unchained();
         setDepositFee(_depositFee);
         setDepositBridgeFee(_depositBridgeFee);
         setWithdrawalFee(_withdrawalFee);

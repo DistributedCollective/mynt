@@ -5,8 +5,6 @@ import { ZERO_ADDRESS } from "@utils/constants";
 import { StandardAccounts } from "@utils/standardAccounts";
 import envSetup from "@utils/env_setup";
 
-const { expect } = envSetup.configure();
-
 const BasketManager = artifacts.require("BasketManager");
 const Masset = artifacts.require("Masset");
 const MockERC20 = artifacts.require("MockERC20");
@@ -32,6 +30,7 @@ contract("BasketManager", async (accounts) => {
         let factors;
         let bridges;
         before(async () => {
+            console.log("asdadasddsa")
             masset = await Masset.new();
             mockToken1 = await MockERC20.new("", "", 18, sa.dummy1, 1);
             mockToken2 = await MockERC20.new("", "", 18, sa.dummy1, 1);

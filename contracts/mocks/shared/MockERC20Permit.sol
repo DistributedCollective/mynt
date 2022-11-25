@@ -1,13 +1,13 @@
-pragma solidity 0.5.17;
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.17;
 
 import "../../shared/ERC20Permit.sol";
-import "@openzeppelin/contracts/token/ERC20/ERC20Detailed.sol";
 
-contract MockERC20Permit is ERC20Permit, ERC20Detailed {
+contract MockERC20Permit is ERC20Permit {
   /**
   * @notice Constructor called on deployment, initiates the contract.
   */
-  constructor(string memory _tokenName, string memory _symbol, address _initialHolder, uint256 _initialSupply) public ERC20Detailed(_tokenName, _symbol, 18) {
+  constructor(string memory _tokenName, string memory _symbol, address _initialHolder, uint256 _initialSupply) ERC20(_tokenName, _symbol) {
     _mint(_initialHolder, _initialSupply);
   }
 }
