@@ -1,6 +1,4 @@
 import { DeployFunction } from "hardhat-deploy/types";
-const {deployments} = require('hardhat');
-
 
 const func: DeployFunction = async ({
   deployments: { deploy },

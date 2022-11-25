@@ -1,7 +1,5 @@
 import { DeployFunction } from "hardhat-deploy/types";
 
-const { ZERO_ADDRESS } = require("@openzeppelin/test-helpers/src/constants");
-
 const func: DeployFunction = async ({
   deployments: { deploy },
   getNamedAccounts,

@@ -3,15 +3,15 @@
     "outDir": "./transpiled/",
     "sourceMap": true,
     "noImplicitAny": false,
-    "lib": ["dom", "es2015", "es2016", "es2017"],
-    "module": "CommonJS",
+    // "lib": ["dom", "es2015", "es2016", "es2017"],
+    "module": "commonjs",
     "baseUrl": ".",
     "rootDir": ".",
     "paths": {
       "@utils/*": ["test-utils/*"],
     },
     "allowJs": true,
-    "target": "ES5",
+    "target": "es2018",
     "skipLibCheck": true,
     "typeRoots": [
       "node_modules/@0x/typescript-typings/types",

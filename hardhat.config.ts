@@ -3,6 +3,7 @@ import { HardhatUserConfig } from "hardhat/types";
 import * as dotenv from 'dotenv'
 import "hardhat-gas-reporter";
 import "solidity-coverage";
+import "@nomiclabs/hardhat-web3";
 import "@nomiclabs/hardhat-waffle";
 import "@nomiclabs/hardhat-ethers"
 import "@nomiclabs/hardhat-truffle5";
@@ -10,7 +11,7 @@ import "@tenderly/hardhat-tenderly";
 import "hardhat-deploy";
 import "ts-node/register";
 import "tsconfig-paths/register";
-import "hardhat-typechain";
+import "@typechain/hardhat";
 import "hardhat-docgen";
 import "hardhat-contract-sizer";
 import "@openzeppelin/hardhat-upgrades";
