@@ -11,6 +11,7 @@ import { signTypedMessage } from "eth-sig-util";
 import BN from "bn.js";
 import { network, ethers, upgrades } from "hardhat";
 import { EIP712Domain, Permit, PERMIT_TYPEHASH, domainSeparator } from "../helpers/EIP712";
+import { MockProxyImplementationMetaAssetTokenInstance } from "../../types/generated/contracts/mocks/upgradability/MockProxyImplementation.sol/MockProxyImplementationMetaAssetToken";
 
 const MetaAssetToken = artifacts.require("MetaAssetToken");
 const MockMetaAssetToken = artifacts.require("MockMetaAssetToken");
@@ -48,13 +49,16 @@ contract("MetaAssetToken", async (accounts) => {
         admin = owner;
 
         const assetProxyInstance = (await upgrades.deployProxy(
-            await getContractFactory("MockProxyImplementation1"), [user], {
+            await getContractFactory("MockProxyImplementationMetaAssetToken"), [user], {
                 initializer: "initialize"
             }
         ));
 
+        // console.log(await upgrades.erc1967.getImplementationAddress(assetProxyInstance.address));
+        // console.log(await upgrades.erc1967.getAdminAddress(assetProxyInstance.address));
+
         const basketManagerProxyInstance = (await upgrades.deployProxy(
-            await getContractFactory("MockProxyImplementation1"),
+            await getContractFactory("MockProxyImplementationMetaAssetToken"),
             [
                 assetProxyInstance.address
             ],
@@ -64,7 +68,9 @@ contract("MetaAssetToken", async (accounts) => {
         ));
 
         assetProxy = assetProxyInstance.address;
+        assetImplementation = await upgrades.erc1967.getImplementationAddress(assetProxyInstance.address);
         basketManagerProxy = basketManagerProxyInstance.address;
+        basketManagerImplementation = await upgrades.erc1967.getImplementationAddress(basketManagerProxyInstance.address);
 
         token = await MetaAssetToken.new(tokenName, tokenSymbol, { from: owner });
         mockToken = await MockMetaAssetToken.new(tokenName, tokenSymbol, accounts[8], accounts[9], { from: owner });
@@ -634,6 +640,7 @@ contract("MetaAssetToken", async (accounts) => {
 
         context("should succeed", async () => {
             it("transferFrom to valid recipient", async () => {
+                const oldAssetProxyAddress = assetProxy;
                 const deadline = MAX_UINT256;
                 const initialOwnerBalance = toWei("1000000");
                 const amount = toWei("100");
@@ -651,7 +658,7 @@ contract("MetaAssetToken", async (accounts) => {
                 await token.setAssetProxy(assetProxy);
                 await token.mint(ownerPermit, initialOwnerBalance, { from: assetProxy });
 
-                await token.setAssetProxy(assetProxyInstance.address);
+                await token.setAssetProxy(oldAssetProxyAddress);
 
                 const userInitialBalance = await token.balanceOf(user);
                 const ownerInitialBalance = await token.balanceOf(ownerPermit);
@@ -690,5 +697,4 @@ contract("MetaAssetToken", async (accounts) => {
             expect(await approvalReceiver.data(), "data").eq("0x1234");
         });
     });
-
 });

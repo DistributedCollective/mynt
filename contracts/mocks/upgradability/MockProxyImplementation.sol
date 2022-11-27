@@ -1,4 +1,7 @@
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.17;
+
+import "@openzeppelin/contracts-upgradeable/proxy/ERC1967/ERC1967UpgradeUpgradeable.sol";
 
 contract MockDependency {
     string public desc = "mock dependency contract";
@@ -44,7 +47,7 @@ contract MockProxyImplementation2 is IMockImplementation {
 }
 
 
-contract MockProxyImplementationMetaAssetToken is IMockImplementation {
+contract MockProxyImplementationMetaAssetToken is IMockImplementation, ERC1967UpgradeUpgradeable {
     MockDependency private dep;
 
     function initialize(address _depAddress) public {
@@ -58,6 +61,10 @@ contract MockProxyImplementationMetaAssetToken is IMockImplementation {
 
     function getDep () public view returns(address) {
         return address(dep);
+    }
+
+    function getProxyImplementation() external view returns(address) {
+        return ERC1967UpgradeUpgradeable._getImplementation();
     }
 
     receive() external payable {}

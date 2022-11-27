@@ -14,6 +14,7 @@ import { FeesManager } from "./FeesManager.sol";
 import "./Token.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/ERC1967/ERC1967UpgradeUpgradeable.sol";
 
 /**
  * @title MassetV3
@@ -22,7 +23,7 @@ import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.
  * if transaction based on token from another blockchain.
  */
 
-contract MassetV3 is IERC777Recipient, OwnableUpgradeable, ReentrancyGuardUpgradeable {
+contract MassetV3 is IERC777Recipient, OwnableUpgradeable, ReentrancyGuardUpgradeable, ERC1967UpgradeUpgradeable {
 
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
@@ -545,5 +546,14 @@ contract MassetV3 is IERC777Recipient, OwnableUpgradeable, ReentrancyGuardUpgrad
         basketManager = BasketManagerV3(_basketManagerAddress);
         token = Token(_tokenAddress);
         version = "3.0";
+    }
+
+    /**
+     * @dev get the implementation logic address referring to ERC1967 standard.
+     *
+     * @return logic implementation address.
+     */
+    function getProxyImplementation() external view returns(address) {
+        return ERC1967UpgradeUpgradeable._getImplementation();
     }
 }

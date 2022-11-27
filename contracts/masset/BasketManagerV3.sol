@@ -4,6 +4,7 @@ pragma solidity 0.8.17;
 import { SafeMath } from "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/ERC1967/ERC1967UpgradeUpgradeable.sol";
 
 
 /**
@@ -14,7 +15,7 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
  * to adjust precisions or set/get parameters: bridge, factor, range and paused.
  */
 
-contract BasketManagerV3 is OwnableUpgradeable {
+contract BasketManagerV3 is OwnableUpgradeable, ERC1967UpgradeUpgradeable {
 
     using SafeMath for uint256;
 
@@ -384,5 +385,14 @@ contract BasketManagerV3 is OwnableUpgradeable {
         bassetsArray.pop();
 
         emit BassetRemoved(_basset);
+    }
+
+    /**
+     * @dev get the implementation logic address referring to ERC1967 standard.
+     *
+     * @return logic implementation address.
+     */
+    function getProxyImplementation() external view returns(address) {
+        return ERC1967UpgradeUpgradeable._getImplementation();
     }
 }

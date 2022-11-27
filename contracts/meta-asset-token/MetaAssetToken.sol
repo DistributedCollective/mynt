@@ -66,7 +66,7 @@ contract MetaAssetToken is ERC20Permit, Ownable {
      * @return asset implementation address
      */
     function assetImplementation() public virtual view returns(address) {
-        return IProxy(assetProxy).implementation();
+        return IProxy(assetProxy).getProxyImplementation();
     }
 
     /**
@@ -75,7 +75,7 @@ contract MetaAssetToken is ERC20Permit, Ownable {
      * @return basket manager implementation address
      */
     function basketManagerImplementation() public virtual view returns(address) {
-        return IProxy(basketManagerProxy).implementation();
+        return IProxy(basketManagerProxy).getProxyImplementation();
     }
 
     /**
