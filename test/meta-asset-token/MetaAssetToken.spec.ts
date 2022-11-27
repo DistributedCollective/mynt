@@ -1,9 +1,6 @@
 import { expectRevert, expectEvent } from "@openzeppelin/test-helpers";
 import { toWei, toChecksumAddress } from "web3-utils";
-import {
-    MockMetaAssetTokenInstance,
-    MetaAssetTokenInstance,
-} from "types/generated";
+import { MockMetaAssetTokenInstance, MetaAssetTokenInstance } from "types/generated";
 import { MAX_UINT256, ZERO_ADDRESS } from "@utils/constants";
 import Wallet from "ethereumjs-wallet";
 import { fromRpcSig } from "ethereumjs-util";
@@ -48,24 +45,17 @@ contract("MetaAssetToken", async (accounts) => {
     beforeEach("before all", async () => {
         admin = owner;
 
-        const assetProxyInstance = (await upgrades.deployProxy(
-            await getContractFactory("MockProxyImplementationMetaAssetToken"), [user], {
+        const assetProxyInstance = await upgrades.deployProxy(await getContractFactory("MockProxyImplementationMetaAssetToken"), [user], {
+            initializer: "initialize"
+        });
+
+        const basketManagerProxyInstance = await upgrades.deployProxy(
+            await getContractFactory("MockProxyImplementationMetaAssetToken"),
+            [assetProxyInstance.address],
+            {
                 initializer: "initialize"
             }
-        ));
-
-        // console.log(await upgrades.erc1967.getImplementationAddress(assetProxyInstance.address));
-        // console.log(await upgrades.erc1967.getAdminAddress(assetProxyInstance.address));
-
-        const basketManagerProxyInstance = (await upgrades.deployProxy(
-            await getContractFactory("MockProxyImplementationMetaAssetToken"),
-            [
-                assetProxyInstance.address
-            ],
-            {
-              initializer: "initialize",
-            }
-        ));
+        );
 
         assetProxy = assetProxyInstance.address;
         assetImplementation = await upgrades.erc1967.getImplementationAddress(assetProxyInstance.address);

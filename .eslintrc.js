@@ -33,7 +33,8 @@ module.exports = {
         "no-param-reassign": 0,
         "import/prefer-default-export": 0,
         "lines-between-class-members": 0,
-        "@typescript-eslint/explicit-function-return-type": 0
+        "@typescript-eslint/explicit-function-return-type": 0,
+        "@typescript-eslint/camelcase": "off"
     },
     "overrides": [
         {

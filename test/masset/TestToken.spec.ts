@@ -2,7 +2,7 @@ import { expectRevert } from "@openzeppelin/test-helpers";
 import { TokenInstance } from "types/generated";
 
 const Token = artifacts.require("Token");
-const toWei = web3.utils.toWei
+const {toWei} = web3.utils;
 
 contract("Token", async (accounts) => {
     const [owner, user] = accounts;
