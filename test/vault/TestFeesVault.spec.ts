@@ -36,7 +36,7 @@ contract("FeesVault", async (accounts) => {
                 await feesVault.initialize();
                 await expectRevert(
                     feesVault.initialize(),
-                    "VM Exception while processing transaction: reverted with reason string 'already initialized'"
+                    "VM Exception while processing transaction: reverted with reason string 'Initializable: contract is already initialized'"
                 );
             });
         });
@@ -63,20 +63,20 @@ contract("FeesVault", async (accounts) => {
             it("when it's not called by owner", async () => {
                 await expectRevert(
                     feesVault.withdraw(token1.address, tokens(5), user2),
-                    "VM Exception while processing transaction: reverted with reason string 'InitializableOwnable: caller is not the owner'"
+                    "VM Exception while processing transaction: reverted with reason string 'Ownable: caller is not the owner'"
                 );
             });
 
             it("when balance is not sufficient", async () => {
                 await expectRevert(
                     feesVault.withdraw(token1.address, tokens(5), user2, { from: owner }),
-                    "VM Exception while processing transaction: reverted with reason string 'SafeERC20: low-level call failed'"
+                    "VM Exception while processing transaction: reverted with reason string 'ERC20: transfer amount exceeds balance'"
                 );
 
                 await token1.transfer(feesVault.address, tokens(5), { from: user1 });
                 await expectRevert(
                     feesVault.withdraw(token1.address, tokens(10), user2, { from: owner }),
-                    "VM Exception while processing transaction: reverted with reason string 'SafeERC20: low-level call failed'"
+                    "VM Exception while processing transaction: reverted with reason string 'ERC20: transfer amount exceeds balance'"
                 );
             });
         });

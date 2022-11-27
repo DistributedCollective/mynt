@@ -5,7 +5,7 @@ contract MockDependency {
 }
 
 abstract contract IMockImplementation {
-    bool initialized = false;
+    bool initialized;
 
     function isInitialized() public view returns(bool) {
         return initialized;
@@ -60,5 +60,5 @@ contract MockProxyImplementationMetaAssetToken is IMockImplementation {
         return address(dep);
     }
 
-    fallback() external payable {}
+    receive() external payable {}
 }

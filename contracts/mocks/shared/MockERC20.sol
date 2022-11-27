@@ -6,7 +6,7 @@ import { IERC777Recipient } from "@openzeppelin/contracts/token/ERC777/IERC777Re
 
 contract MockERC20 is ERC20 {
 
-    fallback () external payable {}
+    receive () external payable {}
 
     constructor (
         string memory _name,

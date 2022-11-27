@@ -9,7 +9,6 @@ import "@nomiclabs/hardhat-ethers"
 import "@nomiclabs/hardhat-truffle5";
 import "@tenderly/hardhat-tenderly";
 import "hardhat-deploy";
-import "ts-node/register";
 import "tsconfig-paths/register";
 import "@typechain/hardhat";
 import "hardhat-docgen";

@@ -3,24 +3,18 @@ import { toWei, toChecksumAddress } from "web3-utils";
 import {
     MockMetaAssetTokenInstance,
     MetaAssetTokenInstance,
-    IMockImplementationInstance,
-    InitializableAdminUpgradeabilityProxyInstance,
-    MockProxyImplementationMetaAssetTokenInstance
 } from "types/generated";
 import { MAX_UINT256, ZERO_ADDRESS } from "@utils/constants";
 import Wallet from "ethereumjs-wallet";
 import { fromRpcSig } from "ethereumjs-util";
 import { signTypedMessage } from "eth-sig-util";
 import BN from "bn.js";
-import { network, ethers } from "hardhat";
+import { network, ethers, upgrades } from "hardhat";
 import { EIP712Domain, Permit, PERMIT_TYPEHASH, domainSeparator } from "../helpers/EIP712";
 
 const MetaAssetToken = artifacts.require("MetaAssetToken");
 const MockMetaAssetToken = artifacts.require("MockMetaAssetToken");
 const MockApprovalReceiver = artifacts.require("MockApprovalReceiver");
-const InitializableAdminUpgradeabilityProxy = artifacts.require("InitializableAdminUpgradeabilityProxy");
-const MockDependency = artifacts.require("MockDependency");
-const MockProxyImplementation = artifacts.require("MockProxyImplementationMetaAssetToken");
 const NOT_OWNER_EXCEPTION = "VM Exception while processing transaction: reverted with reason string 'Ownable: caller is not the owner";
 
 const tokenName = "Meta Asset Token";
@@ -29,6 +23,7 @@ const decimals = 18;
 const maxDeadline = MAX_UINT256;
 const name = "MetaAsset";
 const version = "1";
+const { getContractFactory } = ethers;
 
 const buildData = (chainId, verifyingContract, from, spender, amount, nonce, deadline = maxDeadline) => ({
     primaryType: "Permit",
@@ -43,30 +38,33 @@ contract("MetaAssetToken", async (accounts) => {
     let token: MetaAssetTokenInstance;
     let mockToken: MockMetaAssetTokenInstance;
     let chainId;
-    let proxyImplementation: MockProxyImplementationMetaAssetTokenInstance;
-    let adminUpgradeabilityProxy: InitializableAdminUpgradeabilityProxyInstance;
     let admin: string;
     let assetProxy: string;
     let assetImplementation: string;
     let basketManagerProxy: string;
     let basketManagerImplementation: string;
-    let assetProxyInstance: MockProxyImplementationMetaAssetTokenInstance;
-    let basketManagerProxyInstance: MockProxyImplementationMetaAssetTokenInstance;
 
     beforeEach("before all", async () => {
         admin = owner;
 
-        proxyImplementation = await MockProxyImplementation.new();
-        adminUpgradeabilityProxy = await InitializableAdminUpgradeabilityProxy.new({ from: owner });
-        assetProxyInstance = await initProxy(admin, proxyImplementation, adminUpgradeabilityProxy);
-        assetProxy = assetProxyInstance.address;
-        assetImplementation = proxyImplementation.address;
+        const assetProxyInstance = (await upgrades.deployProxy(
+            await getContractFactory("MockProxyImplementation1"), [user], {
+                initializer: "initialize"
+            }
+        ));
 
-        proxyImplementation = await MockProxyImplementation.new();
-        adminUpgradeabilityProxy = await InitializableAdminUpgradeabilityProxy.new({ from: owner });
-        basketManagerProxyInstance = await initProxy(admin, proxyImplementation, adminUpgradeabilityProxy);
+        const basketManagerProxyInstance = (await upgrades.deployProxy(
+            await getContractFactory("MockProxyImplementation1"),
+            [
+                assetProxyInstance.address
+            ],
+            {
+              initializer: "initialize",
+            }
+        ));
+
+        assetProxy = assetProxyInstance.address;
         basketManagerProxy = basketManagerProxyInstance.address;
-        basketManagerImplementation = proxyImplementation.address;
 
         token = await MetaAssetToken.new(tokenName, tokenSymbol, { from: owner });
         mockToken = await MockMetaAssetToken.new(tokenName, tokenSymbol, accounts[8], accounts[9], { from: owner });
@@ -692,20 +690,5 @@ contract("MetaAssetToken", async (accounts) => {
             expect(await approvalReceiver.data(), "data").eq("0x1234");
         });
     });
+
 });
-
-const initProxy = async (
-    admin: string,
-    implementation: IMockImplementationInstance,
-    proxy: InitializableAdminUpgradeabilityProxyInstance
-): Promise<MockProxyImplementationMetaAssetTokenInstance> => {
-    const dependencyContract = await MockDependency.new();
-
-    const initdata: string = implementation.contract.methods.initialize(dependencyContract.address).encodeABI();
-
-    await proxy.methods["initialize(address,address,bytes)"](implementation.address, admin, initdata);
-
-    const implementationThroughProxy = await MockProxyImplementation.at(proxy.address);
-
-    return implementationThroughProxy;
-};
