@@ -1,5 +1,0 @@
-node_modules
-contracts/z_mocks
-contracts/openzeppelin
-contracts/fish
-contracts/helpers/ABDKMathQuad.sol

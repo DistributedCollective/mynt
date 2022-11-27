@@ -1,6 +1,12 @@
-# .prettierrc
-printWidth: 140
-parser: typescript
-tabWidth: 4
-trailingComma: none
-arrowParens: always
+{
+  "overrides": [
+    {
+      "files": ["*.sol", "*.js", "*.test.js", "*.json"],
+      "options": {
+        "printWidth": 120,
+        "singleQuote": false,
+        "bracketSpacing": true
+      }
+    }
+  ]
+}

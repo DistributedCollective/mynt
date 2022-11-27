@@ -15,7 +15,7 @@ interface IBridge {
     /**
      * @dev Returns the fee percentage.
      */
-    function getFeePercentage() external view returns(uint);
+    function getFeePercentage() external view returns (uint);
 
     /**
      * @dev Calculates maximal withdraw.
@@ -26,7 +26,7 @@ interface IBridge {
      * @dev ERC-20 tokens approve and transferFrom pattern
      * See https://eips.ethereum.org/EIPS/eip-20#transferfrom for details.
      */
-    function receiveTokens(address tokenToUse, uint256 amount) external returns(bool);
+    function receiveTokens(address tokenToUse, uint256 amount) external returns (bool);
 
     /**
      * @dev ERC-20 tokens approve and transferFrom pattern
@@ -37,13 +37,13 @@ interface IBridge {
         uint256 amount,
         address receiver,
         bytes calldata extraData
-    ) external returns(bool);
+    ) external returns (bool);
 
     /**
      * @dev ERC-777 tokensReceived hook allows to send tokens to a contract and notify it in a single transaction
      * See https://eips.ethereum.org/EIPS/eip-777#motivation for details.
      */
-    function tokensReceived (
+    function tokensReceived(
         address operator,
         address from,
         address to,
@@ -66,7 +66,7 @@ interface IBridge {
         uint32 logIndex,
         uint8 decimals,
         uint256 granularity
-    ) external returns(bool);
+    ) external returns (bool);
 
     /**
      * @dev Accepts the transaction from the other chain that was voted and sent by the federation contract.
@@ -83,24 +83,45 @@ interface IBridge {
         uint8 decimals,
         uint256 granularity,
         bytes calldata userData
-    ) external returns(bool);
+    ) external returns (bool);
 
     /**
      * @dev Emitted when cross occured.
      */
-    event Cross(address indexed _tokenAddress, address indexed _to, uint256 _amount, string _symbol, bytes _userData,
-        uint8 _decimals, uint256 _granularity);
+    event Cross(
+        address indexed _tokenAddress,
+        address indexed _to,
+        uint256 _amount,
+        string _symbol,
+        bytes _userData,
+        uint8 _decimals,
+        uint256 _granularity
+    );
 
     /**
      * @dev Emitted when new side token is deployed.
      */
-    event NewSideToken(address indexed _newSideTokenAddress, address indexed _originalTokenAddress, string _newSymbol, uint256 _granularity);
+    event NewSideToken(
+        address indexed _newSideTokenAddress,
+        address indexed _originalTokenAddress,
+        string _newSymbol,
+        uint256 _granularity
+    );
 
     /**
      * @dev Emitted when cross transfer is accepted.
      */
-    event AcceptedCrossTransfer(address indexed _tokenAddress, address indexed _to, uint256 _amount, uint8 _decimals, uint256 _granularity,
-        uint256 _formattedAmount, uint8 _calculatedDecimals, uint256 _calculatedGranularity, bytes _userData);
+    event AcceptedCrossTransfer(
+        address indexed _tokenAddress,
+        address indexed _to,
+        uint256 _amount,
+        uint8 _decimals,
+        uint256 _granularity,
+        uint256 _formattedAmount,
+        uint8 _calculatedDecimals,
+        uint256 _calculatedGranularity,
+        bytes _userData
+    );
 
     /**
      * @dev Emitted when fee percentage has changed.

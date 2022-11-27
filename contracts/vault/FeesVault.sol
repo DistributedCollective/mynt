@@ -21,7 +21,7 @@ contract FeesVault is OwnableUpgradeable {
      * @param _amount           Amount to withdraw.
      * @param _recipient        Recipient of withdrawn tokens.
      */
-    function withdraw (address _token, uint256 _amount, address _recipient) public onlyOwner {
+    function withdraw(address _token, uint256 _amount, address _recipient) public onlyOwner {
         IERC20(_token).safeTransfer(_recipient, _amount);
     }
 }

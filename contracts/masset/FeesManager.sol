@@ -18,7 +18,7 @@ contract FeesManager is OwnableUpgradeable {
      * @dev Factor of fees.
      * @notice a value of 10000 means that 223 equals 2.23% and 10000 equals 100%
      */
-    uint256 constant public PRECISION = 10000;
+    uint256 public constant PRECISION = 10000;
 
     uint256 private depositFee;
     uint256 private depositBridgeFee;
@@ -31,25 +31,25 @@ contract FeesManager is OwnableUpgradeable {
      * @dev Emitted when deposit fee has changed.
      * @param depositFee            Amount of the fee.
      */
-    event DepositFeeChanged (uint256 depositFee);
+    event DepositFeeChanged(uint256 depositFee);
 
     /**
      * @dev Emitted when deposit bridge fee has changed.
      * @param depositBridgeFee      Amount of the fee.
      */
-    event DepositBridgeFeeChanged (uint256 depositBridgeFee);
+    event DepositBridgeFeeChanged(uint256 depositBridgeFee);
 
     /**
      * @dev Emitted when withdrawal fee has changed.
      * @param withdrawalFee         Amount of the fee.
      */
-    event WithdrawalFeeChanged (uint256 withdrawalFee);
+    event WithdrawalFeeChanged(uint256 withdrawalFee);
 
     /**
      * @dev Emitted when withdrawal bridge fee has changed.
      * @param withdrawalBridgeFee   Amount of the fee.
      */
-    event WithdrawalBridgeFeeChanged (uint256 withdrawalBridgeFee);
+    event WithdrawalBridgeFeeChanged(uint256 withdrawalBridgeFee);
 
     // Initializer
 
@@ -59,7 +59,7 @@ contract FeesManager is OwnableUpgradeable {
      * @param _depositBridgeFee     Amount of deposit through bridge fee in promils.
      * @param _withdrawalFee        Amount of redeem fee in promils.
      * @param _withdrawalBridgeFee  Amount of redeem through bridge fee in promils.
-    */
+     */
     function initialize(
         uint256 _depositFee,
         uint256 _depositBridgeFee,
@@ -78,7 +78,7 @@ contract FeesManager is OwnableUpgradeable {
     /**
      * @dev Calculate and return fee amount based on massetAmount and type of fee.
      */
-    function _calculateFee(uint256 _massetAmount, uint256 _fee) internal pure returns(uint256) {
+    function _calculateFee(uint256 _massetAmount, uint256 _fee) internal pure returns (uint256) {
         return _massetAmount.mul(_fee).div(PRECISION);
     }
 
@@ -89,7 +89,7 @@ contract FeesManager is OwnableUpgradeable {
      * @param _massetAmount  Amount of masset to deposit.
      * @return fee           Calculated fee amount.
      */
-    function calculateDepositFee(uint256 _massetAmount) external view returns(uint256) {
+    function calculateDepositFee(uint256 _massetAmount) external view returns (uint256) {
         return _calculateFee(_massetAmount, depositFee);
     }
 
@@ -98,7 +98,7 @@ contract FeesManager is OwnableUpgradeable {
      * @param _massetAmount  Amount of masset to deposit.
      * @return fee           Calculated fee amount.
      */
-    function calculateDepositBridgeFee(uint256 _massetAmount) external view returns(uint256) {
+    function calculateDepositBridgeFee(uint256 _massetAmount) external view returns (uint256) {
         return _calculateFee(_massetAmount, depositBridgeFee);
     }
 
@@ -107,7 +107,7 @@ contract FeesManager is OwnableUpgradeable {
      * @param _massetAmount  Amount of masset.
      * @return fee           Calculated fee amount.
      */
-    function calculateRedeemFee(uint256 _massetAmount) external view returns(uint256) {
+    function calculateRedeemFee(uint256 _massetAmount) external view returns (uint256) {
         return _calculateFee(_massetAmount, withdrawalFee);
     }
 
@@ -116,52 +116,52 @@ contract FeesManager is OwnableUpgradeable {
      * @param _massetAmount  Amount of masset.
      * @return fee           Calculated fee amount.
      */
-    function calculateRedeemBridgeFee(uint256 _massetAmount) external view returns(uint256) {
+    function calculateRedeemBridgeFee(uint256 _massetAmount) external view returns (uint256) {
         return _calculateFee(_massetAmount, withdrawalBridgeFee);
     }
 
     // Getters
 
-    function getDepositFee () external view returns(uint256) {
+    function getDepositFee() external view returns (uint256) {
         return depositFee;
     }
 
-    function getDepositBridgeFee () external view returns(uint256) {
+    function getDepositBridgeFee() external view returns (uint256) {
         return depositBridgeFee;
     }
 
-    function getWithdrawalFee () external view returns(uint256) {
+    function getWithdrawalFee() external view returns (uint256) {
         return withdrawalFee;
     }
 
-    function getWithdrawalBridgeFee () external view returns(uint256) {
+    function getWithdrawalBridgeFee() external view returns (uint256) {
         return withdrawalBridgeFee;
     }
 
     // Governance methods
 
-    function setDepositFee (uint256 _amount) public onlyOwner {
+    function setDepositFee(uint256 _amount) public onlyOwner {
         require(_amount <= PRECISION, "invalid fee amount");
 
         depositFee = _amount;
         emit DepositFeeChanged(_amount);
     }
 
-    function setDepositBridgeFee (uint256 _amount) public onlyOwner {
+    function setDepositBridgeFee(uint256 _amount) public onlyOwner {
         require(_amount <= PRECISION, "invalid fee amount");
 
         depositBridgeFee = _amount;
         emit DepositBridgeFeeChanged(_amount);
     }
 
-    function setWithdrawalFee (uint256 _amount) public onlyOwner {
+    function setWithdrawalFee(uint256 _amount) public onlyOwner {
         require(_amount <= PRECISION, "invalid fee amount");
 
         withdrawalFee = _amount;
         emit WithdrawalFeeChanged(_amount);
     }
 
-    function setWithdrawalBridgeFee (uint256 _amount) public onlyOwner {
+    function setWithdrawalBridgeFee(uint256 _amount) public onlyOwner {
         require(_amount <= PRECISION, "invalid fee amount");
 
         withdrawalBridgeFee = _amount;

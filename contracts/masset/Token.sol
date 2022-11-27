@@ -12,7 +12,6 @@ import "@openzeppelin/contracts/access/Ownable.sol";
  */
 
 contract Token is ERC20, Ownable {
-
     uint8 private _decimals;
 
     /**
@@ -21,8 +20,7 @@ contract Token is ERC20, Ownable {
      * @param _symbol The symbol of the token.
      * @param _decimalsValue The decimals of the token.
      * */
-    constructor(string memory _name, string memory _symbol, uint8 _decimalsValue)
-    ERC20(_name, _symbol) {
+    constructor(string memory _name, string memory _symbol, uint8 _decimalsValue) ERC20(_name, _symbol) {
         _decimals = _decimalsValue;
     }
 

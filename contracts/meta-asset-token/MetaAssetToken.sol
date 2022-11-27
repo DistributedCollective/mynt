@@ -35,8 +35,8 @@ contract MetaAssetToken is ERC20Permit, Ownable {
 
     // modifiers
     modifier onlyAssetProxy() {
-      require(msg.sender == assetProxy, "DLLR:unauthorized mAsset proxy");
-      _;
+        require(msg.sender == assetProxy, "DLLR:unauthorized mAsset proxy");
+        _;
     }
 
     modifier requireValidRecipient(address _recipient) {
@@ -48,7 +48,10 @@ contract MetaAssetToken is ERC20Permit, Ownable {
         address _assetImplementation = assetImplementation();
         address _basketManagerImplementation = basketManagerImplementation();
         require(
-            _recipient != assetProxy && _recipient != _assetImplementation && _recipient != basketManagerProxy && _recipient != _basketManagerImplementation,
+            _recipient != assetProxy &&
+                _recipient != _assetImplementation &&
+                _recipient != basketManagerProxy &&
+                _recipient != _basketManagerImplementation,
             "DLLR: Invalid address. Cannot transfer DLLR directly to a Sovryn protocol address"
         );
 
@@ -65,7 +68,7 @@ contract MetaAssetToken is ERC20Permit, Ownable {
      *
      * @return asset implementation address
      */
-    function assetImplementation() public virtual view returns(address) {
+    function assetImplementation() public view virtual returns (address) {
         return IProxy(assetProxy).getProxyImplementation();
     }
 
@@ -74,7 +77,7 @@ contract MetaAssetToken is ERC20Permit, Ownable {
      *
      * @return basket manager implementation address
      */
-    function basketManagerImplementation() public virtual view returns(address) {
+    function basketManagerImplementation() public view virtual returns (address) {
         return IProxy(basketManagerProxy).getProxyImplementation();
     }
 
@@ -89,7 +92,7 @@ contract MetaAssetToken is ERC20Permit, Ownable {
         emit AssetProxyChanged(assetProxy);
     }
 
-     /**
+    /**
      * @notice setBasketManagerConfig sets the Basket Manager proxy address
      * @param _basketManagerProxy The address of the Basket Manager proxy contract
      */
@@ -134,7 +137,10 @@ contract MetaAssetToken is ERC20Permit, Ownable {
      *
      * @return true / false.
      */
-    function transfer(address _recipient, uint256 _amount) public override requireValidRecipient(_recipient) returns (bool) {
+    function transfer(
+        address _recipient,
+        uint256 _amount
+    ) public override requireValidRecipient(_recipient) returns (bool) {
         _transfer(_msgSender(), _recipient, _amount);
         return true;
     }
@@ -153,12 +159,12 @@ contract MetaAssetToken is ERC20Permit, Ownable {
      *
      * @return true / false.
      */
-    function transferFrom(address _from, address _to, uint256 _amount) public override requireValidRecipient(_to) returns (bool) {
-        _approve(
-            _from,
-            msg.sender,
-            allowance(_from, msg.sender) - _amount
-        );
+    function transferFrom(
+        address _from,
+        address _to,
+        uint256 _amount
+    ) public override requireValidRecipient(_to) returns (bool) {
+        _approve(_from, msg.sender, allowance(_from, msg.sender) - _amount);
         _transfer(_from, _to, _amount);
         return true;
     }
@@ -182,7 +188,15 @@ contract MetaAssetToken is ERC20Permit, Ownable {
      * @param _r First 32 bytes of ECDSA signature.
      * @param _s 32 bytes after _r in ECDSA signature.
      */
-    function transferWithPermit(address _from, address _to, uint256 _amount, uint256 _deadline, uint8 _v, bytes32 _r, bytes32 _s) external requireValidRecipient(_to) {
+    function transferWithPermit(
+        address _from,
+        address _to,
+        uint256 _amount,
+        uint256 _deadline,
+        uint8 _v,
+        bytes32 _r,
+        bytes32 _s
+    ) external requireValidRecipient(_to) {
         permit(_from, msg.sender, _amount, _deadline, _v, _r, _s);
         transferFrom(_from, _to, _amount);
     }
@@ -196,11 +210,7 @@ contract MetaAssetToken is ERC20Permit, Ownable {
      * @param _amount The amount of tokens to be sent.
      * @param _data Parameters for the contract call, such as endpoint signature.
      */
-    function approveAndCall(
-        address _spender,
-        uint256 _amount,
-        bytes calldata _data
-    ) external {
+    function approveAndCall(address _spender, uint256 _amount, bytes calldata _data) external {
         approve(_spender, _amount);
         IApproveAndCall(_spender).receiveApproval(msg.sender, _amount, address(this), _data);
     }

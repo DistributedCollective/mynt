@@ -14,6 +14,7 @@ import "@typechain/hardhat";
 import "hardhat-docgen";
 import "hardhat-contract-sizer";
 import "@openzeppelin/hardhat-upgrades";
+import "@nomiclabs/hardhat-solhint";
 
 dotenv.config()
 

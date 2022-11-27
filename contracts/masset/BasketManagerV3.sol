@@ -6,7 +6,6 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/ERC1967/ERC1967UpgradeUpgradeable.sol";
 
-
 /**
  * @title BasketManagerV3
  * @dev Contract is responsible for mAsset and bAsset exchange process and
@@ -16,7 +15,6 @@ import "@openzeppelin/contracts-upgradeable/proxy/ERC1967/ERC1967UpgradeUpgradea
  */
 
 contract BasketManagerV3 is OwnableUpgradeable, ERC1967UpgradeUpgradeable {
-
     using SafeMath for uint256;
 
     // Events
@@ -25,27 +23,27 @@ contract BasketManagerV3 is OwnableUpgradeable, ERC1967UpgradeUpgradeable {
      * @dev Event emitted when basset is added.
      * @param basset Address of the bAsset contract.
      */
-    event BassetAdded (address basset);
+    event BassetAdded(address basset);
 
     /**
      * @dev Event emitted when basset is removed.
      * @param basset Address of the bAsset contract.
      */
-    event BassetRemoved (address basset);
+    event BassetRemoved(address basset);
 
     /**
      * @dev Event emitted when factor is changed.
      * @param basset Address of the bAsset contract.
      * @param factor Factor of fees.
      */
-    event FactorChanged (address basset, int256 factor);
+    event FactorChanged(address basset, int256 factor);
 
     /**
      * @dev Event emitted when bridge is changed.
      * @param basset Address of the bAsset contract.
      * @param bridge Address of bridge.
      */
-    event BridgeChanged (address basset, address bridge);
+    event BridgeChanged(address basset, address bridge);
 
     /**
      * @dev Event emitted when range is changed.
@@ -53,14 +51,14 @@ contract BasketManagerV3 is OwnableUpgradeable, ERC1967UpgradeUpgradeable {
      * @param min       Minimal value of range.
      * @param max       Maximal value of range.
      */
-    event RangeChanged (address basset, uint256 min, uint256 max);
+    event RangeChanged(address basset, uint256 min, uint256 max);
 
     /**
      * @dev Event emitted when paused is changed.
      * @param basset    Address of the bAsset contract.
      * @param paused    Determine if paused or not.
      */
-    event PausedChanged (address basset, bool paused);
+    event PausedChanged(address basset, bool paused);
 
     uint256 constant MAX_VALUE = 1000;
 
@@ -77,34 +75,33 @@ contract BasketManagerV3 is OwnableUpgradeable, ERC1967UpgradeUpgradeable {
     // Modifiers
 
     /**
-    * @dev Prevents a contract from making actions on paused bAssets.
-    */
+     * @dev Prevents a contract from making actions on paused bAssets.
+     */
     modifier notPaused(address _basset) {
         _notPaused(_basset);
         _;
     }
 
     /**
-    * @dev Prevents a contract from making actions on invalid bAssets.
-    */
+     * @dev Prevents a contract from making actions on invalid bAssets.
+     */
     modifier validBasset(address _basset) {
         _validBasset(_basset);
         _;
     }
 
     /**
-    * @dev Prevents a contract from making actions on paused bAssets.
-    * This method is called and separated from modifier to optimize bytecode and save gas.
-    */
+     * @dev Prevents a contract from making actions on paused bAssets.
+     * This method is called and separated from modifier to optimize bytecode and save gas.
+     */
     function _notPaused(address _basset) internal view {
         require(!pausedMap[_basset], "basset is paused");
     }
 
-
     /**
-    * @dev Prevents a contract from making actions on invalid bAssets.
-    * This method is called and separated from modifier to optimize bytecode and save gas.
-    */
+     * @dev Prevents a contract from making actions on invalid bAssets.
+     * This method is called and separated from modifier to optimize bytecode and save gas.
+     */
     function _validBasset(address _basset) internal view {
         require(factorMap[_basset] != 0, "invalid basset");
     }
@@ -112,9 +109,9 @@ contract BasketManagerV3 is OwnableUpgradeable, ERC1967UpgradeUpgradeable {
     // Initializer
 
     /**
-   * @dev Contract initializer.
-   * @param _masset     Address of the mAsset contract.
-   */
+     * @dev Contract initializer.
+     * @param _masset     Address of the mAsset contract.
+     */
     function initialize(address _masset) external initializer {
         require(masset == address(0), "already initialized");
         masset = _masset;
@@ -128,7 +125,7 @@ contract BasketManagerV3 is OwnableUpgradeable, ERC1967UpgradeUpgradeable {
     /**
      * @dev Checks if bAasset is valid by checking its presence in the bAssets factors list.
      */
-    function isValidBasset(address _basset) public view returns(bool) {
+    function isValidBasset(address _basset) public view returns (bool) {
         return (factorMap[_basset] != 0);
     }
 
@@ -140,8 +137,8 @@ contract BasketManagerV3 is OwnableUpgradeable, ERC1967UpgradeUpgradeable {
      */
     function checkBasketBalanceForDeposit(
         address _basset,
-        uint256 _bassetQuantity) public view validBasset(_basset) notPaused(_basset) returns(bool) {
-
+        uint256 _bassetQuantity
+    ) public view validBasset(_basset) notPaused(_basset) returns (bool) {
         (uint256 massetQuantity, ) = convertBassetToMassetQuantity(_basset, _bassetQuantity);
         uint256 bassetBalance = IERC20(_basset).balanceOf(masset);
 
@@ -162,8 +159,8 @@ contract BasketManagerV3 is OwnableUpgradeable, ERC1967UpgradeUpgradeable {
      */
     function checkBasketBalanceForWithdrawal(
         address _basset,
-        uint256 _bassetQuantity) public view validBasset(_basset) notPaused(_basset) returns(bool) {
-
+        uint256 _bassetQuantity
+    ) public view validBasset(_basset) notPaused(_basset) returns (bool) {
         (uint256 massetQuantity, ) = convertBassetToMassetQuantity(_basset, _bassetQuantity);
         uint256 bassetBalance = IERC20(_basset).balanceOf(masset);
         (uint256 totalBassetBalanceInMasset, ) = convertBassetToMassetQuantity(_basset, bassetBalance);
@@ -191,10 +188,10 @@ contract BasketManagerV3 is OwnableUpgradeable, ERC1967UpgradeUpgradeable {
      */
     function convertBassetToMassetQuantity(
         address _basset,
-        uint256 _bassetQuantity) public view validBasset(_basset) returns(uint256 massetQuantity, uint256 bassetQuantity) {
-
+        uint256 _bassetQuantity
+    ) public view validBasset(_basset) returns (uint256 massetQuantity, uint256 bassetQuantity) {
         int256 factor = factorMap[_basset];
-        if(factor > 0) {
+        if (factor > 0) {
             massetQuantity = _bassetQuantity.div(uint256(factor));
             bassetQuantity = massetQuantity.mul(uint256(factor));
             return (massetQuantity, bassetQuantity);
@@ -214,10 +211,10 @@ contract BasketManagerV3 is OwnableUpgradeable, ERC1967UpgradeUpgradeable {
      */
     function convertMassetToBassetQuantity(
         address _basset,
-        uint256 _massetQuantity) public view validBasset(_basset) returns(uint256 bassetQuantity, uint256 massetQuantity) {
-
+        uint256 _massetQuantity
+    ) public view validBasset(_basset) returns (uint256 bassetQuantity, uint256 massetQuantity) {
         int256 factor = factorMap[_basset];
-        if(factor > 0) {
+        if (factor > 0) {
             bassetQuantity = _massetQuantity.mul(uint256(factor));
             return (bassetQuantity, _massetQuantity);
         }
@@ -233,7 +230,7 @@ contract BasketManagerV3 is OwnableUpgradeable, ERC1967UpgradeUpgradeable {
      * @return total Calculated total balance.
      */
     function getTotalMassetBalance() public view returns (uint256 total) {
-        for(uint i=0; i<bassetsArray.length; i++) {
+        for (uint i = 0; i < bassetsArray.length; i++) {
             address basset = bassetsArray[i];
             uint256 balance = IERC20(basset).balanceOf(masset);
             (uint256 massetQuantity, ) = convertBassetToMassetQuantity(basset, balance);
@@ -245,28 +242,28 @@ contract BasketManagerV3 is OwnableUpgradeable, ERC1967UpgradeUpgradeable {
         return IERC20(_basset).balanceOf(masset);
     }
 
-    function getVersion() external view returns(string memory) {
+    function getVersion() external view returns (string memory) {
         return version;
     }
 
-    function getBassets() public view returns(address[] memory) {
+    function getBassets() public view returns (address[] memory) {
         return bassetsArray;
     }
 
-    function getFactor(address _basset) public view validBasset(_basset) returns(int256) {
+    function getFactor(address _basset) public view validBasset(_basset) returns (int256) {
         return factorMap[_basset];
     }
 
-    function getBridge(address _basset) public view validBasset(_basset) returns(address) {
+    function getBridge(address _basset) public view validBasset(_basset) returns (address) {
         return bridgeMap[_basset];
     }
 
-    function getRange(address _basset) public view validBasset(_basset) returns(uint256 min, uint256 max) {
+    function getRange(address _basset) public view validBasset(_basset) returns (uint256 min, uint256 max) {
         min = minMap[_basset];
         max = maxMap[_basset];
     }
 
-    function getPaused(address _basset) public view validBasset(_basset) returns(bool) {
+    function getPaused(address _basset) public view validBasset(_basset) returns (bool) {
         return pausedMap[_basset];
     }
 
@@ -281,7 +278,14 @@ contract BasketManagerV3 is OwnableUpgradeable, ERC1967UpgradeUpgradeable {
      * @param _max          Maximum ratio in basket.
      * @param _paused       Flag to determine if basset should be paused.
      */
-    function addBasset(address _basset, int256 _factor, address _bridge, uint256 _min, uint256 _max, bool _paused) public onlyOwner {
+    function addBasset(
+        address _basset,
+        int256 _factor,
+        address _bridge,
+        uint256 _min,
+        uint256 _max,
+        bool _paused
+    ) public onlyOwner {
         require(_basset != address(0), "invalid basset address");
         require(factorMap[_basset] == 0, "basset already exists");
         require(_factor != 0, "invalid factor");
@@ -301,18 +305,24 @@ contract BasketManagerV3 is OwnableUpgradeable, ERC1967UpgradeUpgradeable {
      * @notice All parameters must be arrays with proper order and equal length.
      */
     function addBassets(
-        address[] memory _bassets, int256[] memory _factors, address[] memory _bridges,
-        uint256[] memory _mins, uint256[] memory _maxs, bool[] memory _pausedFlags) public onlyOwner {
-
+        address[] memory _bassets,
+        int256[] memory _factors,
+        address[] memory _bridges,
+        uint256[] memory _mins,
+        uint256[] memory _maxs,
+        bool[] memory _pausedFlags
+    ) public onlyOwner {
         uint length = _bassets.length;
         require(
             _factors.length == length &&
-            _bridges.length == length &&
-            _mins.length == length &&
-            _maxs.length == length &&
-            _pausedFlags.length == length, "invalid lengths");
+                _bridges.length == length &&
+                _mins.length == length &&
+                _maxs.length == length &&
+                _pausedFlags.length == length,
+            "invalid lengths"
+        );
 
-        for(uint i=0; i<length; i++) {
+        for (uint i = 0; i < length; i++) {
             addBasset(_bassets[i], _factors[i], _bridges[i], _mins[i], _maxs[i], _pausedFlags[i]);
         }
     }
@@ -374,7 +384,7 @@ contract BasketManagerV3 is OwnableUpgradeable, ERC1967UpgradeUpgradeable {
         factorMap[_basset] = 0;
 
         uint256 index;
-        for(uint i = 0; i < bassetsArray.length - 1; i++) {
+        for (uint i = 0; i < bassetsArray.length - 1; i++) {
             if (bassetsArray[i] == _basset) {
                 index = i;
                 break;
@@ -392,7 +402,7 @@ contract BasketManagerV3 is OwnableUpgradeable, ERC1967UpgradeUpgradeable {
      *
      * @return logic implementation address.
      */
-    function getProxyImplementation() external view returns(address) {
+    function getProxyImplementation() external view returns (address) {
         return ERC1967UpgradeUpgradeable._getImplementation();
     }
 }
