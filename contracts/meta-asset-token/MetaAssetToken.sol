@@ -52,7 +52,7 @@ contract MetaAssetToken is ERC20Permit, Ownable {
                 _recipient != _assetImplementation &&
                 _recipient != basketManagerProxy &&
                 _recipient != _basketManagerImplementation,
-            "DLLR: Invalid address. Cannot transfer DLLR directly to a Sovryn protocol address"
+            "DLLR: Invalid address. Cannot transfer DLLR directly to a Mynt protocol address"
         );
 
         _;
