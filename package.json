@@ -1,7 +1,7 @@
 {
-  "name": "sovryn-dollar",
+  "name": "sovryn-mynt",
   "version": "1.0.0",
-  "description": "Sovryn Dollar Contracts",
+  "description": "Sovryn Mynt Contracts",
   "license": "AGPL-3.0-or-later",
   "files": [
     "/contracts/**/*.sol",
