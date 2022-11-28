@@ -10,11 +10,20 @@ const func: DeployFunction = async ({
   const deployedMasset = await deployments.get("MassetV3")
   const deployedBasketManager = await deployments.get("BasketManagerV3")
 
-  await deploy('MetaAssetToken', {
+  await deploy('DLLR', {
     from: deployer,
+    contract: "MetaAssetToken",
     args: ["Sovryn Dollar", "DLLR"],
     log: true,
   });
+
+  await deployments.execute("DLLR", {from: deployer}, "setAssetProxy",
+    deployedMasset.address
+  );
+
+  await deployments.execute("DLLR", {from: deployer}, "setBasketManagerProxy",
+    deployedBasketManager.address
+  );
 }
 
 func.tags = ["DLLR"];
