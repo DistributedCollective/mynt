@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.17;
+pragma solidity ^0.8.17;
 
 abstract contract IMockDummy {
     function getVersion() external virtual pure returns(string memory);

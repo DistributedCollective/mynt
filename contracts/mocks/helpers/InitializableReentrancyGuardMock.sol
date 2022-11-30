@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.17;
+pragma solidity ^0.8.17;
 
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 
@@ -34,6 +34,6 @@ contract InitializableReentrancyMock is ReentrancyGuardUpgradeable {
 
     function runClientMethod (address reentrantMockAddress) public nonReentrant {
         IReentrantMock reentrantMock = IReentrantMock(reentrantMockAddress);
-        require(reentrantMock.clientMethod(), "");
+    require(reentrantMock.clientMethod(), "");
     }
 }
