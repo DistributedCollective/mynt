@@ -8,7 +8,7 @@ import { IERC777Recipient } from "@openzeppelin/contracts/token/ERC777/IERC777Re
 import { IERC1820Registry } from "@openzeppelin/contracts/utils/introspection/IERC1820Registry.sol";
 import { IBridge } from "../IBridge.sol";
 import { BasketManager } from "./BasketManager.sol";
-import "../Token.sol";
+import "../../meta-asset-token/MetaAssetToken.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 
@@ -53,7 +53,7 @@ contract Masset is IERC777Recipient, OwnableUpgradeable, ReentrancyGuardUpgradea
     // state
     string private version;
     BasketManager private basketManager;
-    Token private token;
+    MetaAssetToken private token;
 
     // internal
 
@@ -77,7 +77,7 @@ contract Masset is IERC777Recipient, OwnableUpgradeable, ReentrancyGuardUpgradea
         __ReentrancyGuard_init_unchained();
 
         basketManager = BasketManager(_basketManagerAddress);
-        token = Token(_tokenAddress);
+        token = MetaAssetToken(_tokenAddress);
         if(_registerAsERC777RecipientFlag) {
             registerAsERC777Recipient();
         }

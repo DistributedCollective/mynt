@@ -2,14 +2,14 @@
 pragma solidity ^0.8.17;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/token/ERC20/extensions/draft-ERC20Permit.sol";
 import "../interfaces/IApproveAndCall.sol";
 import "../interfaces/IProxy.sol";
-import "../shared/ERC20Permit.sol";
 
 /**
  * @title Token
  * @dev Implementation of staking Token.
- * Inherits from ERC20 and ERC20Detailed with implemented
+ * Inherits from ERC20.
  * mint and burn functions.
  */
 
@@ -52,7 +52,7 @@ contract MetaAssetToken is ERC20Permit, Ownable {
                 _recipient != _assetImplementation &&
                 _recipient != basketManagerProxy &&
                 _recipient != _basketManagerImplementation,
-            "DLLR: Invalid address. Cannot transfer DLLR directly to a Sovryn protocol address"
+            "DLLR: Invalid address. Cannot transfer DLLR directly to a Mynt protocol address"
         );
 
         _;
@@ -61,7 +61,7 @@ contract MetaAssetToken is ERC20Permit, Ownable {
     /**
      * @notice Constructor called on deployment, initiates the contract.
      */
-    constructor(string memory _tokenName, string memory _symbol) ERC20(_tokenName, _symbol) {}
+    constructor(string memory _tokenName, string memory _symbol) ERC20(_tokenName, _symbol) ERC20Permit("MetaAsset") {}
 
     /**
      * @dev getter function of asset implementation address
@@ -213,5 +213,15 @@ contract MetaAssetToken is ERC20Permit, Ownable {
     function approveAndCall(address _spender, uint256 _amount, bytes calldata _data) external {
         approve(_spender, _amount);
         IApproveAndCall(_spender).receiveApproval(msg.sender, _amount, address(this), _data);
+    }
+
+    /**
+     * @dev to support EIP712, will need the token contract to return the chain id.
+     *
+     * @return chain id.
+     *
+     */
+    function getChainId() external view returns (uint256) {
+        return block.chainid;
     }
 }

@@ -8,7 +8,7 @@ const func: DeployFunction = async ({
 }) => {
   const { deployer } = await getNamedAccounts();
   const deployedMasset = await deployments.get("MassetV3")
-  const deployedToken = await deployments.get("Token")
+  const deployedToken = await deployments.get("DLLR")
   const deployedFeesVault = await deployments.get("FeesVault")
   const deployedFeesManager = await deployments.get("FeesManager")
 
@@ -53,6 +53,15 @@ const func: DeployFunction = async ({
 
   const mAssetVersion = await deployments.read("MassetV3", "getVersion")
   console.log("Masset Version :", mAssetVersion)
+
+  // Set Masset & Basket Manager in DLLR contract
+  await deployments.execute("DLLR", {from: deployer}, "setAssetProxy",
+    deployedMasset.address
+  );
+
+  await deployments.execute("DLLR", {from: deployer}, "setBasketManagerProxy",
+    deployedBasketManager.address
+  );
 };
 
 func.tags = ["BasketManager"];

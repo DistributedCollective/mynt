@@ -11,7 +11,7 @@ import { IBridge } from "./IBridge.sol";
 import { BasketManagerV3 } from "./BasketManagerV3.sol";
 import { FeesVault } from "../vault/FeesVault.sol";
 import { FeesManager } from "./FeesManager.sol";
-import "./Token.sol";
+import "../meta-asset-token/MetaAssetToken.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/ERC1967/ERC1967UpgradeUpgradeable.sol";
@@ -26,7 +26,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/ERC1967/ERC1967UpgradeUpgradea
 contract MassetV3 is IERC777Recipient, OwnableUpgradeable, ReentrancyGuardUpgradeable, ERC1967UpgradeUpgradeable {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
-    using SafeERC20 for Token;
+    using SafeERC20 for MetaAssetToken;
 
     // events
 
@@ -96,7 +96,7 @@ contract MassetV3 is IERC777Recipient, OwnableUpgradeable, ReentrancyGuardUpgrad
     string private version;
 
     BasketManagerV3 private basketManager;
-    Token private token;
+    MetaAssetToken private token;
 
     FeesVault private feesVault;
     FeesManager private feesManager;
@@ -132,7 +132,7 @@ contract MassetV3 is IERC777Recipient, OwnableUpgradeable, ReentrancyGuardUpgrad
         __ReentrancyGuard_init_unchained();
 
         basketManager = BasketManagerV3(_basketManagerAddress);
-        token = Token(_tokenAddress);
+        token = MetaAssetToken(_tokenAddress);
         if (_registerAsERC777RecipientFlag) {
             registerAsERC777Recipient();
         }
@@ -201,7 +201,7 @@ contract MassetV3 is IERC777Recipient, OwnableUpgradeable, ReentrancyGuardUpgrad
 
         IERC20(_basset).safeTransferFrom(msg.sender, address(this), bassetQuantity);
 
-        uint256 massetsToMint = _mintAndCalulateFee(massetQuantity, false);
+        uint256 massetsToMint = _mintAndCalculateFee(massetQuantity, false);
         token.mint(_recipient, massetsToMint);
 
         emit Minted(msg.sender, _recipient, massetsToMint, _basset, bassetQuantity);
@@ -215,7 +215,7 @@ contract MassetV3 is IERC777Recipient, OwnableUpgradeable, ReentrancyGuardUpgrad
      * @param _bridgeFlag       Flag that indicates if the proces is used with conjunction with bridge.
      * @return massetsToMint    Amount of massets that is left to mint for user.
      */
-    function _mintAndCalulateFee(uint256 massetQuantity, bool _bridgeFlag) internal returns (uint256 massetsToMint) {
+    function _mintAndCalculateFee(uint256 massetQuantity, bool _bridgeFlag) internal returns (uint256 massetsToMint) {
         uint256 fee;
         if (_bridgeFlag) {
             fee = feesManager.calculateDepositBridgeFee(massetQuantity);
@@ -476,7 +476,7 @@ contract MassetV3 is IERC777Recipient, OwnableUpgradeable, ReentrancyGuardUpgrad
             basset,
             _orderAmount
         );
-        uint256 massetsToMint = _mintAndCalulateFee(massetQuantity, true);
+        uint256 massetsToMint = _mintAndCalculateFee(massetQuantity, true);
         token.mint(recipient, massetsToMint);
 
         emit Minted(msg.sender, recipient, massetsToMint, basset, bassetQuantity);
@@ -533,7 +533,7 @@ contract MassetV3 is IERC777Recipient, OwnableUpgradeable, ReentrancyGuardUpgrad
         feesVault = FeesVault(_feesVaultAddress);
         feesManager = FeesManager(_feesManagerAddress);
         basketManager = BasketManagerV3(_basketManagerAddress);
-        token = Token(_tokenAddress);
+        token = MetaAssetToken(_tokenAddress);
         version = "3.0";
     }
 

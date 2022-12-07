@@ -8,7 +8,7 @@ import "../interfaces/IApproveAndCall.sol";
 /**
  * @title Token
  * @dev Implementation of staking Token.
- * Inherits from ERC20 and ERC20Detailed with implemented
+ * Inherits from ERC20
  * mint and burn functions.
  */
 

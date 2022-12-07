@@ -263,21 +263,21 @@ contract("MetaAssetToken", async (accounts) => {
       it("when recipient is mAsset proxy address", async () => {
         await expectRevert(
           token.transfer(assetProxy, toWei("100"), { from: owner }),
-          "DLLR: Invalid address. Cannot transfer DLLR directly to a Sovryn protocol address"
+          "DLLR: Invalid address. Cannot transfer DLLR directly to a Mynt protocol address"
         );
       });
 
       it("when recipient is mAsset implementation address", async () => {
         await expectRevert(
           token.transfer(assetImplementation, toWei("100"), { from: owner }),
-          "DLLR: Invalid address. Cannot transfer DLLR directly to a Sovryn protocol address"
+          "DLLR: Invalid address. Cannot transfer DLLR directly to a Mynt protocol address"
         );
       });
 
       it("when recipient is basket manager proxy address", async () => {
         await expectRevert(
           token.transfer(assetProxy, toWei("100"), { from: owner }),
-          "DLLR: Invalid address. Cannot transfer DLLR directly to a Sovryn protocol address"
+          "DLLR: Invalid address. Cannot transfer DLLR directly to a Mynt protocol address"
         );
       });
 
@@ -286,7 +286,7 @@ contract("MetaAssetToken", async (accounts) => {
           token.transfer(basketManagerImplementation, toWei("100"), {
             from: owner,
           }),
-          "DLLR: Invalid address. Cannot transfer DLLR directly to a Sovryn protocol address"
+          "DLLR: Invalid address. Cannot transfer DLLR directly to a Mynt protocol address"
         );
       });
     });
@@ -344,7 +344,7 @@ contract("MetaAssetToken", async (accounts) => {
       it("when recipient is mAsset proxy address", async () => {
         await expectRevert(
           token.transferFrom(user, assetProxy, toWei("100"), { from: owner }),
-          "DLLR: Invalid address. Cannot transfer DLLR directly to a Sovryn protocol address"
+          "DLLR: Invalid address. Cannot transfer DLLR directly to a Mynt protocol address"
         );
       });
 
@@ -353,14 +353,14 @@ contract("MetaAssetToken", async (accounts) => {
           token.transferFrom(user, assetImplementation, toWei("100"), {
             from: owner,
           }),
-          "DLLR: Invalid address. Cannot transfer DLLR directly to a Sovryn protocol address"
+          "DLLR: Invalid address. Cannot transfer DLLR directly to a Mynt protocol address"
         );
       });
 
       it("when recipient is basket manager proxy address", async () => {
         await expectRevert(
           token.transferFrom(user, assetProxy, toWei("100"), { from: owner }),
-          "DLLR: Invalid address. Cannot transfer DLLR directly to a Sovryn protocol address"
+          "DLLR: Invalid address. Cannot transfer DLLR directly to a Mynt protocol address"
         );
       });
 
@@ -369,7 +369,7 @@ contract("MetaAssetToken", async (accounts) => {
           token.transferFrom(user, basketManagerImplementation, toWei("100"), {
             from: owner,
           }),
-          "DLLR: Invalid address. Cannot transfer DLLR directly to a Sovryn protocol address"
+          "DLLR: Invalid address. Cannot transfer DLLR directly to a Mynt protocol address"
         );
       });
     });
@@ -418,7 +418,7 @@ contract("MetaAssetToken", async (accounts) => {
     const spender = spenderWallet.getAddressString();
 
     before(async () => {
-      chainId = await token.getChainID();
+      chainId = await token.getChainId();
     });
 
     context("should failed if", async () => {
@@ -447,7 +447,7 @@ contract("MetaAssetToken", async (accounts) => {
         // incorrect amount
         await expectRevert(
           token.permit(ownerPermit, spender, toWei("500"), deadline, v, r, s),
-          "MetaAsset:INVALID_SIGNATURE"
+          "ERC20Permit: invalid signature"
         );
       });
 
@@ -476,20 +476,12 @@ contract("MetaAssetToken", async (accounts) => {
         // incorrect amount
         await expectRevert(
           token.permit(ownerPermit, spender, firstValue, deadline, v, r, s),
-          "MetaAsset:AUTH_EXPIRED"
+          "ERC20Permit: expired deadline"
         );
       });
     });
 
     context("success permit check", async () => {
-      it("has the correct permit typehash", async () => {
-        assert.equal(
-          await token.PERMIT_TYPEHASH(),
-          PERMIT_TYPEHASH,
-          "erc2612: typehash"
-        );
-      });
-
       it("has the correct DOMAIN_SEPARATOR", async () => {
         const DOMAIN_SEPARATOR = await domainSeparator(
           name,
@@ -590,7 +582,7 @@ contract("MetaAssetToken", async (accounts) => {
     const spender = spenderWallet.getAddressString();
 
     before(async () => {
-      chainId = await token.getChainID();
+      chainId = await token.getChainId();
       // funding spender wallet
       const funder = await ethers.provider.getSigner(owner);
       await funder.sendTransaction({
@@ -634,7 +626,7 @@ contract("MetaAssetToken", async (accounts) => {
             r,
             s
           ),
-          "MetaAsset:AUTH_EXPIRED"
+          "ERC20Permit: expired deadline"
         );
       });
 
@@ -763,7 +755,7 @@ contract("MetaAssetToken", async (accounts) => {
             r,
             s
           ),
-          "DLLR: Invalid address. Cannot transfer DLLR directly to a Sovryn protocol address"
+          "DLLR: Invalid address. Cannot transfer DLLR directly to a Mynt protocol address"
         );
       });
 
@@ -806,7 +798,7 @@ contract("MetaAssetToken", async (accounts) => {
             r,
             s
           ),
-          "DLLR: Invalid address. Cannot transfer DLLR directly to a Sovryn protocol address"
+          "DLLR: Invalid address. Cannot transfer DLLR directly to a Mynt protocol address"
         );
       });
 
@@ -849,7 +841,7 @@ contract("MetaAssetToken", async (accounts) => {
             r,
             s
           ),
-          "DLLR: Invalid address. Cannot transfer DLLR directly to a Sovryn protocol address"
+          "DLLR: Invalid address. Cannot transfer DLLR directly to a Mynt protocol address"
         );
       });
 
@@ -892,7 +884,7 @@ contract("MetaAssetToken", async (accounts) => {
             r,
             s
           ),
-          "DLLR: Invalid address. Cannot transfer DLLR directly to a Sovryn protocol address"
+          "DLLR: Invalid address. Cannot transfer DLLR directly to a Mynt protocol address"
         );
       });
 

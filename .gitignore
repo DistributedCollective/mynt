@@ -69,3 +69,7 @@ _flat/
 .idea*
 
 .DS_Store
+
+# local deployment
+deployments/development/
+.openzeppelin

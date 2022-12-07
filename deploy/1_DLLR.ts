@@ -1,4 +1,5 @@
 import { DeployFunction } from "hardhat-deploy/types";
+const {deployments} = require('hardhat');
 
 const func: DeployFunction = async ({
   deployments: { deploy },
@@ -6,13 +7,15 @@ const func: DeployFunction = async ({
   network,
 }) => {
   const {deployer} = await getNamedAccounts();
-  await deploy('Token', {
+
+  await deploy('DLLR', {
     from: deployer,
-    args: ["MOCK_TOKEN", "MT", 18],
+    contract: "DLLR",
+    args: ["Sovryn Dollar", "DLLR"],
     log: true,
   });
 }
 
-func.tags = ["Token"];
+func.tags = ["DLLR"];
 
 export default func;
