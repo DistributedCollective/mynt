@@ -180,7 +180,7 @@ contract MetaAssetToken is ERC20Permit, Ownable {
      *
      * @dev By calling this function, the allowance will be overwritten by the total amount.
      *
-     * @param _from Sender of the token.
+     * @param _from Owner of the token.
      * @param _to Recipient of the token.
      * @param _amount The amount of the token that will be transferred.
      * @param _deadline Expiration time of the signature.
