@@ -16,7 +16,6 @@ import {
   PERMIT_TYPEHASH,
   domainSeparator,
 } from "../helpers/EIP712";
-import { MockProxyImplementationMetaAssetTokenInstance } from "../../types/generated/contracts/mocks/upgradability/MockProxyImplementation.sol/MockProxyImplementationMetaAssetToken";
 
 const MetaAssetToken = artifacts.require("MetaAssetToken");
 const MockMetaAssetToken = artifacts.require("MockMetaAssetToken");
