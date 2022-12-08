@@ -1,5 +1,4 @@
 import { DeployFunction } from "hardhat-deploy/types";
-const {deployments} = require('hardhat');
 
 const func: DeployFunction = async ({
   deployments: { deploy },
@@ -11,10 +10,9 @@ const func: DeployFunction = async ({
   await deploy('DLLR', {
     from: deployer,
     contract: "DLLR",
-    args: ["Sovryn Dollar", "DLLR"],
     log: true,
   });
-}
+};
 
 func.tags = ["DLLR"];
 
