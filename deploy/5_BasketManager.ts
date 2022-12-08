@@ -55,7 +55,7 @@ const func: DeployFunction = async ({
   console.log("Masset Version :", mAssetVersion)
 
   // Set Masset & Basket Manager in DLLR contract
-  await deployments.execute("DLLR", {from: deployer}, "setAssetProxy",
+  await deployments.execute("DLLR", {from: deployer}, "setMassetProxy",
     deployedMasset.address
   );
 
