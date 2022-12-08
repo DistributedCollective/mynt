@@ -1,0 +1,42 @@
+{
+  "compilerOptions": {
+    "outDir": "./transpiled/",
+    "sourceMap": true,
+    "noImplicitAny": false,
+    // "lib": ["dom", "es2015", "es2016", "es2017"],
+    "module": "commonjs",
+    "baseUrl": ".",
+    "rootDir": ".",
+    "paths": {
+      "@utils/*": [
+        "test-utils/*"
+      ],
+    },
+    "allowJs": true,
+    "target": "es2018",
+    "skipLibCheck": true,
+    "typeRoots": [
+      "node_modules/@0x/typescript-typings/types",
+      "node_modules/@types"
+    ],
+    "esModuleInterop": true
+  },
+  "include": [
+    "./types/*.ts",
+    "./types/chai.d.ts",
+    "./types/interfaces.d.ts",
+    "./types/**/*.ts",
+    "./test/*.ts",
+    "./typechain",
+    "./scripts/**/*.ts",
+    "./test/**/*.ts",
+    "./test-utils/*.ts",
+    "./test-utils/**/*.ts",
+    "./migrations",
+    "./deploy",
+    ".eslintrc.js"
+  ],
+  "files": [
+    "./hardhat.config.ts"
+  ]
+}

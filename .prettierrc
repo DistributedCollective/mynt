@@ -1,0 +1,12 @@
+{
+  "overrides": [
+    {
+      "files": ["*.sol", "*.js", "*.test.js", "*.json"],
+      "options": {
+        "printWidth": 120,
+        "singleQuote": false,
+        "bracketSpacing": true
+      }
+    }
+  ]
+}

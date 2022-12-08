@@ -1,0 +1,715 @@
+{
+  "address": "0x38aBfCE29F6FBaC3ff76156b794C2a5beC9571a1",
+  "abi": [
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "minter",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "recipient",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "massetQuantity",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "bAsset",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "bassetQuantity",
+          "type": "uint256"
+        }
+      ],
+      "name": "Minted",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "previousOwner",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "OwnershipTransferred",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "redeemer",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "recipient",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "massetQuantity",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "bAsset",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "bassetQuantity",
+          "type": "uint256"
+        }
+      ],
+      "name": "Redeemed",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "sender",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "orderAmount",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "tokenAddress",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes",
+          "name": "userData",
+          "type": "bytes"
+        }
+      ],
+      "name": "onTokensMintedCalled",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "operator",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "from",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes",
+          "name": "userData",
+          "type": "bytes"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes",
+          "name": "operatorData",
+          "type": "bytes"
+        }
+      ],
+      "name": "onTokensReceivedCalled",
+      "type": "event"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "getBasketManager",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "getToken",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "getVersion",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_basketManagerAddress",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "_tokenAddress",
+          "type": "address"
+        },
+        {
+          "internalType": "bool",
+          "name": "_registerAsERC777RecipientFlag",
+          "type": "bool"
+        }
+      ],
+      "name": "initialize",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "isOwner",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_bAsset",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_bAssetQuantity",
+          "type": "uint256"
+        }
+      ],
+      "name": "mint",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "massetMinted",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_bAsset",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_bAssetQuantity",
+          "type": "uint256"
+        },
+        {
+          "internalType": "address",
+          "name": "_recipient",
+          "type": "address"
+        }
+      ],
+      "name": "mintTo",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "massetMinted",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_orderAmount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "address",
+          "name": "_tokenAddress",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes",
+          "name": "_userData",
+          "type": "bytes"
+        }
+      ],
+      "name": "onTokensMinted",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "owner",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_bAsset",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_massetQuantity",
+          "type": "uint256"
+        }
+      ],
+      "name": "redeem",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "massetRedeemed",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_bAsset",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_massetQuantity",
+          "type": "uint256"
+        },
+        {
+          "internalType": "address",
+          "name": "_recipient",
+          "type": "address"
+        }
+      ],
+      "name": "redeemTo",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "massetRedeemed",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_basset",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_massetQuantity",
+          "type": "uint256"
+        },
+        {
+          "internalType": "address",
+          "name": "_recipient",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "_bridgeAddress",
+          "type": "address"
+        }
+      ],
+      "name": "redeemToBridge",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "massetRedeemed",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_basset",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_massetQuantity",
+          "type": "uint256"
+        },
+        {
+          "internalType": "address",
+          "name": "_recipient",
+          "type": "address"
+        }
+      ],
+      "name": "redeemToBridge",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "massetRedeemed",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [],
+      "name": "renounceOwnership",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_operator",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "_from",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_amount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes",
+          "name": "_userData",
+          "type": "bytes"
+        },
+        {
+          "internalType": "bytes",
+          "name": "_operatorData",
+          "type": "bytes"
+        }
+      ],
+      "name": "tokensReceived",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "transferOwnership",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "transactionHash": "0x8ba621bbb7117d438a2a56a888e95cb7290063fd9de7eda263adae98d85741da",
+  "receipt": {
+    "to": null,
+    "from": "0x13Be55487D37FE3C66EE7305e1e9C1ac85de75Ae",
+    "contractAddress": "0x38aBfCE29F6FBaC3ff76156b794C2a5beC9571a1",
+    "transactionIndex": 0,
+    "gasUsed": "2236531",
+    "logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "blockHash": "0x6f13156505c89c54df69fbcb149b64805ebdc01a982d7bb9dd985998f383d12a",
+    "transactionHash": "0x8ba621bbb7117d438a2a56a888e95cb7290063fd9de7eda263adae98d85741da",
+    "logs": [],
+    "blockNumber": 3331254,
+    "cumulativeGasUsed": "2236531",
+    "status": 1,
+    "byzantium": true
+  },
+  "args": [],
+  "numDeployments": 1,
+  "solcInputHash": "1a3e2dbf67d3233bbb3b7921dfe5a273",
+  "metadata": "{\"compiler\":{\"version\":\"0.5.17+commit.d19bba13\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"minter\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"recipient\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"massetQuantity\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"bAsset\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"bassetQuantity\",\"type\":\"uint256\"}],\"name\":\"Minted\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"previousOwner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"OwnershipTransferred\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"redeemer\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"recipient\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"massetQuantity\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"bAsset\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"bassetQuantity\",\"type\":\"uint256\"}],\"name\":\"Redeemed\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"orderAmount\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"tokenAddress\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"bytes\",\"name\":\"userData\",\"type\":\"bytes\"}],\"name\":\"onTokensMintedCalled\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"operator\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"from\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"bytes\",\"name\":\"userData\",\"type\":\"bytes\"},{\"indexed\":false,\"internalType\":\"bytes\",\"name\":\"operatorData\",\"type\":\"bytes\"}],\"name\":\"onTokensReceivedCalled\",\"type\":\"event\"},{\"constant\":true,\"inputs\":[],\"name\":\"getBasketManager\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"getToken\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"getVersion\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"address\",\"name\":\"_basketManagerAddress\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_tokenAddress\",\"type\":\"address\"},{\"internalType\":\"bool\",\"name\":\"_registerAsERC777RecipientFlag\",\"type\":\"bool\"}],\"name\":\"initialize\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"isOwner\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"address\",\"name\":\"_bAsset\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_bAssetQuantity\",\"type\":\"uint256\"}],\"name\":\"mint\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"massetMinted\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"address\",\"name\":\"_bAsset\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_bAssetQuantity\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"_recipient\",\"type\":\"address\"}],\"name\":\"mintTo\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"massetMinted\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_orderAmount\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"_tokenAddress\",\"type\":\"address\"},{\"internalType\":\"bytes\",\"name\":\"_userData\",\"type\":\"bytes\"}],\"name\":\"onTokensMinted\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"address\",\"name\":\"_bAsset\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_massetQuantity\",\"type\":\"uint256\"}],\"name\":\"redeem\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"massetRedeemed\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"address\",\"name\":\"_bAsset\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_massetQuantity\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"_recipient\",\"type\":\"address\"}],\"name\":\"redeemTo\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"massetRedeemed\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"address\",\"name\":\"_basset\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_massetQuantity\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"_recipient\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_bridgeAddress\",\"type\":\"address\"}],\"name\":\"redeemToBridge\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"massetRedeemed\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"address\",\"name\":\"_basset\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_massetQuantity\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"_recipient\",\"type\":\"address\"}],\"name\":\"redeemToBridge\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"massetRedeemed\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"renounceOwnership\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"address\",\"name\":\"_operator\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_from\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_to\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_amount\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"_userData\",\"type\":\"bytes\"},{\"internalType\":\"bytes\",\"name\":\"_operatorData\",\"type\":\"bytes\"}],\"name\":\"tokensReceived\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"transferOwnership\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"methods\":{\"isOwner()\":{\"details\":\"Returns true if the caller is the current owner.\"},\"mint(address,uint256)\":{\"details\":\"Mint a single bAsset, at a 1:1 ratio with the bAsset. This contract     must have approval to spend the senders bAsset\",\"params\":{\"_bAsset\":\"Address of the bAsset to mint\",\"_bAssetQuantity\":\"Quantity in bAsset units\"},\"return\":\"massetMinted   Number of newly minted mAssets\"},\"mintTo(address,uint256,address)\":{\"details\":\"Mint a single bAsset, at a 1:1 ratio with the bAsset. This contract     must have approval to spend the senders bAsset\",\"params\":{\"_bAsset\":\"Address of the bAsset to mint\",\"_bAssetQuantity\":\"Quantity in bAsset units\",\"_recipient\":\"receipient of the newly minted mAsset tokens\"},\"return\":\"massetMinted   Number of newly minted mAssets\"},\"onTokensMinted(uint256,address,bytes)\":{\"details\":\"This is called by the bridge to let us know the user has sent tokens through it and     into the masset.\",\"params\":{\"_orderAmount\":\"Units of the masset to redeem\",\"_tokenAddress\":\"Address of the bAsset to redeem\",\"_userData\":\"Address of the final recipient as ABI encoded bytes\"}},\"owner()\":{\"details\":\"Returns the address of the current owner.\"},\"redeem(address,uint256)\":{\"details\":\"Credits the sender with a certain quantity of selected bAsset, in exchange for burning the     relative mAsset quantity from the sender. Sender also incurs a small mAsset fee, if any.\",\"params\":{\"_bAsset\":\"Address of the bAsset to redeem\",\"_massetQuantity\":\"Units of the masset to redeem\"},\"return\":\"massetMinted     Relative number of mAsset units burned to pay for the bAssets\"},\"redeemTo(address,uint256,address)\":{\"details\":\"Credits a recipient with a certain quantity of selected bAsset, in exchange for burning the     relative Masset quantity from the sender. Sender also incurs a small fee, if any.\",\"params\":{\"_bAsset\":\"Address of the bAsset to redeem\",\"_massetQuantity\":\"Units of the masset to redeem\",\"_recipient\":\"Address to credit with withdrawn bAssets\"},\"return\":\"massetMinted     Relative number of mAsset units burned to pay for the bAssets\"},\"redeemToBridge(address,uint256,address)\":{\"details\":\"Credits a recipient with a certain quantity of selected bAsset, in exchange for burning the     relative Masset quantity from the sender. Sender also incurs a small fee, if any.     This function is designed to also call the bridge in order to have the basset tokens sent to     another blockchain.\",\"params\":{\"_basset\":\"Address of the bAsset to redeem\",\"_massetQuantity\":\"Units of the masset to redeem\",\"_recipient\":\"Address to credit with withdrawn bAssets\"},\"return\":\"massetMinted     Relative number of mAsset units burned to pay for the bAssets\"},\"redeemToBridge(address,uint256,address,address)\":{\"details\":\"Credits a recipient with a certain quantity of selected bAsset, in exchange for burning the     relative Masset quantity from the sender. Sender also incurs a small fee, if any.     This function is designed to also call the bridge in order to have the basset tokens sent to     another blockchain.\",\"params\":{\"_basset\":\"Address of the bAsset to redeem\",\"_bridgeAddress\":\"This is ignored and is left here for backward compatibility with the FE\",\"_massetQuantity\":\"Units of the masset to redeem\",\"_recipient\":\"Address to credit with withdrawn bAssets\"},\"return\":\"massetMinted     Relative number of mAsset units burned to pay for the bAssets\"},\"renounceOwnership()\":{\"details\":\"Leaves the contract without owner. It will not be possible to call `onlyOwner` functions anymore. Can only be called by the current owner.     * NOTE: Renouncing ownership will leave the contract without an owner, thereby removing any functionality that is only available to the owner.\"},\"transferOwnership(address)\":{\"details\":\"Transfers ownership of the contract to a new account (`newOwner`). Can only be called by the current owner.\"}}},\"userdoc\":{\"methods\":{}}},\"settings\":{\"compilationTarget\":{\"contracts/masset/versions/Masset.sol\":\"Masset\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"useLiteralContent\":true},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"@openzeppelin/contracts/GSN/Context.sol\":{\"content\":\"pragma solidity ^0.5.0;\\n\\n/*\\n * @dev Provides information about the current execution context, including the\\n * sender of the transaction and its data. While these are generally available\\n * via msg.sender and msg.data, they should not be accessed in such a direct\\n * manner, since when dealing with GSN meta-transactions the account sending and\\n * paying for execution may not be the actual sender (as far as an application\\n * is concerned).\\n *\\n * This contract is only required for intermediate, library-like contracts.\\n */\\ncontract Context {\\n    // Empty internal constructor, to prevent people from mistakenly deploying\\n    // an instance of this contract, which should be used via inheritance.\\n    constructor () internal { }\\n    // solhint-disable-previous-line no-empty-blocks\\n\\n    function _msgSender() internal view returns (address payable) {\\n        return msg.sender;\\n    }\\n\\n    function _msgData() internal view returns (bytes memory) {\\n        this; // silence state mutability warning without generating bytecode - see https://github.com/ethereum/solidity/issues/2691\\n        return msg.data;\\n    }\\n}\\n\",\"keccak256\":\"0x90a3995645af7562d84b9d69363ffa5ae7217714ab61e951bf7bc450f40e4061\"},\"@openzeppelin/contracts/introspection/IERC1820Registry.sol\":{\"content\":\"pragma solidity ^0.5.0;\\n\\n/**\\n * @dev Interface of the global ERC1820 Registry, as defined in the\\n * https://eips.ethereum.org/EIPS/eip-1820[EIP]. Accounts may register\\n * implementers for interfaces in this registry, as well as query support.\\n *\\n * Implementers may be shared by multiple accounts, and can also implement more\\n * than a single interface for each account. Contracts can implement interfaces\\n * for themselves, but externally-owned accounts (EOA) must delegate this to a\\n * contract.\\n *\\n * {IERC165} interfaces can also be queried via the registry.\\n *\\n * For an in-depth explanation and source code analysis, see the EIP text.\\n */\\ninterface IERC1820Registry {\\n    /**\\n     * @dev Sets `newManager` as the manager for `account`. A manager of an\\n     * account is able to set interface implementers for it.\\n     *\\n     * By default, each account is its own manager. Passing a value of `0x0` in\\n     * `newManager` will reset the manager to this initial state.\\n     *\\n     * Emits a {ManagerChanged} event.\\n     *\\n     * Requirements:\\n     *\\n     * - the caller must be the current manager for `account`.\\n     */\\n    function setManager(address account, address newManager) external;\\n\\n    /**\\n     * @dev Returns the manager for `account`.\\n     *\\n     * See {setManager}.\\n     */\\n    function getManager(address account) external view returns (address);\\n\\n    /**\\n     * @dev Sets the `implementer` contract as `account`'s implementer for\\n     * `interfaceHash`.\\n     *\\n     * `account` being the zero address is an alias for the caller's address.\\n     * The zero address can also be used in `implementer` to remove an old one.\\n     *\\n     * See {interfaceHash} to learn how these are created.\\n     *\\n     * Emits an {InterfaceImplementerSet} event.\\n     *\\n     * Requirements:\\n     *\\n     * - the caller must be the current manager for `account`.\\n     * - `interfaceHash` must not be an {IERC165} interface id (i.e. it must not\\n     * end in 28 zeroes).\\n     * - `implementer` must implement {IERC1820Implementer} and return true when\\n     * queried for support, unless `implementer` is the caller. See\\n     * {IERC1820Implementer-canImplementInterfaceForAddress}.\\n     */\\n    function setInterfaceImplementer(address account, bytes32 interfaceHash, address implementer) external;\\n\\n    /**\\n     * @dev Returns the implementer of `interfaceHash` for `account`. If no such\\n     * implementer is registered, returns the zero address.\\n     *\\n     * If `interfaceHash` is an {IERC165} interface id (i.e. it ends with 28\\n     * zeroes), `account` will be queried for support of it.\\n     *\\n     * `account` being the zero address is an alias for the caller's address.\\n     */\\n    function getInterfaceImplementer(address account, bytes32 interfaceHash) external view returns (address);\\n\\n    /**\\n     * @dev Returns the interface hash for an `interfaceName`, as defined in the\\n     * corresponding\\n     * https://eips.ethereum.org/EIPS/eip-1820#interface-name[section of the EIP].\\n     */\\n    function interfaceHash(string calldata interfaceName) external pure returns (bytes32);\\n\\n    /**\\n     *  @notice Updates the cache with whether the contract implements an ERC165 interface or not.\\n     *  @param account Address of the contract for which to update the cache.\\n     *  @param interfaceId ERC165 interface for which to update the cache.\\n     */\\n    function updateERC165Cache(address account, bytes4 interfaceId) external;\\n\\n    /**\\n     *  @notice Checks whether a contract implements an ERC165 interface or not.\\n     *  If the result is not cached a direct lookup on the contract address is performed.\\n     *  If the result is not cached or the cached value is out-of-date, the cache MUST be updated manually by calling\\n     *  {updateERC165Cache} with the contract address.\\n     *  @param account Address of the contract to check.\\n     *  @param interfaceId ERC165 interface to check.\\n     *  @return True if `account` implements `interfaceId`, false otherwise.\\n     */\\n    function implementsERC165Interface(address account, bytes4 interfaceId) external view returns (bool);\\n\\n    /**\\n     *  @notice Checks whether a contract implements an ERC165 interface or not without using nor updating the cache.\\n     *  @param account Address of the contract to check.\\n     *  @param interfaceId ERC165 interface to check.\\n     *  @return True if `account` implements `interfaceId`, false otherwise.\\n     */\\n    function implementsERC165InterfaceNoCache(address account, bytes4 interfaceId) external view returns (bool);\\n\\n    event InterfaceImplementerSet(address indexed account, bytes32 indexed interfaceHash, address indexed implementer);\\n\\n    event ManagerChanged(address indexed account, address indexed newManager);\\n}\\n\",\"keccak256\":\"0x03c69b91f23efafb5d460b32520ac5066a084347733de3078cf2ba9b33397945\"},\"@openzeppelin/contracts/math/SafeMath.sol\":{\"content\":\"pragma solidity ^0.5.0;\\n\\n/**\\n * @dev Wrappers over Solidity's arithmetic operations with added overflow\\n * checks.\\n *\\n * Arithmetic operations in Solidity wrap on overflow. This can easily result\\n * in bugs, because programmers usually assume that an overflow raises an\\n * error, which is the standard behavior in high level programming languages.\\n * `SafeMath` restores this intuition by reverting the transaction when an\\n * operation overflows.\\n *\\n * Using this library instead of the unchecked operations eliminates an entire\\n * class of bugs, so it's recommended to use it always.\\n */\\nlibrary SafeMath {\\n    /**\\n     * @dev Returns the addition of two unsigned integers, reverting on\\n     * overflow.\\n     *\\n     * Counterpart to Solidity's `+` operator.\\n     *\\n     * Requirements:\\n     * - Addition cannot overflow.\\n     */\\n    function add(uint256 a, uint256 b) internal pure returns (uint256) {\\n        uint256 c = a + b;\\n        require(c >= a, \\\"SafeMath: addition overflow\\\");\\n\\n        return c;\\n    }\\n\\n    /**\\n     * @dev Returns the subtraction of two unsigned integers, reverting on\\n     * overflow (when the result is negative).\\n     *\\n     * Counterpart to Solidity's `-` operator.\\n     *\\n     * Requirements:\\n     * - Subtraction cannot overflow.\\n     */\\n    function sub(uint256 a, uint256 b) internal pure returns (uint256) {\\n        return sub(a, b, \\\"SafeMath: subtraction overflow\\\");\\n    }\\n\\n    /**\\n     * @dev Returns the subtraction of two unsigned integers, reverting with custom message on\\n     * overflow (when the result is negative).\\n     *\\n     * Counterpart to Solidity's `-` operator.\\n     *\\n     * Requirements:\\n     * - Subtraction cannot overflow.\\n     *\\n     * _Available since v2.4.0._\\n     */\\n    function sub(uint256 a, uint256 b, string memory errorMessage) internal pure returns (uint256) {\\n        require(b <= a, errorMessage);\\n        uint256 c = a - b;\\n\\n        return c;\\n    }\\n\\n    /**\\n     * @dev Returns the multiplication of two unsigned integers, reverting on\\n     * overflow.\\n     *\\n     * Counterpart to Solidity's `*` operator.\\n     *\\n     * Requirements:\\n     * - Multiplication cannot overflow.\\n     */\\n    function mul(uint256 a, uint256 b) internal pure returns (uint256) {\\n        // Gas optimization: this is cheaper than requiring 'a' not being zero, but the\\n        // benefit is lost if 'b' is also tested.\\n        // See: https://github.com/OpenZeppelin/openzeppelin-contracts/pull/522\\n        if (a == 0) {\\n            return 0;\\n        }\\n\\n        uint256 c = a * b;\\n        require(c / a == b, \\\"SafeMath: multiplication overflow\\\");\\n\\n        return c;\\n    }\\n\\n    /**\\n     * @dev Returns the integer division of two unsigned integers. Reverts on\\n     * division by zero. The result is rounded towards zero.\\n     *\\n     * Counterpart to Solidity's `/` operator. Note: this function uses a\\n     * `revert` opcode (which leaves remaining gas untouched) while Solidity\\n     * uses an invalid opcode to revert (consuming all remaining gas).\\n     *\\n     * Requirements:\\n     * - The divisor cannot be zero.\\n     */\\n    function div(uint256 a, uint256 b) internal pure returns (uint256) {\\n        return div(a, b, \\\"SafeMath: division by zero\\\");\\n    }\\n\\n    /**\\n     * @dev Returns the integer division of two unsigned integers. Reverts with custom message on\\n     * division by zero. The result is rounded towards zero.\\n     *\\n     * Counterpart to Solidity's `/` operator. Note: this function uses a\\n     * `revert` opcode (which leaves remaining gas untouched) while Solidity\\n     * uses an invalid opcode to revert (consuming all remaining gas).\\n     *\\n     * Requirements:\\n     * - The divisor cannot be zero.\\n     *\\n     * _Available since v2.4.0._\\n     */\\n    function div(uint256 a, uint256 b, string memory errorMessage) internal pure returns (uint256) {\\n        // Solidity only automatically asserts when dividing by 0\\n        require(b > 0, errorMessage);\\n        uint256 c = a / b;\\n        // assert(a == b * c + a % b); // There is no case in which this doesn't hold\\n\\n        return c;\\n    }\\n\\n    /**\\n     * @dev Returns the remainder of dividing two unsigned integers. (unsigned integer modulo),\\n     * Reverts when dividing by zero.\\n     *\\n     * Counterpart to Solidity's `%` operator. This function uses a `revert`\\n     * opcode (which leaves remaining gas untouched) while Solidity uses an\\n     * invalid opcode to revert (consuming all remaining gas).\\n     *\\n     * Requirements:\\n     * - The divisor cannot be zero.\\n     */\\n    function mod(uint256 a, uint256 b) internal pure returns (uint256) {\\n        return mod(a, b, \\\"SafeMath: modulo by zero\\\");\\n    }\\n\\n    /**\\n     * @dev Returns the remainder of dividing two unsigned integers. (unsigned integer modulo),\\n     * Reverts with custom message when dividing by zero.\\n     *\\n     * Counterpart to Solidity's `%` operator. This function uses a `revert`\\n     * opcode (which leaves remaining gas untouched) while Solidity uses an\\n     * invalid opcode to revert (consuming all remaining gas).\\n     *\\n     * Requirements:\\n     * - The divisor cannot be zero.\\n     *\\n     * _Available since v2.4.0._\\n     */\\n    function mod(uint256 a, uint256 b, string memory errorMessage) internal pure returns (uint256) {\\n        require(b != 0, errorMessage);\\n        return a % b;\\n    }\\n}\\n\",\"keccak256\":\"0x640b6dee7a4b830bdfd52b5031a07fc2b12209f5b2e29e5d364a7d37f69d8076\"},\"@openzeppelin/contracts/ownership/Ownable.sol\":{\"content\":\"pragma solidity ^0.5.0;\\n\\nimport \\\"../GSN/Context.sol\\\";\\n/**\\n * @dev Contract module which provides a basic access control mechanism, where\\n * there is an account (an owner) that can be granted exclusive access to\\n * specific functions.\\n *\\n * This module is used through inheritance. It will make available the modifier\\n * `onlyOwner`, which can be applied to your functions to restrict their use to\\n * the owner.\\n */\\ncontract Ownable is Context {\\n    address private _owner;\\n\\n    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);\\n\\n    /**\\n     * @dev Initializes the contract setting the deployer as the initial owner.\\n     */\\n    constructor () internal {\\n        address msgSender = _msgSender();\\n        _owner = msgSender;\\n        emit OwnershipTransferred(address(0), msgSender);\\n    }\\n\\n    /**\\n     * @dev Returns the address of the current owner.\\n     */\\n    function owner() public view returns (address) {\\n        return _owner;\\n    }\\n\\n    /**\\n     * @dev Throws if called by any account other than the owner.\\n     */\\n    modifier onlyOwner() {\\n        require(isOwner(), \\\"Ownable: caller is not the owner\\\");\\n        _;\\n    }\\n\\n    /**\\n     * @dev Returns true if the caller is the current owner.\\n     */\\n    function isOwner() public view returns (bool) {\\n        return _msgSender() == _owner;\\n    }\\n\\n    /**\\n     * @dev Leaves the contract without owner. It will not be possible to call\\n     * `onlyOwner` functions anymore. Can only be called by the current owner.\\n     *\\n     * NOTE: Renouncing ownership will leave the contract without an owner,\\n     * thereby removing any functionality that is only available to the owner.\\n     */\\n    function renounceOwnership() public onlyOwner {\\n        emit OwnershipTransferred(_owner, address(0));\\n        _owner = address(0);\\n    }\\n\\n    /**\\n     * @dev Transfers ownership of the contract to a new account (`newOwner`).\\n     * Can only be called by the current owner.\\n     */\\n    function transferOwnership(address newOwner) public onlyOwner {\\n        _transferOwnership(newOwner);\\n    }\\n\\n    /**\\n     * @dev Transfers ownership of the contract to a new account (`newOwner`).\\n     */\\n    function _transferOwnership(address newOwner) internal {\\n        require(newOwner != address(0), \\\"Ownable: new owner is the zero address\\\");\\n        emit OwnershipTransferred(_owner, newOwner);\\n        _owner = newOwner;\\n    }\\n}\\n\",\"keccak256\":\"0x6fb9d7889769d7cc161225f9ef7a90e468ba9788b253816f8d8b6894d3472c24\"},\"@openzeppelin/contracts/token/ERC20/ERC20.sol\":{\"content\":\"pragma solidity ^0.5.0;\\n\\nimport \\\"../../GSN/Context.sol\\\";\\nimport \\\"./IERC20.sol\\\";\\nimport \\\"../../math/SafeMath.sol\\\";\\n\\n/**\\n * @dev Implementation of the {IERC20} interface.\\n *\\n * This implementation is agnostic to the way tokens are created. This means\\n * that a supply mechanism has to be added in a derived contract using {_mint}.\\n * For a generic mechanism see {ERC20Mintable}.\\n *\\n * TIP: For a detailed writeup see our guide\\n * https://forum.zeppelin.solutions/t/how-to-implement-erc20-supply-mechanisms/226[How\\n * to implement supply mechanisms].\\n *\\n * We have followed general OpenZeppelin guidelines: functions revert instead\\n * of returning `false` on failure. This behavior is nonetheless conventional\\n * and does not conflict with the expectations of ERC20 applications.\\n *\\n * Additionally, an {Approval} event is emitted on calls to {transferFrom}.\\n * This allows applications to reconstruct the allowance for all accounts just\\n * by listening to said events. Other implementations of the EIP may not emit\\n * these events, as it isn't required by the specification.\\n *\\n * Finally, the non-standard {decreaseAllowance} and {increaseAllowance}\\n * functions have been added to mitigate the well-known issues around setting\\n * allowances. See {IERC20-approve}.\\n */\\ncontract ERC20 is Context, IERC20 {\\n    using SafeMath for uint256;\\n\\n    mapping (address => uint256) private _balances;\\n\\n    mapping (address => mapping (address => uint256)) private _allowances;\\n\\n    uint256 private _totalSupply;\\n\\n    /**\\n     * @dev See {IERC20-totalSupply}.\\n     */\\n    function totalSupply() public view returns (uint256) {\\n        return _totalSupply;\\n    }\\n\\n    /**\\n     * @dev See {IERC20-balanceOf}.\\n     */\\n    function balanceOf(address account) public view returns (uint256) {\\n        return _balances[account];\\n    }\\n\\n    /**\\n     * @dev See {IERC20-transfer}.\\n     *\\n     * Requirements:\\n     *\\n     * - `recipient` cannot be the zero address.\\n     * - the caller must have a balance of at least `amount`.\\n     */\\n    function transfer(address recipient, uint256 amount) public returns (bool) {\\n        _transfer(_msgSender(), recipient, amount);\\n        return true;\\n    }\\n\\n    /**\\n     * @dev See {IERC20-allowance}.\\n     */\\n    function allowance(address owner, address spender) public view returns (uint256) {\\n        return _allowances[owner][spender];\\n    }\\n\\n    /**\\n     * @dev See {IERC20-approve}.\\n     *\\n     * Requirements:\\n     *\\n     * - `spender` cannot be the zero address.\\n     */\\n    function approve(address spender, uint256 amount) public returns (bool) {\\n        _approve(_msgSender(), spender, amount);\\n        return true;\\n    }\\n\\n    /**\\n     * @dev See {IERC20-transferFrom}.\\n     *\\n     * Emits an {Approval} event indicating the updated allowance. This is not\\n     * required by the EIP. See the note at the beginning of {ERC20};\\n     *\\n     * Requirements:\\n     * - `sender` and `recipient` cannot be the zero address.\\n     * - `sender` must have a balance of at least `amount`.\\n     * - the caller must have allowance for `sender`'s tokens of at least\\n     * `amount`.\\n     */\\n    function transferFrom(address sender, address recipient, uint256 amount) public returns (bool) {\\n        _transfer(sender, recipient, amount);\\n        _approve(sender, _msgSender(), _allowances[sender][_msgSender()].sub(amount, \\\"ERC20: transfer amount exceeds allowance\\\"));\\n        return true;\\n    }\\n\\n    /**\\n     * @dev Atomically increases the allowance granted to `spender` by the caller.\\n     *\\n     * This is an alternative to {approve} that can be used as a mitigation for\\n     * problems described in {IERC20-approve}.\\n     *\\n     * Emits an {Approval} event indicating the updated allowance.\\n     *\\n     * Requirements:\\n     *\\n     * - `spender` cannot be the zero address.\\n     */\\n    function increaseAllowance(address spender, uint256 addedValue) public returns (bool) {\\n        _approve(_msgSender(), spender, _allowances[_msgSender()][spender].add(addedValue));\\n        return true;\\n    }\\n\\n    /**\\n     * @dev Atomically decreases the allowance granted to `spender` by the caller.\\n     *\\n     * This is an alternative to {approve} that can be used as a mitigation for\\n     * problems described in {IERC20-approve}.\\n     *\\n     * Emits an {Approval} event indicating the updated allowance.\\n     *\\n     * Requirements:\\n     *\\n     * - `spender` cannot be the zero address.\\n     * - `spender` must have allowance for the caller of at least\\n     * `subtractedValue`.\\n     */\\n    function decreaseAllowance(address spender, uint256 subtractedValue) public returns (bool) {\\n        _approve(_msgSender(), spender, _allowances[_msgSender()][spender].sub(subtractedValue, \\\"ERC20: decreased allowance below zero\\\"));\\n        return true;\\n    }\\n\\n    /**\\n     * @dev Moves tokens `amount` from `sender` to `recipient`.\\n     *\\n     * This is internal function is equivalent to {transfer}, and can be used to\\n     * e.g. implement automatic token fees, slashing mechanisms, etc.\\n     *\\n     * Emits a {Transfer} event.\\n     *\\n     * Requirements:\\n     *\\n     * - `sender` cannot be the zero address.\\n     * - `recipient` cannot be the zero address.\\n     * - `sender` must have a balance of at least `amount`.\\n     */\\n    function _transfer(address sender, address recipient, uint256 amount) internal {\\n        require(sender != address(0), \\\"ERC20: transfer from the zero address\\\");\\n        require(recipient != address(0), \\\"ERC20: transfer to the zero address\\\");\\n\\n        _balances[sender] = _balances[sender].sub(amount, \\\"ERC20: transfer amount exceeds balance\\\");\\n        _balances[recipient] = _balances[recipient].add(amount);\\n        emit Transfer(sender, recipient, amount);\\n    }\\n\\n    /** @dev Creates `amount` tokens and assigns them to `account`, increasing\\n     * the total supply.\\n     *\\n     * Emits a {Transfer} event with `from` set to the zero address.\\n     *\\n     * Requirements\\n     *\\n     * - `to` cannot be the zero address.\\n     */\\n    function _mint(address account, uint256 amount) internal {\\n        require(account != address(0), \\\"ERC20: mint to the zero address\\\");\\n\\n        _totalSupply = _totalSupply.add(amount);\\n        _balances[account] = _balances[account].add(amount);\\n        emit Transfer(address(0), account, amount);\\n    }\\n\\n    /**\\n     * @dev Destroys `amount` tokens from `account`, reducing the\\n     * total supply.\\n     *\\n     * Emits a {Transfer} event with `to` set to the zero address.\\n     *\\n     * Requirements\\n     *\\n     * - `account` cannot be the zero address.\\n     * - `account` must have at least `amount` tokens.\\n     */\\n    function _burn(address account, uint256 amount) internal {\\n        require(account != address(0), \\\"ERC20: burn from the zero address\\\");\\n\\n        _balances[account] = _balances[account].sub(amount, \\\"ERC20: burn amount exceeds balance\\\");\\n        _totalSupply = _totalSupply.sub(amount);\\n        emit Transfer(account, address(0), amount);\\n    }\\n\\n    /**\\n     * @dev Sets `amount` as the allowance of `spender` over the `owner`s tokens.\\n     *\\n     * This is internal function is equivalent to `approve`, and can be used to\\n     * e.g. set automatic allowances for certain subsystems, etc.\\n     *\\n     * Emits an {Approval} event.\\n     *\\n     * Requirements:\\n     *\\n     * - `owner` cannot be the zero address.\\n     * - `spender` cannot be the zero address.\\n     */\\n    function _approve(address owner, address spender, uint256 amount) internal {\\n        require(owner != address(0), \\\"ERC20: approve from the zero address\\\");\\n        require(spender != address(0), \\\"ERC20: approve to the zero address\\\");\\n\\n        _allowances[owner][spender] = amount;\\n        emit Approval(owner, spender, amount);\\n    }\\n\\n    /**\\n     * @dev Destroys `amount` tokens from `account`.`amount` is then deducted\\n     * from the caller's allowance.\\n     *\\n     * See {_burn} and {_approve}.\\n     */\\n    function _burnFrom(address account, uint256 amount) internal {\\n        _burn(account, amount);\\n        _approve(account, _msgSender(), _allowances[account][_msgSender()].sub(amount, \\\"ERC20: burn amount exceeds allowance\\\"));\\n    }\\n}\\n\",\"keccak256\":\"0xb15af804e2bc97db51e4e103f13de9fe13f87e6b835d7a88c897966c0e58506e\"},\"@openzeppelin/contracts/token/ERC20/ERC20Detailed.sol\":{\"content\":\"pragma solidity ^0.5.0;\\n\\nimport \\\"./IERC20.sol\\\";\\n\\n/**\\n * @dev Optional functions from the ERC20 standard.\\n */\\ncontract ERC20Detailed is IERC20 {\\n    string private _name;\\n    string private _symbol;\\n    uint8 private _decimals;\\n\\n    /**\\n     * @dev Sets the values for `name`, `symbol`, and `decimals`. All three of\\n     * these values are immutable: they can only be set once during\\n     * construction.\\n     */\\n    constructor (string memory name, string memory symbol, uint8 decimals) public {\\n        _name = name;\\n        _symbol = symbol;\\n        _decimals = decimals;\\n    }\\n\\n    /**\\n     * @dev Returns the name of the token.\\n     */\\n    function name() public view returns (string memory) {\\n        return _name;\\n    }\\n\\n    /**\\n     * @dev Returns the symbol of the token, usually a shorter version of the\\n     * name.\\n     */\\n    function symbol() public view returns (string memory) {\\n        return _symbol;\\n    }\\n\\n    /**\\n     * @dev Returns the number of decimals used to get its user representation.\\n     * For example, if `decimals` equals `2`, a balance of `505` tokens should\\n     * be displayed to a user as `5,05` (`505 / 10 ** 2`).\\n     *\\n     * Tokens usually opt for a value of 18, imitating the relationship between\\n     * Ether and Wei.\\n     *\\n     * NOTE: This information is only used for _display_ purposes: it in\\n     * no way affects any of the arithmetic of the contract, including\\n     * {IERC20-balanceOf} and {IERC20-transfer}.\\n     */\\n    function decimals() public view returns (uint8) {\\n        return _decimals;\\n    }\\n}\\n\",\"keccak256\":\"0x4a3a810b7ebe742e897e1fd428b3eeed2196d3acea58eaf9c566ed10d545d2ed\"},\"@openzeppelin/contracts/token/ERC20/IERC20.sol\":{\"content\":\"pragma solidity ^0.5.0;\\n\\n/**\\n * @dev Interface of the ERC20 standard as defined in the EIP. Does not include\\n * the optional functions; to access them see {ERC20Detailed}.\\n */\\ninterface IERC20 {\\n    /**\\n     * @dev Returns the amount of tokens in existence.\\n     */\\n    function totalSupply() external view returns (uint256);\\n\\n    /**\\n     * @dev Returns the amount of tokens owned by `account`.\\n     */\\n    function balanceOf(address account) external view returns (uint256);\\n\\n    /**\\n     * @dev Moves `amount` tokens from the caller's account to `recipient`.\\n     *\\n     * Returns a boolean value indicating whether the operation succeeded.\\n     *\\n     * Emits a {Transfer} event.\\n     */\\n    function transfer(address recipient, uint256 amount) external returns (bool);\\n\\n    /**\\n     * @dev Returns the remaining number of tokens that `spender` will be\\n     * allowed to spend on behalf of `owner` through {transferFrom}. This is\\n     * zero by default.\\n     *\\n     * This value changes when {approve} or {transferFrom} are called.\\n     */\\n    function allowance(address owner, address spender) external view returns (uint256);\\n\\n    /**\\n     * @dev Sets `amount` as the allowance of `spender` over the caller's tokens.\\n     *\\n     * Returns a boolean value indicating whether the operation succeeded.\\n     *\\n     * IMPORTANT: Beware that changing an allowance with this method brings the risk\\n     * that someone may use both the old and the new allowance by unfortunate\\n     * transaction ordering. One possible solution to mitigate this race\\n     * condition is to first reduce the spender's allowance to 0 and set the\\n     * desired value afterwards:\\n     * https://github.com/ethereum/EIPs/issues/20#issuecomment-263524729\\n     *\\n     * Emits an {Approval} event.\\n     */\\n    function approve(address spender, uint256 amount) external returns (bool);\\n\\n    /**\\n     * @dev Moves `amount` tokens from `sender` to `recipient` using the\\n     * allowance mechanism. `amount` is then deducted from the caller's\\n     * allowance.\\n     *\\n     * Returns a boolean value indicating whether the operation succeeded.\\n     *\\n     * Emits a {Transfer} event.\\n     */\\n    function transferFrom(address sender, address recipient, uint256 amount) external returns (bool);\\n\\n    /**\\n     * @dev Emitted when `value` tokens are moved from one account (`from`) to\\n     * another (`to`).\\n     *\\n     * Note that `value` may be zero.\\n     */\\n    event Transfer(address indexed from, address indexed to, uint256 value);\\n\\n    /**\\n     * @dev Emitted when the allowance of a `spender` for an `owner` is set by\\n     * a call to {approve}. `value` is the new allowance.\\n     */\\n    event Approval(address indexed owner, address indexed spender, uint256 value);\\n}\\n\",\"keccak256\":\"0xe5bb0f57cff3e299f360052ba50f1ea0fff046df2be070b6943e0e3c3fdad8a9\"},\"@openzeppelin/contracts/token/ERC777/IERC777Recipient.sol\":{\"content\":\"pragma solidity ^0.5.0;\\n\\n/**\\n * @dev Interface of the ERC777TokensRecipient standard as defined in the EIP.\\n *\\n * Accounts can be notified of {IERC777} tokens being sent to them by having a\\n * contract implement this interface (contract holders can be their own\\n * implementer) and registering it on the\\n * https://eips.ethereum.org/EIPS/eip-1820[ERC1820 global registry].\\n *\\n * See {IERC1820Registry} and {ERC1820Implementer}.\\n */\\ninterface IERC777Recipient {\\n    /**\\n     * @dev Called by an {IERC777} token contract whenever tokens are being\\n     * moved or created into a registered account (`to`). The type of operation\\n     * is conveyed by `from` being the zero address or not.\\n     *\\n     * This call occurs _after_ the token contract's state is updated, so\\n     * {IERC777-balanceOf}, etc., can be used to query the post-operation state.\\n     *\\n     * This function may revert to prevent the operation from being executed.\\n     */\\n    function tokensReceived(\\n        address operator,\\n        address from,\\n        address to,\\n        uint256 amount,\\n        bytes calldata userData,\\n        bytes calldata operatorData\\n    ) external;\\n}\\n\",\"keccak256\":\"0x6b097bc7c7762b5ad4a7447755e3654ada71d1c10f40c0ad5a4f820892f67edf\"},\"contracts/helpers/InitializableOwnable.sol\":{\"content\":\"pragma solidity ^0.5.17;\\n\\nimport \\\"@openzeppelin/contracts/GSN/Context.sol\\\";\\n\\n/**\\n * @dev Contract module which provides a basic access control mechanism, where\\n * there is an account (an owner) that can be granted exclusive access to\\n * specific functions.\\n *\\n * This module is used through inheritance. It will make available the modifier\\n * `onlyOwner`, which can be applied to your functions to restrict their use to\\n * the owner.\\n */\\ncontract InitializableOwnable is Context {\\n    address private _owner;\\n\\n    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);\\n\\n    /**\\n     * @dev Initializes the contract setting the deployer as the initial owner.\\n     */\\n    function _initialize() internal {\\n        require(_owner == address(0), \\\"already initialized\\\");\\n        address msgSender = _msgSender();\\n        _owner = msgSender;\\n        emit OwnershipTransferred(address(0), msgSender);\\n    }\\n\\n    /**\\n     * @dev Returns the address of the current owner.\\n     */\\n    function owner() public view returns (address) {\\n        return _owner;\\n    }\\n\\n    /**\\n     * @dev Throws if called by any account other than the owner.\\n     */\\n    modifier onlyOwner() {\\n        _onlyOwner();\\n        _;\\n    }\\n\\n    /**\\n    * @dev Throws if called by any account other than the owner.\\n    * this method is called and separated from modifier to optimize bytecode and save gas.\\n    */\\n\\n    function _onlyOwner() internal view {\\n        require(isOwner(), \\\"InitializableOwnable: caller is not the owner\\\");\\n    }\\n\\n    /**\\n     * @dev Returns true if the caller is the current owner.\\n     */\\n    function isOwner() public view returns (bool) {\\n        return _msgSender() == _owner;\\n    }\\n\\n    /**\\n     * @dev Leaves the contract without owner. It will not be possible to call\\n     * `onlyOwner` functions anymore. Can only be called by the current owner.\\n     *\\n     * NOTE: Renouncing ownership will leave the contract without an owner,\\n     * thereby removing any functionality that is only available to the owner.\\n     */\\n    function renounceOwnership() public onlyOwner {\\n        emit OwnershipTransferred(_owner, address(0));\\n        _owner = address(0);\\n    }\\n\\n    /**\\n     * @dev Transfers ownership of the contract to a new account (`newOwner`).\\n     * Can only be called by the current owner.\\n     */\\n    function transferOwnership(address newOwner) public onlyOwner {\\n        _transferOwnership(newOwner);\\n    }\\n\\n    /**\\n     * @dev Transfers ownership of the contract to a new account (`newOwner`).\\n     */\\n    function _transferOwnership(address newOwner) internal {\\n        require(newOwner != address(0), \\\"InitializableOwnable: new owner is the zero address\\\");\\n        emit OwnershipTransferred(_owner, newOwner);\\n        _owner = newOwner;\\n    }\\n}\\n\",\"keccak256\":\"0x3ed80a5e37beb6037c333fd39ffa494420a1f95569c8e283d1f9cc8c742b2361\"},\"contracts/helpers/InitializableReentrancyGuard.sol\":{\"content\":\"pragma solidity ^0.5.17;\\n\\n/**\\n * @dev Contract module that helps prevent reentrant calls to a function.\\n *\\n * Inheriting from `ReentrancyGuard` will make the {nonReentrant} modifier\\n * available, which can be applied to functions to make sure there are no nested\\n * (reentrant) calls to them.\\n *\\n * Note that because there is a single `nonReentrant` guard, functions marked as\\n * `nonReentrant` may not call one another. This can be worked around by making\\n * those functions `private`, and then adding `external` `nonReentrant` entry\\n * points to them.\\n *\\n * TIP: If you would like to learn more about reentrancy and alternative ways\\n * to protect against it, check out our blog post\\n * https://blog.openzeppelin.com/reentrancy-after-istanbul/[Reentrancy After Istanbul].\\n *\\n * _Since v2.5.0:_ this module is now much more gas efficient, given net gas\\n * metering changes introduced in the Istanbul hardfork.\\n */\\ncontract InitializableReentrancyGuard {\\n    /**\\n     * 1 - not entered\\n     * 2 - entered\\n     */\\n    uint256 private _notEntered;\\n\\n    function _initialize() internal {\\n        // Storing an initial non-zero value makes deployment a bit more\\n        // expensive, but in exchange the refund on every call to nonReentrant\\n        // will be lower in amount. Since refunds are capped to a percetange of\\n        // the total transaction's gas, it is best to keep them low in cases\\n        // like this one, to increase the likelihood of the full refund coming\\n        // into effect.\\n        _notEntered = 1;\\n    }\\n\\n    /**\\n     * @dev Prevents a contract from calling itself, directly or indirectly.\\n     * Calling a `nonReentrant` function from another `nonReentrant`\\n     * function is not supported. It is possible to prevent this from happening\\n     * by making the `nonReentrant` function external, and make it call a\\n     * `private` function that does the actual work.\\n     */\\n    modifier nonReentrant() {\\n        // On the first call to nonReentrant, _notEntered will be true\\n        _nonReentrant();\\n\\n        // Any calls to nonReentrant after this point will fail\\n        _notEntered = 2;\\n\\n        _;\\n\\n        // By storing the original value once again, a refund is triggered (see\\n        // https://eips.ethereum.org/EIPS/eip-2200)\\n        _notEntered = 1;\\n    }\\n\\n    /**\\n    * @dev Prevents a contract from calling itself, directly or indirectly.\\n    * this method is called and separated from modifier to optimize bytecode and save gas.\\n    */\\n    function _nonReentrant() internal view {\\n        require(_notEntered == 1, \\\"ReentrancyGuard: reentrant call\\\");\\n    }\\n}\\n\",\"keccak256\":\"0x59b4e853989652e1f055e2757018f85675b172a9a07f0b87206f36fc488211ed\"},\"contracts/masset/IBridge.sol\":{\"content\":\"pragma solidity ^0.5.17;\\n\\n/**\\n * @title IBridge\\n * @dev Interface of the bridge. Bridge is used to exchange basset tokens from another blockchains.\\n */\\n\\ninterface IBridge {\\n    /**\\n     * @dev Returns the version.\\n     */\\n    function version() external pure returns (string memory);\\n\\n    /**\\n     * @dev Returns the fee percentage.\\n     */\\n    function getFeePercentage() external view returns(uint);\\n\\n    /**\\n     * @dev Calculates maximal withdraw.\\n     */\\n    function calcMaxWithdraw() external view returns (uint);\\n\\n    /**\\n     * @dev ERC-20 tokens approve and transferFrom pattern\\n     * See https://eips.ethereum.org/EIPS/eip-20#transferfrom for details.\\n     */\\n    function receiveTokens(address tokenToUse, uint256 amount) external returns(bool);\\n\\n    /**\\n     * @dev ERC-20 tokens approve and transferFrom pattern\\n     * See https://eips.ethereum.org/EIPS/eip-20#transferfrom for details.\\n     */\\n    function receiveTokensAt(\\n        address tokenToUse,\\n        uint256 amount,\\n        address receiver,\\n        bytes calldata extraData\\n    ) external returns(bool);\\n\\n    /**\\n     * @dev ERC-777 tokensReceived hook allows to send tokens to a contract and notify it in a single transaction\\n     * See https://eips.ethereum.org/EIPS/eip-777#motivation for details.\\n     */\\n    function tokensReceived (\\n        address operator,\\n        address from,\\n        address to,\\n        uint amount,\\n        bytes calldata userData,\\n        bytes calldata operatorData\\n    ) external;\\n\\n    /**\\n     * @dev Accepts the transaction from the other chain that was voted and sent by the federation contract.\\n     * @return Returns a boolean value indicating whether transfer was accepted.\\n     */\\n    function acceptTransfer(\\n        address originalTokenAddress,\\n        address receiver,\\n        uint256 amount,\\n        string calldata symbol,\\n        bytes32 blockHash,\\n        bytes32 transactionHash,\\n        uint32 logIndex,\\n        uint8 decimals,\\n        uint256 granularity\\n    ) external returns(bool);\\n\\n    /**\\n     * @dev Accepts the transaction from the other chain that was voted and sent by the federation contract.\\n     * @return Returns a boolean value indicating whether transfer was accepted.\\n     */\\n    function acceptTransferAt(\\n        address originalTokenAddress,\\n        address receiver,\\n        uint256 amount,\\n        string calldata symbol,\\n        bytes32 blockHash,\\n        bytes32 transactionHash,\\n        uint32 logIndex,\\n        uint8 decimals,\\n        uint256 granularity,\\n        bytes calldata userData\\n    ) external returns(bool);\\n\\n    /**\\n     * @dev Emitted when cross occured.\\n     */\\n    event Cross(address indexed _tokenAddress, address indexed _to, uint256 _amount, string _symbol, bytes _userData,\\n        uint8 _decimals, uint256 _granularity);\\n\\n    /**\\n     * @dev Emitted when new side token is deployed.\\n     */\\n    event NewSideToken(address indexed _newSideTokenAddress, address indexed _originalTokenAddress, string _newSymbol, uint256 _granularity);\\n\\n    /**\\n     * @dev Emitted when cross transfer is accepted.\\n     */\\n    event AcceptedCrossTransfer(address indexed _tokenAddress, address indexed _to, uint256 _amount, uint8 _decimals, uint256 _granularity,\\n        uint256 _formattedAmount, uint8 _calculatedDecimals, uint256 _calculatedGranularity, bytes _userData);\\n\\n    /**\\n     * @dev Emitted when fee percentage has changed.\\n     */\\n    event FeePercentageChanged(uint256 _amount);\\n\\n    /**\\n     * @dev Emitted when error while receiving token occured.\\n     */\\n    event ErrorTokenReceiver(bytes _errorData);\\n}\\n\",\"keccak256\":\"0xe36657227d2ced8773daae121b708813a89e5b6e6f02bedaf2469aeeb2e53220\"},\"contracts/masset/Token.sol\":{\"content\":\"pragma solidity ^0.5.17;\\n\\nimport \\\"@openzeppelin/contracts/token/ERC20/ERC20Detailed.sol\\\";\\nimport \\\"@openzeppelin/contracts/token/ERC20/ERC20.sol\\\";\\nimport \\\"@openzeppelin/contracts/ownership/Ownable.sol\\\";\\n\\n/**\\n * @title Token\\n * @dev Implementation of masset Token.\\n * Inherits from ERC20 and ERC20Detailed with implemented\\n * mint and burn functions.\\n */\\n\\ncontract Token is ERC20, ERC20Detailed, Ownable {\\n\\n    /**\\n     * @notice Constructor called on deployment, initiates the contract.\\n     * @param _name The name of the token.\\n     * @param _symbol The symbol of the token.\\n     * @param _decimals The decimals of the token.\\n     * */\\n    constructor(string memory _name, string memory _symbol, uint8 _decimals) public\\n    ERC20Detailed(_name, _symbol, _decimals) {}\\n\\n    /**\\n     * @notice Creates new tokens and sends them to the recipient.\\n     * @param _account The recipient address to get the minted tokens.\\n     * @param _amount The amount of tokens to be minted.\\n     * */\\n    function mint(address _account, uint256 _amount) public onlyOwner {\\n        _mint(_account, _amount);\\n    }\\n\\n    /**\\n     * @notice Burns tokens for the given account.\\n     * @param _account The recipient address to get the minted tokens.\\n     * @param _amount The amount of tokens to be minted.\\n     * */\\n    function burn(address _account, uint256 _amount) public onlyOwner {\\n        _burn(_account, _amount);\\n    }\\n}\\n\",\"keccak256\":\"0x4f61c2add168949e71aa0ed423d2a84e0ddcf1ab1ff8c034ac7a03e3aa084bf0\"},\"contracts/masset/versions/BasketManager.sol\":{\"content\":\"pragma solidity ^0.5.17;\\n\\nimport { SafeMath } from \\\"@openzeppelin/contracts/math/SafeMath.sol\\\";\\n\\ncontract BasketManager {\\n\\n    using SafeMath for uint256;\\n\\n    // state\\n    address[] private bassetsArray;\\n    mapping(address => bool) private bassetsMap;\\n    mapping(address => int256) private factorMap;\\n    mapping(address => address) private bridgeMap;\\n\\n    function _isValidBasset(address _basset) internal view returns(bool) {\\n        return _basset != address(0) && bassetsMap[_basset];\\n    }\\n\\n    // external\\n    constructor(address[] memory _bassets, int256[] memory _factors, address[] memory _bridges) public {\\n        require(_bassets.length > 0, \\\"some basset required\\\");\\n        require(_bassets.length == _factors.length, \\\"factor array length mismatch\\\");\\n        require(_bridges.length == _factors.length, \\\"bridge array length mismatch\\\");\\n\\n        bassetsArray = _bassets;\\n        for(uint i=0; i<bassetsArray.length; i++) {\\n            address basset = bassetsArray[i];\\n            require(basset != address(0), \\\"invalid basset address\\\");\\n            require(!bassetsMap[basset], \\\"basset not unique\\\");\\n            bassetsMap[basset] = true;\\n            require(_factors[i] != 0, \\\"invalid factor\\\");\\n            factorMap[basset] = _factors[i];\\n            if(_bridges[i] != address(0)) {\\n                bridgeMap[basset] = _bridges[i];\\n            }\\n        }\\n    }\\n\\n    function isValidBasset(address _basset) external view returns(bool) {\\n        return _isValidBasset(_basset);\\n    }\\n\\n    function checkBasketBalanceForDeposit(address _basset, uint256 _bassetQuantity) external view returns(bool) {\\n        return _isValidBasset(_basset);\\n    }\\n\\n    function checkBasketBalanceForWithdrawal(address _basset, uint256 _bassetQuantity) external view returns(bool) {\\n        return _isValidBasset(_basset);\\n    }\\n\\n    function convertBassetToMassetQuantity(address _basset, uint256 _bassetQuantity) external view returns(uint256) {\\n        require(_isValidBasset(_basset), \\\"invalid basset\\\");\\n        int256 factor = factorMap[_basset];\\n        if(factor > 0) {\\n            return _bassetQuantity.div(uint256(factor));\\n        }\\n        return _bassetQuantity.mul(uint256(-factor));\\n    }\\n\\n    function convertMassetToBassetQuantity(address _basset, uint256 _massetQuantity) external view returns(uint256) {\\n        require(_isValidBasset(_basset), \\\"invalid basset\\\");\\n        int256 factor = factorMap[_basset];\\n        if(factor > 0) {\\n            return _massetQuantity.mul(uint256(factor));\\n        }\\n        return _massetQuantity.div(uint256(-factor));\\n    }\\n\\n    function getBridge(address _basset) external view returns(address) {\\n        return bridgeMap[_basset];\\n    }\\n\\n    function getVersion() external pure returns(string memory) {\\n        return \\\"2.0\\\";\\n    }\\n}\\n\",\"keccak256\":\"0xfa09697aadb26238698afd995fd5ed7060c9d75b94cec5f9bb466c9211bcdee6\"},\"contracts/masset/versions/Masset.sol\":{\"content\":\"pragma solidity ^0.5.17;\\npragma experimental ABIEncoderV2;\\n\\nimport { SafeMath } from \\\"@openzeppelin/contracts/math/SafeMath.sol\\\";\\nimport { IERC20 } from \\\"@openzeppelin/contracts/token/ERC20/IERC20.sol\\\";\\nimport { IERC777Recipient } from \\\"@openzeppelin/contracts/token/ERC777/IERC777Recipient.sol\\\";\\nimport { IERC1820Registry } from \\\"@openzeppelin/contracts/introspection/IERC1820Registry.sol\\\";\\nimport { InitializableOwnable } from \\\"../../helpers/InitializableOwnable.sol\\\";\\nimport { InitializableReentrancyGuard } from \\\"../../helpers/InitializableReentrancyGuard.sol\\\";\\nimport { IBridge } from \\\"../IBridge.sol\\\";\\nimport { BasketManager } from \\\"./BasketManager.sol\\\";\\nimport \\\"../Token.sol\\\";\\n\\ncontract Masset is IERC777Recipient, InitializableOwnable, InitializableReentrancyGuard {\\n\\n    using SafeMath for uint256;\\n\\n    // Events\\n\\n    event Minted(\\n        address indexed minter,\\n        address indexed recipient,\\n        uint256 massetQuantity,\\n        address bAsset,\\n        uint256 bassetQuantity\\n    );\\n\\n    event Redeemed(\\n        address indexed redeemer,\\n        address indexed recipient,\\n        uint256 massetQuantity,\\n        address bAsset,\\n        uint256 bassetQuantity\\n    );\\n\\n    event onTokensReceivedCalled(\\n        address operator,\\n        address from,\\n        address to,\\n        uint amount,\\n        bytes userData,\\n        bytes operatorData\\n    );\\n\\n    event onTokensMintedCalled(\\n        address indexed sender,\\n        uint256 orderAmount,\\n        address tokenAddress,\\n        bytes userData\\n    );\\n\\n    // state\\n    string private version;\\n    BasketManager private basketManager;\\n    Token private token;\\n\\n    // internal\\n\\n    function registerAsERC777Recipient() internal {\\n        IERC1820Registry ERC1820 = IERC1820Registry(0x1820a4B7618BdE71Dce8cdc73aAB6C95905faD24);\\n        ERC1820.setInterfaceImplementer(address(this), keccak256(\\\"ERC777TokensRecipient\\\"), address(this));\\n    }\\n\\n    // public\\n\\n    function initialize(\\n        address _basketManagerAddress,\\n        address _tokenAddress,\\n        bool _registerAsERC777RecipientFlag) public {\\n\\n        require(address(basketManager) == address(0) && address(token) == address(0), \\\"already initialized\\\");\\n        require(_basketManagerAddress != address(0), \\\"invalid basket manager\\\");\\n        require(_tokenAddress != address(0), \\\"invalid token\\\");\\n\\n        InitializableOwnable._initialize();\\n        InitializableReentrancyGuard._initialize();\\n\\n        basketManager = BasketManager(_basketManagerAddress);\\n        token = Token(_tokenAddress);\\n        if(_registerAsERC777RecipientFlag) {\\n            registerAsERC777Recipient();\\n        }\\n\\n        version = \\\"1.0\\\";\\n    }\\n\\n    /***************************************\\n                MINTING (PUBLIC)\\n    ****************************************/\\n\\n    /**\\n     * @dev Mint a single bAsset, at a 1:1 ratio with the bAsset. This contract\\n     *      must have approval to spend the senders bAsset\\n     * @param _bAsset         Address of the bAsset to mint\\n     * @param _bAssetQuantity Quantity in bAsset units\\n     * @return massetMinted   Number of newly minted mAssets\\n     */\\n    function mint(\\n        address _bAsset,\\n        uint256 _bAssetQuantity\\n    )\\n    external\\n    nonReentrant\\n    returns (uint256 massetMinted)\\n    {\\n        return _mintTo(_bAsset, _bAssetQuantity, msg.sender);\\n    }\\n\\n    /**\\n     * @dev Mint a single bAsset, at a 1:1 ratio with the bAsset. This contract\\n     *      must have approval to spend the senders bAsset\\n     * @param _bAsset         Address of the bAsset to mint\\n     * @param _bAssetQuantity Quantity in bAsset units\\n     * @param _recipient receipient of the newly minted mAsset tokens\\n     * @return massetMinted   Number of newly minted mAssets\\n     */\\n    function mintTo(\\n        address _bAsset,\\n        uint256 _bAssetQuantity,\\n        address _recipient\\n    )\\n    external\\n    nonReentrant\\n    returns (uint256 massetMinted)\\n    {\\n        return _mintTo(_bAsset, _bAssetQuantity, _recipient);\\n    }\\n\\n    /***************************************\\n              MINTING (INTERNAL)\\n    ****************************************/\\n\\n    function _mintTo(\\n        address _basset,\\n        uint256 _bassetQuantity,\\n        address _recipient\\n    )\\n    internal\\n    returns (uint256 massetMinted)\\n    {\\n        require(_recipient != address(0), \\\"must be a valid recipient\\\");\\n        require(_bassetQuantity > 0, \\\"quantity must not be 0\\\");\\n\\n        require(basketManager.isValidBasset(_basset), \\\"invalid basset\\\");\\n        require(basketManager.checkBasketBalanceForDeposit(_basset, _bassetQuantity), \\\"invalid basket\\\");\\n\\n        uint256 massetQuantity = basketManager.convertBassetToMassetQuantity(_basset, _bassetQuantity);\\n\\n        IERC20(_basset).transferFrom(msg.sender, address(this), _bassetQuantity);\\n\\n        token.mint(_recipient, massetQuantity);\\n        emit Minted(msg.sender, _recipient, massetQuantity, _basset, _bassetQuantity);\\n\\n        return massetQuantity;\\n    }\\n\\n    /***************************************\\n              REDEMPTION (PUBLIC)\\n    ****************************************/\\n\\n    /**\\n     * @dev Credits the sender with a certain quantity of selected bAsset, in exchange for burning the\\n     *      relative mAsset quantity from the sender. Sender also incurs a small mAsset fee, if any.\\n     * @param _bAsset           Address of the bAsset to redeem\\n     * @param _massetQuantity   Units of the masset to redeem\\n     * @return massetMinted     Relative number of mAsset units burned to pay for the bAssets\\n     */\\n    function redeem(\\n        address _bAsset,\\n        uint256 _massetQuantity\\n    ) external nonReentrant returns (uint256 massetRedeemed) {\\n        return _redeemTo(_bAsset, _massetQuantity, msg.sender, false);\\n    }\\n\\n    /**\\n     * @dev Credits a recipient with a certain quantity of selected bAsset, in exchange for burning the\\n     *      relative Masset quantity from the sender. Sender also incurs a small fee, if any.\\n     * @param _bAsset           Address of the bAsset to redeem\\n     * @param _massetQuantity   Units of the masset to redeem\\n     * @param _recipient        Address to credit with withdrawn bAssets\\n     * @return massetMinted     Relative number of mAsset units burned to pay for the bAssets\\n     */\\n    function redeemTo(\\n        address _bAsset,\\n        uint256 _massetQuantity,\\n        address _recipient\\n    ) external nonReentrant returns (uint256 massetRedeemed) {\\n        return _redeemTo(_bAsset, _massetQuantity, _recipient, false);\\n    }\\n\\n    /***************************************\\n              REDEMPTION (INTERNAL)\\n    ****************************************/\\n\\n    function _redeemTo(\\n        address _basset,\\n        uint256 _massetQuantity,\\n        address _recipient,\\n        bool bridgeFlag\\n    ) internal returns (uint256 massetRedeemed) {\\n        require(_recipient != address(0), \\\"must be a valid recipient\\\");\\n        require(_massetQuantity > 0, \\\"masset quantity must be greater than 0\\\");\\n        require(basketManager.isValidBasset(_basset), \\\"invalid basset\\\");\\n\\n        uint256 bassetQuantity = basketManager.convertMassetToBassetQuantity(_basset, _massetQuantity);\\n\\n        require(basketManager.checkBasketBalanceForWithdrawal(_basset, bassetQuantity), \\\"invalid basket\\\");\\n\\n        if(bridgeFlag) {\\n            address bridgeAddress = basketManager.getBridge(_basset);\\n            require(bridgeAddress != address(0), \\\"invalid bridge\\\");\\n            IERC20(_basset).approve(bridgeAddress, bassetQuantity);\\n            require(\\n                IBridge(bridgeAddress).receiveTokensAt(_basset, bassetQuantity, _recipient, bytes(\\\"\\\")),\\n                \\\"call to bridge failed\\\");\\n        } else {\\n            IERC20(_basset).transfer(_recipient, bassetQuantity);\\n        }\\n\\n        token.burn(msg.sender, _massetQuantity);\\n        emit Redeemed(msg.sender, _recipient, _massetQuantity, _basset, bassetQuantity);\\n\\n        return _massetQuantity;\\n    }\\n\\n    // For the BRIDGE\\n\\n    /**\\n     * @dev Credits a recipient with a certain quantity of selected bAsset, in exchange for burning the\\n     *      relative Masset quantity from the sender. Sender also incurs a small fee, if any.\\n     *      This function is designed to also call the bridge in order to have the basset tokens sent to\\n     *      another blockchain.\\n     * @param _basset           Address of the bAsset to redeem\\n     * @param _massetQuantity   Units of the masset to redeem\\n     * @param _recipient        Address to credit with withdrawn bAssets\\n     * @param _bridgeAddress    This is ignored and is left here for backward compatibility with the FE\\n     * @return massetMinted     Relative number of mAsset units burned to pay for the bAssets\\n     */\\n    function redeemToBridge(\\n        address _basset,\\n        uint256 _massetQuantity,\\n        address _recipient,\\n        address _bridgeAddress // IGNORED! for backward compatibility\\n    ) external nonReentrant returns (uint256 massetRedeemed) {\\n        return _redeemTo(_basset, _massetQuantity, _recipient, true);\\n    }\\n\\n    /**\\n     * @dev Credits a recipient with a certain quantity of selected bAsset, in exchange for burning the\\n     *      relative Masset quantity from the sender. Sender also incurs a small fee, if any.\\n     *      This function is designed to also call the bridge in order to have the basset tokens sent to\\n     *      another blockchain.\\n     * @param _basset           Address of the bAsset to redeem\\n     * @param _massetQuantity   Units of the masset to redeem\\n     * @param _recipient        Address to credit with withdrawn bAssets\\n     * @return massetMinted     Relative number of mAsset units burned to pay for the bAssets\\n     */\\n    function redeemToBridge(\\n        address _basset,\\n        uint256 _massetQuantity,\\n        address _recipient\\n    ) external nonReentrant returns (uint256 massetRedeemed) {\\n        return _redeemTo(_basset, _massetQuantity, _recipient, true);\\n    }\\n\\n    function _decodeAddress(bytes memory data) private pure returns (address) {\\n        address addr = abi.decode(data, (address));\\n        require(addr != address(0), \\\"Converter: Error decoding extraData\\\");\\n        return addr;\\n    }\\n\\n    function _encodeAddress(address _address) private pure returns (bytes memory) {\\n        require(_address != address(0), \\\"Converter: Error encoding extraData\\\");\\n        return abi.encode(_address);\\n    }\\n\\n    function tokensReceived(\\n        address _operator,\\n        address _from,\\n        address _to,\\n        uint _amount,\\n        bytes calldata _userData,\\n        bytes calldata _operatorData\\n    ) external {\\n        emit onTokensReceivedCalled(\\n            _operator,\\n            _from,\\n            _to,\\n            _amount,\\n            _userData,\\n            _operatorData\\n        );\\n    }\\n\\n    /**\\n     * @dev This is called by the bridge to let us know the user has sent tokens through it and\\n     *      into the masset.\\n     * @param _orderAmount      Units of the masset to redeem\\n     * @param _tokenAddress     Address of the bAsset to redeem\\n     * @param _userData         Address of the final recipient as ABI encoded bytes\\n     */\\n    function onTokensMinted(\\n        uint256 _orderAmount,\\n        address _tokenAddress,\\n        bytes calldata _userData\\n    ) external nonReentrant {\\n        emit onTokensMintedCalled(msg.sender, _orderAmount, _tokenAddress, _userData);\\n\\n        require(_orderAmount > 0, \\\"amount must be > 0\\\");\\n\\n        address recipient =  _decodeAddress(_userData);\\n        address basset = _tokenAddress;\\n\\n        address bridgeAddress = basketManager.getBridge(basset);\\n        require(msg.sender == bridgeAddress, \\\"only bridge may call\\\");\\n\\n        require(basketManager.isValidBasset(basset), \\\"invalid basset\\\");\\n        require(basketManager.checkBasketBalanceForDeposit(basset, _orderAmount), \\\"basket out of balance\\\");\\n\\n        uint256 massetQuantity = basketManager.convertBassetToMassetQuantity(basset, _orderAmount);\\n        token.mint(recipient, massetQuantity);\\n        emit Minted(msg.sender, recipient, massetQuantity, basset, _orderAmount);\\n    }\\n\\n    // Getters\\n\\n    function getVersion() external view returns (string memory) {\\n        return version;\\n    }\\n\\n    function getToken() external view returns (address) {\\n        return address(token);\\n    }\\n\\n    function getBasketManager() external view returns (address) {\\n        return address(basketManager);\\n    }\\n}\\n\",\"keccak256\":\"0x18ed0a54c9b1afa0c44010cbe84c754941164f6dcfacd63fa4600a91a1df21c8\"}},\"version\":1}",
+  "bytecode": "0x6080604052611ffb806100136000396000f3fe608060405234801561001057600080fd5b50600436106100ff5760003560e01c80638da5cb5b11610097578063e4bbb5a811610066578063e4bbb5a8146101f0578063eeea5d3614610203578063f2fde38b1461020b578063fb2c92231461021e576100ff565b80638da5cb5b146101ad5780638f32d59b146101b5578063960015a2146101ca578063c4a58637146101dd576100ff565b806321df0da7116100d357806321df0da71461016a57806340c10f191461017f578063438b1b4b14610192578063715018a6146101a5576100ff565b806223de29146101045780630b8aad07146101195780630d8e6e2c146101425780631e9a695014610157575b600080fd5b610117610112366004611575565b610231565b005b61012c610127366004611700565b610280565b6040516101399190611ec7565b60405180910390f35b61014a6102ac565b6040516101399190611da6565b61012c610165366004611683565b610340565b610172610367565b6040516101399190611c62565b61012c61018d366004611683565b610376565b61012c6101a03660046116bd565b610390565b6101176103b6565b610172610408565b6101bd610417565b6040516101399190611d98565b61012c6101d83660046116bd565b61043b565b6101176101eb36600461179d565b61045a565b6101176101fe366004611636565b61083f565b610172610947565b610117610219366004611539565b610956565b61012c61022c3660046116bd565b61096a565b7fa693010e29186da1ce1e8a9fdf6619831117e41c17cbb8927787b66b35627be6888888888888888860405161026e989796959493929190611cb3565b60405180910390a15050505050505050565b600061028a610986565b600260018190555061029f85858560016109aa565b6001805595945050505050565b60028054604080516020601f60001961010060018716150201909416859004938401819004810282018101909252828152606093909290918301828280156103355780601f1061030a57610100808354040283529160200191610335565b820191906000526020600020905b81548152906001019060200180831161031857829003601f168201915b505050505090505b90565b600061034a610986565b600260015561035c83833360006109aa565b600180559392505050565b6004546001600160a01b031690565b6000610380610986565b600260015561035c838333610ed2565b600061039a610986565b60026001556103aa848484610ed2565b60018055949350505050565b6103be611219565b600080546040516001600160a01b03909116907f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0908390a3600080546001600160a01b0319169055565b6000546001600160a01b031690565b600080546001600160a01b031661042c61123d565b6001600160a01b031614905090565b6000610445610986565b60026001819055506103aa84848460016109aa565b610462610986565b600260015560405133907fc00ef8ea79854d25cda161b949dfe54da4ddf385ef9cf6faaab7c6f9e8d9b3ac9061049f908790879087908790611ed5565b60405180910390a2600084116104d05760405162461bcd60e51b81526004016104c790611e07565b60405180910390fd5b600061051183838080601f01602080910402602001604051908101604052809392919081815260200183838082843760009201919091525061124192505050565b60035460405163f44c7c8f60e01b815291925085916000916001600160a01b03169063f44c7c8f90610547908590600401611c62565b60206040518083038186803b15801561055f57600080fd5b505afa158015610573573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052506105979190810190611557565b9050336001600160a01b038216146105c15760405162461bcd60e51b81526004016104c790611e37565b60035460405163d80f5a8760e01b81526001600160a01b039091169063d80f5a87906105f1908590600401611c62565b60206040518083038186803b15801561060957600080fd5b505afa15801561061d573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052506106419190810190611761565b61065d5760405162461bcd60e51b81526004016104c790611de7565b6003546040516354f8177f60e11b81526001600160a01b039091169063a9f02efe9061068f9085908b90600401611d46565b60206040518083038186803b1580156106a757600080fd5b505afa1580156106bb573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052506106df9190810190611761565b6106fb5760405162461bcd60e51b81526004016104c790611e27565b600354604051631af327bd60e01b81526000916001600160a01b031690631af327bd9061072e9086908c90600401611d46565b60206040518083038186803b15801561074657600080fd5b505afa15801561075a573d6000803e3d6000fd5b505050506040513d601f19601f8201168201806040525061077e919081019061177f565b600480546040516340c10f1960e01b81529293506001600160a01b0316916340c10f19916107b0918891869101611d46565b600060405180830381600087803b1580156107ca57600080fd5b505af11580156107de573d6000803e3d6000fd5b50505050836001600160a01b0316336001600160a01b03167f30873c596f54a2e2e09894670d7e1a48b2433c00204f81fbedf557353c36e7c783868c60405161082993929190611f03565b60405180910390a3505060018055505050505050565b6003546001600160a01b031615801561086157506004546001600160a01b0316155b61087d5760405162461bcd60e51b81526004016104c790611e57565b6001600160a01b0383166108a35760405162461bcd60e51b81526004016104c790611e17565b6001600160a01b0382166108c95760405162461bcd60e51b81526004016104c790611e67565b6108d1611286565b6108d9611305565b600380546001600160a01b038086166001600160a01b031992831617909255600480549285169290911691909117905580156109175761091761130b565b604080518082019091526003808252620312e360ec1b602090920191825261094191600291611416565b50505050565b6003546001600160a01b031690565b61095e611219565b61096781611395565b50565b6000610974610986565b60026001556103aa84848460006109aa565b6001546001146109a85760405162461bcd60e51b81526004016104c790611ea7565b565b60006001600160a01b0383166109d25760405162461bcd60e51b81526004016104c790611dc7565b600084116109f25760405162461bcd60e51b81526004016104c790611e87565b60035460405163d80f5a8760e01b81526001600160a01b039091169063d80f5a8790610a22908890600401611c62565b60206040518083038186803b158015610a3a57600080fd5b505afa158015610a4e573d6000803e3d6000fd5b505050506040513d601f19601f82011682018060405250610a729190810190611761565b610a8e5760405162461bcd60e51b81526004016104c790611de7565b600354604051635ac9946160e01b81526000916001600160a01b031690635ac9946190610ac19089908990600401611d46565b60206040518083038186803b158015610ad957600080fd5b505afa158015610aed573d6000803e3d6000fd5b505050506040513d601f19601f82011682018060405250610b11919081019061177f565b60035460405163c7bbc86560e01b81529192506001600160a01b03169063c7bbc86590610b449089908590600401611d46565b60206040518083038186803b158015610b5c57600080fd5b505afa158015610b70573d6000803e3d6000fd5b505050506040513d601f19601f82011682018060405250610b949190810190611761565b610bb05760405162461bcd60e51b81526004016104c790611db7565b8215610d915760035460405163f44c7c8f60e01b81526000916001600160a01b03169063f44c7c8f90610be7908a90600401611c62565b60206040518083038186803b158015610bff57600080fd5b505afa158015610c13573d6000803e3d6000fd5b505050506040513d601f19601f82011682018060405250610c379190810190611557565b90506001600160a01b038116610c5f5760405162461bcd60e51b81526004016104c790611e47565b60405163095ea7b360e01b81526001600160a01b0388169063095ea7b390610c8d9084908690600401611d46565b602060405180830381600087803b158015610ca757600080fd5b505af1158015610cbb573d6000803e3d6000fd5b505050506040513d601f19601f82011682018060405250610cdf9190810190611761565b50604080516020810182526000815290516303f2e9b160e51b81526001600160a01b03831691637e5d362091610d1d918b9187918b91600401611d54565b602060405180830381600087803b158015610d3757600080fd5b505af1158015610d4b573d6000803e3d6000fd5b505050506040513d601f19601f82011682018060405250610d6f9190810190611761565b610d8b5760405162461bcd60e51b81526004016104c790611e77565b50610e13565b60405163a9059cbb60e01b81526001600160a01b0387169063a9059cbb90610dbf9087908590600401611d46565b602060405180830381600087803b158015610dd957600080fd5b505af1158015610ded573d6000803e3d6000fd5b505050506040513d601f19601f82011682018060405250610e119190810190611761565b505b60048054604051632770a7eb60e21b81526001600160a01b0390911691639dc29fac91610e449133918a9101611c98565b600060405180830381600087803b158015610e5e57600080fd5b505af1158015610e72573d6000803e3d6000fd5b50505050836001600160a01b0316336001600160a01b03167fa0dde38365e7863fcda1e12536206bc5ab0b7074a66a441e866145cf3d07fc24878985604051610ebd93929190611f03565b60405180910390a3849150505b949350505050565b60006001600160a01b038216610efa5760405162461bcd60e51b81526004016104c790611dc7565b60008311610f1a5760405162461bcd60e51b81526004016104c790611df7565b60035460405163d80f5a8760e01b81526001600160a01b039091169063d80f5a8790610f4a908790600401611c62565b60206040518083038186803b158015610f6257600080fd5b505afa158015610f76573d6000803e3d6000fd5b505050506040513d601f19601f82011682018060405250610f9a9190810190611761565b610fb65760405162461bcd60e51b81526004016104c790611de7565b6003546040516354f8177f60e11b81526001600160a01b039091169063a9f02efe90610fe89087908790600401611d46565b60206040518083038186803b15801561100057600080fd5b505afa158015611014573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052506110389190810190611761565b6110545760405162461bcd60e51b81526004016104c790611db7565b600354604051631af327bd60e01b81526000916001600160a01b031690631af327bd906110879088908890600401611d46565b60206040518083038186803b15801561109f57600080fd5b505afa1580156110b3573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052506110d7919081019061177f565b6040516323b872dd60e01b81529091506001600160a01b038616906323b872dd9061110a90339030908990600401611c70565b602060405180830381600087803b15801561112457600080fd5b505af1158015611138573d6000803e3d6000fd5b505050506040513d601f19601f8201168201806040525061115c9190810190611761565b50600480546040516340c10f1960e01b81526001600160a01b03909116916340c10f199161118e918791869101611d46565b600060405180830381600087803b1580156111a857600080fd5b505af11580156111bc573d6000803e3d6000fd5b50505050826001600160a01b0316336001600160a01b03167f30873c596f54a2e2e09894670d7e1a48b2433c00204f81fbedf557353c36e7c783888860405161120793929190611f03565b60405180910390a390505b9392505050565b611221610417565b6109a85760405162461bcd60e51b81526004016104c790611eb7565b3390565b600080828060200190516112589190810190611557565b90506001600160a01b0381166112805760405162461bcd60e51b81526004016104c790611e97565b92915050565b6000546001600160a01b0316156112af5760405162461bcd60e51b81526004016104c790611e57565b60006112b961123d565b600080546001600160a01b0319166001600160a01b0383169081178255604051929350917f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0908290a350565b60018055565b604051731820a4b7618bde71dce8cdc73aab6c95905fad249081906329965a1d90309061133790611c57565b6040519081900381206001600160e01b031960e085901b16825261136092913090600401611d1e565b600060405180830381600087803b15801561137a57600080fd5b505af115801561138e573d6000803e3d6000fd5b5050505050565b6001600160a01b0381166113bb5760405162461bcd60e51b81526004016104c790611dd7565b600080546040516001600160a01b03808516939216917f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e091a3600080546001600160a01b0319166001600160a01b0392909216919091179055565b828054600181600116156101000203166002900490600052602060002090601f016020900481019282601f1061145757805160ff1916838001178555611484565b82800160010185558215611484579182015b82811115611484578251825591602001919060010190611469565b50611490929150611494565b5090565b61033d91905b80821115611490576000815560010161149a565b803561128081611f92565b805161128081611f92565b803561128081611fa6565b805161128081611fa6565b60008083601f8401126114ec57600080fd5b50813567ffffffffffffffff81111561150457600080fd5b60208301915083600182028301111561151c57600080fd5b9250929050565b803561128081611faf565b805161128081611faf565b60006020828403121561154b57600080fd5b6000610eca84846114ae565b60006020828403121561156957600080fd5b6000610eca84846114b9565b60008060008060008060008060c0898b03121561159157600080fd5b600061159d8b8b6114ae565b98505060206115ae8b828c016114ae565b97505060406115bf8b828c016114ae565b96505060606115d08b828c01611523565b955050608089013567ffffffffffffffff8111156115ed57600080fd5b6115f98b828c016114da565b945094505060a089013567ffffffffffffffff81111561161857600080fd5b6116248b828c016114da565b92509250509295985092959890939650565b60008060006060848603121561164b57600080fd5b600061165786866114ae565b9350506020611668868287016114ae565b9250506040611679868287016114c4565b9150509250925092565b6000806040838503121561169657600080fd5b60006116a285856114ae565b92505060206116b385828601611523565b9150509250929050565b6000806000606084860312156116d257600080fd5b60006116de86866114ae565b93505060206116ef86828701611523565b9250506040611679868287016114ae565b6000806000806080858703121561171657600080fd5b600061172287876114ae565b945050602061173387828801611523565b9350506040611744878288016114ae565b9250506060611755878288016114ae565b91505092959194509250565b60006020828403121561177357600080fd5b6000610eca84846114cf565b60006020828403121561179157600080fd5b6000610eca848461152e565b600080600080606085870312156117b357600080fd5b60006117bf8787611523565b94505060206117d0878288016114ae565b935050604085013567ffffffffffffffff8111156117ed57600080fd5b6117f9878288016114da565b95989497509550505050565b61180e81611f3f565b82525050565b61180e81611f23565b61180e81611f2e565b61180e8161033d565b600061183b8385611f15565b9350611848838584611f50565b61185183611f88565b9093019392505050565b600061186682611f11565b6118708185611f15565b9350611880818560208601611f5c565b61185181611f88565b6000611896600e83611f15565b6d1a5b9d985b1a590818985cdad95d60921b815260200192915050565b60006118c0601983611f15565b7f6d75737420626520612076616c696420726563697069656e7400000000000000815260200192915050565b60006118f9603383611f15565b7f496e697469616c697a61626c654f776e61626c653a206e6577206f776e657220815272697320746865207a65726f206164647265737360681b602082015260400192915050565b600061194e600e83611f15565b6d1a5b9d985b1a590818985cdcd95d60921b815260200192915050565b6000611978601683611f15565b7507175616e74697479206d757374206e6f7420626520360541b815260200192915050565b60006119aa601283611f15565b710616d6f756e74206d757374206265203e20360741b815260200192915050565b60006119d8601683611f15565b7534b73b30b634b2103130b9b5b2ba1036b0b730b3b2b960511b815260200192915050565b6000611a0a601583611f15565b746261736b6574206f7574206f662062616c616e636560581b815260200192915050565b6000611a3b601483611f15565b731bdb9b1e48189c9a5919d9481b585e4818d85b1b60621b815260200192915050565b6000611a6b600e83611f15565b6d696e76616c69642062726964676560901b815260200192915050565b6000611a95601383611f15565b72185b1c9958591e481a5b9a5d1a585b1a5e9959606a1b815260200192915050565b6000611ac4600d83611f15565b6c34b73b30b634b2103a37b5b2b760991b815260200192915050565b6000611aed601583611f15565b7418d85b1b081d1bc8189c9a5919d94819985a5b1959605a1b815260200192915050565b6000611b1e601583611f1e565b74115490cdcdcdd51bdad95b9cd49958da5c1a595b9d605a1b815260150192915050565b6000611b4f602683611f15565b7f6d6173736574207175616e74697479206d75737420626520677265617465722081526507468616e20360d41b602082015260400192915050565b6000611b97602383611f15565b7f436f6e7665727465723a204572726f72206465636f64696e672065787472614481526261746160e81b602082015260400192915050565b6000611bdc601f83611f15565b7f5265656e7472616e637947756172643a207265656e7472616e742063616c6c00815260200192915050565b6000611c15602d83611f15565b7f496e697469616c697a61626c654f776e61626c653a2063616c6c65722069732081526c3737ba103a34329037bbb732b960991b602082015260400192915050565b600061128082611b11565b602081016112808284611814565b60608101611c7e8286611805565b611c8b6020830185611814565b610eca6040830184611826565b60408101611ca68285611805565b6112126020830184611826565b60c08101611cc1828b611814565b611cce602083018a611814565b611cdb6040830189611814565b611ce86060830188611826565b8181036080830152611cfb81868861182f565b905081810360a0830152611d1081848661182f565b9a9950505050505050505050565b60608101611d2c8286611814565b611d396020830185611826565b610eca6040830184611814565b60408101611ca68285611814565b60808101611d628287611814565b611d6f6020830186611826565b611d7c6040830185611814565b8181036060830152611d8e818461185b565b9695505050505050565b60208101611280828461181d565b60208082528101611212818461185b565b6020808252810161128081611889565b60208082528101611280816118b3565b60208082528101611280816118ec565b6020808252810161128081611941565b602080825281016112808161196b565b602080825281016112808161199d565b60208082528101611280816119cb565b60208082528101611280816119fd565b6020808252810161128081611a2e565b6020808252810161128081611a5e565b6020808252810161128081611a88565b6020808252810161128081611ab7565b6020808252810161128081611ae0565b6020808252810161128081611b42565b6020808252810161128081611b8a565b6020808252810161128081611bcf565b6020808252810161128081611c08565b602081016112808284611826565b60608101611ee38287611826565b611ef06020830186611814565b8181036040830152611d8e81848661182f565b60608101611c7e8286611826565b5190565b90815260200190565b919050565b600061128082611f33565b151590565b6001600160a01b031690565b600061128082600061128082611f23565b82818337506000910152565b60005b83811015611f77578181015183820152602001611f5f565b838111156109415750506000910152565b601f01601f191690565b611f9b81611f23565b811461096757600080fd5b611f9b81611f2e565b611f9b8161033d56fea365627a7a723158202bc3d08f66291676ee00070aaaba0d8add711405f66af14480a7ed5bb04bd6276c6578706572696d656e74616cf564736f6c63430005110040",
+  "deployedBytecode": "0x608060405234801561001057600080fd5b50600436106100ff5760003560e01c80638da5cb5b11610097578063e4bbb5a811610066578063e4bbb5a8146101f0578063eeea5d3614610203578063f2fde38b1461020b578063fb2c92231461021e576100ff565b80638da5cb5b146101ad5780638f32d59b146101b5578063960015a2146101ca578063c4a58637146101dd576100ff565b806321df0da7116100d357806321df0da71461016a57806340c10f191461017f578063438b1b4b14610192578063715018a6146101a5576100ff565b806223de29146101045780630b8aad07146101195780630d8e6e2c146101425780631e9a695014610157575b600080fd5b610117610112366004611575565b610231565b005b61012c610127366004611700565b610280565b6040516101399190611ec7565b60405180910390f35b61014a6102ac565b6040516101399190611da6565b61012c610165366004611683565b610340565b610172610367565b6040516101399190611c62565b61012c61018d366004611683565b610376565b61012c6101a03660046116bd565b610390565b6101176103b6565b610172610408565b6101bd610417565b6040516101399190611d98565b61012c6101d83660046116bd565b61043b565b6101176101eb36600461179d565b61045a565b6101176101fe366004611636565b61083f565b610172610947565b610117610219366004611539565b610956565b61012c61022c3660046116bd565b61096a565b7fa693010e29186da1ce1e8a9fdf6619831117e41c17cbb8927787b66b35627be6888888888888888860405161026e989796959493929190611cb3565b60405180910390a15050505050505050565b600061028a610986565b600260018190555061029f85858560016109aa565b6001805595945050505050565b60028054604080516020601f60001961010060018716150201909416859004938401819004810282018101909252828152606093909290918301828280156103355780601f1061030a57610100808354040283529160200191610335565b820191906000526020600020905b81548152906001019060200180831161031857829003601f168201915b505050505090505b90565b600061034a610986565b600260015561035c83833360006109aa565b600180559392505050565b6004546001600160a01b031690565b6000610380610986565b600260015561035c838333610ed2565b600061039a610986565b60026001556103aa848484610ed2565b60018055949350505050565b6103be611219565b600080546040516001600160a01b03909116907f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0908390a3600080546001600160a01b0319169055565b6000546001600160a01b031690565b600080546001600160a01b031661042c61123d565b6001600160a01b031614905090565b6000610445610986565b60026001819055506103aa84848460016109aa565b610462610986565b600260015560405133907fc00ef8ea79854d25cda161b949dfe54da4ddf385ef9cf6faaab7c6f9e8d9b3ac9061049f908790879087908790611ed5565b60405180910390a2600084116104d05760405162461bcd60e51b81526004016104c790611e07565b60405180910390fd5b600061051183838080601f01602080910402602001604051908101604052809392919081815260200183838082843760009201919091525061124192505050565b60035460405163f44c7c8f60e01b815291925085916000916001600160a01b03169063f44c7c8f90610547908590600401611c62565b60206040518083038186803b15801561055f57600080fd5b505afa158015610573573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052506105979190810190611557565b9050336001600160a01b038216146105c15760405162461bcd60e51b81526004016104c790611e37565b60035460405163d80f5a8760e01b81526001600160a01b039091169063d80f5a87906105f1908590600401611c62565b60206040518083038186803b15801561060957600080fd5b505afa15801561061d573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052506106419190810190611761565b61065d5760405162461bcd60e51b81526004016104c790611de7565b6003546040516354f8177f60e11b81526001600160a01b039091169063a9f02efe9061068f9085908b90600401611d46565b60206040518083038186803b1580156106a757600080fd5b505afa1580156106bb573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052506106df9190810190611761565b6106fb5760405162461bcd60e51b81526004016104c790611e27565b600354604051631af327bd60e01b81526000916001600160a01b031690631af327bd9061072e9086908c90600401611d46565b60206040518083038186803b15801561074657600080fd5b505afa15801561075a573d6000803e3d6000fd5b505050506040513d601f19601f8201168201806040525061077e919081019061177f565b600480546040516340c10f1960e01b81529293506001600160a01b0316916340c10f19916107b0918891869101611d46565b600060405180830381600087803b1580156107ca57600080fd5b505af11580156107de573d6000803e3d6000fd5b50505050836001600160a01b0316336001600160a01b03167f30873c596f54a2e2e09894670d7e1a48b2433c00204f81fbedf557353c36e7c783868c60405161082993929190611f03565b60405180910390a3505060018055505050505050565b6003546001600160a01b031615801561086157506004546001600160a01b0316155b61087d5760405162461bcd60e51b81526004016104c790611e57565b6001600160a01b0383166108a35760405162461bcd60e51b81526004016104c790611e17565b6001600160a01b0382166108c95760405162461bcd60e51b81526004016104c790611e67565b6108d1611286565b6108d9611305565b600380546001600160a01b038086166001600160a01b031992831617909255600480549285169290911691909117905580156109175761091761130b565b604080518082019091526003808252620312e360ec1b602090920191825261094191600291611416565b50505050565b6003546001600160a01b031690565b61095e611219565b61096781611395565b50565b6000610974610986565b60026001556103aa84848460006109aa565b6001546001146109a85760405162461bcd60e51b81526004016104c790611ea7565b565b60006001600160a01b0383166109d25760405162461bcd60e51b81526004016104c790611dc7565b600084116109f25760405162461bcd60e51b81526004016104c790611e87565b60035460405163d80f5a8760e01b81526001600160a01b039091169063d80f5a8790610a22908890600401611c62565b60206040518083038186803b158015610a3a57600080fd5b505afa158015610a4e573d6000803e3d6000fd5b505050506040513d601f19601f82011682018060405250610a729190810190611761565b610a8e5760405162461bcd60e51b81526004016104c790611de7565b600354604051635ac9946160e01b81526000916001600160a01b031690635ac9946190610ac19089908990600401611d46565b60206040518083038186803b158015610ad957600080fd5b505afa158015610aed573d6000803e3d6000fd5b505050506040513d601f19601f82011682018060405250610b11919081019061177f565b60035460405163c7bbc86560e01b81529192506001600160a01b03169063c7bbc86590610b449089908590600401611d46565b60206040518083038186803b158015610b5c57600080fd5b505afa158015610b70573d6000803e3d6000fd5b505050506040513d601f19601f82011682018060405250610b949190810190611761565b610bb05760405162461bcd60e51b81526004016104c790611db7565b8215610d915760035460405163f44c7c8f60e01b81526000916001600160a01b03169063f44c7c8f90610be7908a90600401611c62565b60206040518083038186803b158015610bff57600080fd5b505afa158015610c13573d6000803e3d6000fd5b505050506040513d601f19601f82011682018060405250610c379190810190611557565b90506001600160a01b038116610c5f5760405162461bcd60e51b81526004016104c790611e47565b60405163095ea7b360e01b81526001600160a01b0388169063095ea7b390610c8d9084908690600401611d46565b602060405180830381600087803b158015610ca757600080fd5b505af1158015610cbb573d6000803e3d6000fd5b505050506040513d601f19601f82011682018060405250610cdf9190810190611761565b50604080516020810182526000815290516303f2e9b160e51b81526001600160a01b03831691637e5d362091610d1d918b9187918b91600401611d54565b602060405180830381600087803b158015610d3757600080fd5b505af1158015610d4b573d6000803e3d6000fd5b505050506040513d601f19601f82011682018060405250610d6f9190810190611761565b610d8b5760405162461bcd60e51b81526004016104c790611e77565b50610e13565b60405163a9059cbb60e01b81526001600160a01b0387169063a9059cbb90610dbf9087908590600401611d46565b602060405180830381600087803b158015610dd957600080fd5b505af1158015610ded573d6000803e3d6000fd5b505050506040513d601f19601f82011682018060405250610e119190810190611761565b505b60048054604051632770a7eb60e21b81526001600160a01b0390911691639dc29fac91610e449133918a9101611c98565b600060405180830381600087803b158015610e5e57600080fd5b505af1158015610e72573d6000803e3d6000fd5b50505050836001600160a01b0316336001600160a01b03167fa0dde38365e7863fcda1e12536206bc5ab0b7074a66a441e866145cf3d07fc24878985604051610ebd93929190611f03565b60405180910390a3849150505b949350505050565b60006001600160a01b038216610efa5760405162461bcd60e51b81526004016104c790611dc7565b60008311610f1a5760405162461bcd60e51b81526004016104c790611df7565b60035460405163d80f5a8760e01b81526001600160a01b039091169063d80f5a8790610f4a908790600401611c62565b60206040518083038186803b158015610f6257600080fd5b505afa158015610f76573d6000803e3d6000fd5b505050506040513d601f19601f82011682018060405250610f9a9190810190611761565b610fb65760405162461bcd60e51b81526004016104c790611de7565b6003546040516354f8177f60e11b81526001600160a01b039091169063a9f02efe90610fe89087908790600401611d46565b60206040518083038186803b15801561100057600080fd5b505afa158015611014573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052506110389190810190611761565b6110545760405162461bcd60e51b81526004016104c790611db7565b600354604051631af327bd60e01b81526000916001600160a01b031690631af327bd906110879088908890600401611d46565b60206040518083038186803b15801561109f57600080fd5b505afa1580156110b3573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052506110d7919081019061177f565b6040516323b872dd60e01b81529091506001600160a01b038616906323b872dd9061110a90339030908990600401611c70565b602060405180830381600087803b15801561112457600080fd5b505af1158015611138573d6000803e3d6000fd5b505050506040513d601f19601f8201168201806040525061115c9190810190611761565b50600480546040516340c10f1960e01b81526001600160a01b03909116916340c10f199161118e918791869101611d46565b600060405180830381600087803b1580156111a857600080fd5b505af11580156111bc573d6000803e3d6000fd5b50505050826001600160a01b0316336001600160a01b03167f30873c596f54a2e2e09894670d7e1a48b2433c00204f81fbedf557353c36e7c783888860405161120793929190611f03565b60405180910390a390505b9392505050565b611221610417565b6109a85760405162461bcd60e51b81526004016104c790611eb7565b3390565b600080828060200190516112589190810190611557565b90506001600160a01b0381166112805760405162461bcd60e51b81526004016104c790611e97565b92915050565b6000546001600160a01b0316156112af5760405162461bcd60e51b81526004016104c790611e57565b60006112b961123d565b600080546001600160a01b0319166001600160a01b0383169081178255604051929350917f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0908290a350565b60018055565b604051731820a4b7618bde71dce8cdc73aab6c95905fad249081906329965a1d90309061133790611c57565b6040519081900381206001600160e01b031960e085901b16825261136092913090600401611d1e565b600060405180830381600087803b15801561137a57600080fd5b505af115801561138e573d6000803e3d6000fd5b5050505050565b6001600160a01b0381166113bb5760405162461bcd60e51b81526004016104c790611dd7565b600080546040516001600160a01b03808516939216917f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e091a3600080546001600160a01b0319166001600160a01b0392909216919091179055565b828054600181600116156101000203166002900490600052602060002090601f016020900481019282601f1061145757805160ff1916838001178555611484565b82800160010185558215611484579182015b82811115611484578251825591602001919060010190611469565b50611490929150611494565b5090565b61033d91905b80821115611490576000815560010161149a565b803561128081611f92565b805161128081611f92565b803561128081611fa6565b805161128081611fa6565b60008083601f8401126114ec57600080fd5b50813567ffffffffffffffff81111561150457600080fd5b60208301915083600182028301111561151c57600080fd5b9250929050565b803561128081611faf565b805161128081611faf565b60006020828403121561154b57600080fd5b6000610eca84846114ae565b60006020828403121561156957600080fd5b6000610eca84846114b9565b60008060008060008060008060c0898b03121561159157600080fd5b600061159d8b8b6114ae565b98505060206115ae8b828c016114ae565b97505060406115bf8b828c016114ae565b96505060606115d08b828c01611523565b955050608089013567ffffffffffffffff8111156115ed57600080fd5b6115f98b828c016114da565b945094505060a089013567ffffffffffffffff81111561161857600080fd5b6116248b828c016114da565b92509250509295985092959890939650565b60008060006060848603121561164b57600080fd5b600061165786866114ae565b9350506020611668868287016114ae565b9250506040611679868287016114c4565b9150509250925092565b6000806040838503121561169657600080fd5b60006116a285856114ae565b92505060206116b385828601611523565b9150509250929050565b6000806000606084860312156116d257600080fd5b60006116de86866114ae565b93505060206116ef86828701611523565b9250506040611679868287016114ae565b6000806000806080858703121561171657600080fd5b600061172287876114ae565b945050602061173387828801611523565b9350506040611744878288016114ae565b9250506060611755878288016114ae565b91505092959194509250565b60006020828403121561177357600080fd5b6000610eca84846114cf565b60006020828403121561179157600080fd5b6000610eca848461152e565b600080600080606085870312156117b357600080fd5b60006117bf8787611523565b94505060206117d0878288016114ae565b935050604085013567ffffffffffffffff8111156117ed57600080fd5b6117f9878288016114da565b95989497509550505050565b61180e81611f3f565b82525050565b61180e81611f23565b61180e81611f2e565b61180e8161033d565b600061183b8385611f15565b9350611848838584611f50565b61185183611f88565b9093019392505050565b600061186682611f11565b6118708185611f15565b9350611880818560208601611f5c565b61185181611f88565b6000611896600e83611f15565b6d1a5b9d985b1a590818985cdad95d60921b815260200192915050565b60006118c0601983611f15565b7f6d75737420626520612076616c696420726563697069656e7400000000000000815260200192915050565b60006118f9603383611f15565b7f496e697469616c697a61626c654f776e61626c653a206e6577206f776e657220815272697320746865207a65726f206164647265737360681b602082015260400192915050565b600061194e600e83611f15565b6d1a5b9d985b1a590818985cdcd95d60921b815260200192915050565b6000611978601683611f15565b7507175616e74697479206d757374206e6f7420626520360541b815260200192915050565b60006119aa601283611f15565b710616d6f756e74206d757374206265203e20360741b815260200192915050565b60006119d8601683611f15565b7534b73b30b634b2103130b9b5b2ba1036b0b730b3b2b960511b815260200192915050565b6000611a0a601583611f15565b746261736b6574206f7574206f662062616c616e636560581b815260200192915050565b6000611a3b601483611f15565b731bdb9b1e48189c9a5919d9481b585e4818d85b1b60621b815260200192915050565b6000611a6b600e83611f15565b6d696e76616c69642062726964676560901b815260200192915050565b6000611a95601383611f15565b72185b1c9958591e481a5b9a5d1a585b1a5e9959606a1b815260200192915050565b6000611ac4600d83611f15565b6c34b73b30b634b2103a37b5b2b760991b815260200192915050565b6000611aed601583611f15565b7418d85b1b081d1bc8189c9a5919d94819985a5b1959605a1b815260200192915050565b6000611b1e601583611f1e565b74115490cdcdcdd51bdad95b9cd49958da5c1a595b9d605a1b815260150192915050565b6000611b4f602683611f15565b7f6d6173736574207175616e74697479206d75737420626520677265617465722081526507468616e20360d41b602082015260400192915050565b6000611b97602383611f15565b7f436f6e7665727465723a204572726f72206465636f64696e672065787472614481526261746160e81b602082015260400192915050565b6000611bdc601f83611f15565b7f5265656e7472616e637947756172643a207265656e7472616e742063616c6c00815260200192915050565b6000611c15602d83611f15565b7f496e697469616c697a61626c654f776e61626c653a2063616c6c65722069732081526c3737ba103a34329037bbb732b960991b602082015260400192915050565b600061128082611b11565b602081016112808284611814565b60608101611c7e8286611805565b611c8b6020830185611814565b610eca6040830184611826565b60408101611ca68285611805565b6112126020830184611826565b60c08101611cc1828b611814565b611cce602083018a611814565b611cdb6040830189611814565b611ce86060830188611826565b8181036080830152611cfb81868861182f565b905081810360a0830152611d1081848661182f565b9a9950505050505050505050565b60608101611d2c8286611814565b611d396020830185611826565b610eca6040830184611814565b60408101611ca68285611814565b60808101611d628287611814565b611d6f6020830186611826565b611d7c6040830185611814565b8181036060830152611d8e818461185b565b9695505050505050565b60208101611280828461181d565b60208082528101611212818461185b565b6020808252810161128081611889565b60208082528101611280816118b3565b60208082528101611280816118ec565b6020808252810161128081611941565b602080825281016112808161196b565b602080825281016112808161199d565b60208082528101611280816119cb565b60208082528101611280816119fd565b6020808252810161128081611a2e565b6020808252810161128081611a5e565b6020808252810161128081611a88565b6020808252810161128081611ab7565b6020808252810161128081611ae0565b6020808252810161128081611b42565b6020808252810161128081611b8a565b6020808252810161128081611bcf565b6020808252810161128081611c08565b602081016112808284611826565b60608101611ee38287611826565b611ef06020830186611814565b8181036040830152611d8e81848661182f565b60608101611c7e8286611826565b5190565b90815260200190565b919050565b600061128082611f33565b151590565b6001600160a01b031690565b600061128082600061128082611f23565b82818337506000910152565b60005b83811015611f77578181015183820152602001611f5f565b838111156109415750506000910152565b601f01601f191690565b611f9b81611f23565b811461096757600080fd5b611f9b81611f2e565b611f9b8161033d56fea365627a7a723158202bc3d08f66291676ee00070aaaba0d8add711405f66af14480a7ed5bb04bd6276c6578706572696d656e74616cf564736f6c63430005110040",
+  "devdoc": {
+    "methods": {
+      "isOwner()": {
+        "details": "Returns true if the caller is the current owner."
+      },
+      "mint(address,uint256)": {
+        "details": "Mint a single bAsset, at a 1:1 ratio with the bAsset. This contract     must have approval to spend the senders bAsset",
+        "params": {
+          "_bAsset": "Address of the bAsset to mint",
+          "_bAssetQuantity": "Quantity in bAsset units"
+        },
+        "return": "massetMinted   Number of newly minted mAssets"
+      },
+      "mintTo(address,uint256,address)": {
+        "details": "Mint a single bAsset, at a 1:1 ratio with the bAsset. This contract     must have approval to spend the senders bAsset",
+        "params": {
+          "_bAsset": "Address of the bAsset to mint",
+          "_bAssetQuantity": "Quantity in bAsset units",
+          "_recipient": "receipient of the newly minted mAsset tokens"
+        },
+        "return": "massetMinted   Number of newly minted mAssets"
+      },
+      "onTokensMinted(uint256,address,bytes)": {
+        "details": "This is called by the bridge to let us know the user has sent tokens through it and     into the masset.",
+        "params": {
+          "_orderAmount": "Units of the masset to redeem",
+          "_tokenAddress": "Address of the bAsset to redeem",
+          "_userData": "Address of the final recipient as ABI encoded bytes"
+        }
+      },
+      "owner()": {
+        "details": "Returns the address of the current owner."
+      },
+      "redeem(address,uint256)": {
+        "details": "Credits the sender with a certain quantity of selected bAsset, in exchange for burning the     relative mAsset quantity from the sender. Sender also incurs a small mAsset fee, if any.",
+        "params": {
+          "_bAsset": "Address of the bAsset to redeem",
+          "_massetQuantity": "Units of the masset to redeem"
+        },
+        "return": "massetMinted     Relative number of mAsset units burned to pay for the bAssets"
+      },
+      "redeemTo(address,uint256,address)": {
+        "details": "Credits a recipient with a certain quantity of selected bAsset, in exchange for burning the     relative Masset quantity from the sender. Sender also incurs a small fee, if any.",
+        "params": {
+          "_bAsset": "Address of the bAsset to redeem",
+          "_massetQuantity": "Units of the masset to redeem",
+          "_recipient": "Address to credit with withdrawn bAssets"
+        },
+        "return": "massetMinted     Relative number of mAsset units burned to pay for the bAssets"
+      },
+      "redeemToBridge(address,uint256,address)": {
+        "details": "Credits a recipient with a certain quantity of selected bAsset, in exchange for burning the     relative Masset quantity from the sender. Sender also incurs a small fee, if any.     This function is designed to also call the bridge in order to have the basset tokens sent to     another blockchain.",
+        "params": {
+          "_basset": "Address of the bAsset to redeem",
+          "_massetQuantity": "Units of the masset to redeem",
+          "_recipient": "Address to credit with withdrawn bAssets"
+        },
+        "return": "massetMinted     Relative number of mAsset units burned to pay for the bAssets"
+      },
+      "redeemToBridge(address,uint256,address,address)": {
+        "details": "Credits a recipient with a certain quantity of selected bAsset, in exchange for burning the     relative Masset quantity from the sender. Sender also incurs a small fee, if any.     This function is designed to also call the bridge in order to have the basset tokens sent to     another blockchain.",
+        "params": {
+          "_basset": "Address of the bAsset to redeem",
+          "_bridgeAddress": "This is ignored and is left here for backward compatibility with the FE",
+          "_massetQuantity": "Units of the masset to redeem",
+          "_recipient": "Address to credit with withdrawn bAssets"
+        },
+        "return": "massetMinted     Relative number of mAsset units burned to pay for the bAssets"
+      },
+      "renounceOwnership()": {
+        "details": "Leaves the contract without owner. It will not be possible to call `onlyOwner` functions anymore. Can only be called by the current owner.     * NOTE: Renouncing ownership will leave the contract without an owner, thereby removing any functionality that is only available to the owner."
+      },
+      "transferOwnership(address)": {
+        "details": "Transfers ownership of the contract to a new account (`newOwner`). Can only be called by the current owner."
+      }
+    }
+  },
+  "userdoc": {
+    "methods": {}
+  },
+  "storageLayout": {
+    "storage": [
+      {
+        "astId": 14369,
+        "contract": "contracts/masset/versions/Masset.sol:Masset",
+        "label": "_owner",
+        "offset": 0,
+        "slot": "0",
+        "type": "t_address"
+      },
+      {
+        "astId": 14500,
+        "contract": "contracts/masset/versions/Masset.sol:Masset",
+        "label": "_notEntered",
+        "offset": 0,
+        "slot": "1",
+        "type": "t_uint256"
+      },
+      {
+        "astId": 17543,
+        "contract": "contracts/masset/versions/Masset.sol:Masset",
+        "label": "version",
+        "offset": 0,
+        "slot": "2",
+        "type": "t_string_storage"
+      },
+      {
+        "astId": 17545,
+        "contract": "contracts/masset/versions/Masset.sol:Masset",
+        "label": "basketManager",
+        "offset": 0,
+        "slot": "3",
+        "type": "t_contract(BasketManager)17464"
+      },
+      {
+        "astId": 17547,
+        "contract": "contracts/masset/versions/Masset.sol:Masset",
+        "label": "token",
+        "offset": 0,
+        "slot": "4",
+        "type": "t_contract(Token)17158"
+      }
+    ],
+    "types": {
+      "t_address": {
+        "encoding": "inplace",
+        "label": "address",
+        "numberOfBytes": "20"
+      },
+      "t_contract(BasketManager)17464": {
+        "encoding": "inplace",
+        "label": "contract BasketManager",
+        "numberOfBytes": "20"
+      },
+      "t_contract(Token)17158": {
+        "encoding": "inplace",
+        "label": "contract Token",
+        "numberOfBytes": "20"
+      },
+      "t_string_storage": {
+        "encoding": "bytes",
+        "label": "string",
+        "numberOfBytes": "32"
+      },
+      "t_uint256": {
+        "encoding": "inplace",
+        "label": "uint256",
+        "numberOfBytes": "32"
+      }
+    }
+  }
+}
