@@ -1,12 +1,16 @@
-import { BasketManagerV3Instance } from "types/generated";
+import {
+  BasketManagerV3Instance,
+  MetaAssetTokenContract,
+} from "types/generated";
 
-const Token = artifacts.require("Token");
+const Token = artifacts.require("MetaAssetToken");
 const BasketManagerV3 = artifacts.require("BasketManagerV3");
 
 export const createToken = async (massetAddress: string) => {
-  const token = await Token.new("Mock1", "MK1", 18);
+  const token: MetaAssetTokenContract = await Token.new("Mock1", "MK1");
   token.transferOwnership(massetAddress);
   return token;
+  // TODO: add MetaAssetToken MAsset and BasketManager proxies instantiations
 };
 
 export type CreateBasketV3Args = {

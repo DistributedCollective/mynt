@@ -5,7 +5,7 @@ import { BN, tokens } from "@utils/tools";
 import envSetup from "@utils/env_setup";
 import { ZERO_ADDRESS, FEE_PRECISION, ZERO } from "@utils/constants";
 import { StandardAccounts } from "@utils/standardAccounts";
-import { Fees } from "types";
+
 import {
   BasketManagerV3Instance,
   MassetV3Instance,
@@ -14,19 +14,29 @@ import {
   TokenInstance,
   FeesVaultInstance,
   FeesManagerInstance,
+  MetaAssetTokenInstance,
+  MassetV3Contract,
 } from "types/generated";
+import { MetaAssetTokenContract } from "types/generated/contracts/meta-asset-token/MetaAssetToken";
 
 const { expect } = envSetup.configure();
 
 const BasketManagerV3 = artifacts.require("BasketManagerV3");
 const MassetV3 = artifacts.require("MassetV3");
-const Token = artifacts.require("Token");
+const Token = artifacts.require("MetaAssetToken");
 const MockERC20 = artifacts.require("MockERC20");
 const MockBridge = artifacts.require("MockBridge");
 const FeesVault = artifacts.require("FeesVault");
 const FeesManager = artifacts.require("FeesManager");
 
 let standardAccounts: StandardAccounts;
+
+type Fees = {
+  deposit: BN;
+  depositBridge: BN;
+  withdrawal: BN;
+  withdrawalBridge: BN;
+};
 
 const standardFees: Fees = {
   deposit: new BN(100),
@@ -135,6 +145,8 @@ contract("MassetV3", async (accounts) => {
         vault.address,
         standardFees
       );
+
+      await setTokenProxies(token, masset);
 
       mockTokenDummy = await MockERC20.new(
         "",
@@ -260,6 +272,7 @@ contract("MassetV3", async (accounts) => {
         vault.address,
         standardFees
       );
+      await setTokenProxies(token, masset);
     });
     context("should succeed", () => {
       it("if all params are valid", async () => {
@@ -311,6 +324,7 @@ contract("MassetV3", async (accounts) => {
         vault.address,
         standardFees
       );
+      await setTokenProxies(token, masset);
 
       mockTokenDummy = await MockERC20.new(
         "",
@@ -556,6 +570,7 @@ contract("MassetV3", async (accounts) => {
         vault.address,
         standardFees
       );
+      await setTokenProxies(token, masset);
     });
 
     context("should fail", () => {
@@ -643,6 +658,7 @@ contract("MassetV3", async (accounts) => {
           from: standardAccounts.default,
         }
       );
+      await setTokenProxies(token, masset);
 
       await basketManagerObj.mockToken1.approve(masset.address, mintAmount, {
         from: standardAccounts.dummy1,
@@ -726,6 +742,7 @@ contract("MassetV3", async (accounts) => {
         vault.address,
         standardFees
       );
+      await setTokenProxies(token, masset);
     });
 
     context("should fail", async () => {
@@ -882,6 +899,7 @@ contract("MassetV3", async (accounts) => {
         vault.address,
         fees
       );
+      await setTokenProxies(token, masset);
     });
 
     context("should fail", async () => {
@@ -1086,6 +1104,7 @@ contract("MassetV3", async (accounts) => {
         vault.address,
         standardFees
       );
+      await setTokenProxies(token, masset);
     });
     it("works both ways", async () => {
       const amount = tokens(10000);
@@ -1257,9 +1276,17 @@ async function createBasketManager(
 }
 
 async function createToken(masset: MassetV3Instance) {
-  const token = await Token.new("Mock1", "MK1", 18);
-  token.transferOwnership(masset.address);
+  const token = await Token.new("Mock1", "MK1");
   return token;
+}
+
+async function setTokenProxies(
+  token: MetaAssetTokenInstance,
+  masset: MassetV3Contract
+) {
+  await token.setMassetProxy(masset.address);
+  await token.setBasketManagerProxy(await masset.getBasketManager());
+  await token.transferOwnership(masset.address);
 }
 
 async function getBalance(
