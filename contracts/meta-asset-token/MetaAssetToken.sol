@@ -20,7 +20,7 @@ contract MetaAssetToken is ERC20Permit, Ownable {
      * @dev Emitted when mAsset config is changed.
      * @param _newAssetProxy                    Address of new mAsset proxy.
      */
-    event AssetProxyChanged(address indexed _newAssetProxy);
+    event MassetProxyChanged(address indexed _newAssetProxy);
 
     /**
      * @dev Emitted when Basket Manager config is changed.
@@ -30,12 +30,12 @@ contract MetaAssetToken is ERC20Permit, Ownable {
 
     // state
 
-    address public assetProxy;
+    address public mAssetProxy;
     address public basketManagerProxy;
 
     // modifiers
     modifier onlyAssetProxy() {
-        require(msg.sender == assetProxy, "DLLR:unauthorized mAsset proxy");
+        require(msg.sender == mAssetProxy, "DLLR:unauthorized mAsset proxy");
         _;
     }
 
@@ -48,7 +48,7 @@ contract MetaAssetToken is ERC20Permit, Ownable {
         address _assetImplementation = assetImplementation();
         address _basketManagerImplementation = basketManagerImplementation();
         require(
-            _recipient != assetProxy &&
+            _recipient != mAssetProxy &&
                 _recipient != _assetImplementation &&
                 _recipient != basketManagerProxy &&
                 _recipient != _basketManagerImplementation,
@@ -69,7 +69,7 @@ contract MetaAssetToken is ERC20Permit, Ownable {
      * @return asset implementation address
      */
     function assetImplementation() public view virtual returns (address) {
-        return IProxy(assetProxy).getProxyImplementation();
+        return IProxy(mAssetProxy).getProxyImplementation();
     }
 
     /**
@@ -83,13 +83,13 @@ contract MetaAssetToken is ERC20Permit, Ownable {
 
     /**
      * @notice setAssetConfig sets the mAsset proxy address
-     * @param _assetProxy The address of the mAsset proxy contract
+     * @param _mAssetProxy The address of the mAsset proxy contract
      */
-    function setAssetProxy(address _assetProxy) external onlyOwner {
-        require(_assetProxy != address(0), "invalid address");
-        assetProxy = _assetProxy;
+    function setMassetProxy(address _mAssetProxy) external onlyOwner {
+        require(_mAssetProxy != address(0), "invalid mAsset proxy address");
+        mAssetProxy = _mAssetProxy;
 
-        emit AssetProxyChanged(assetProxy);
+        emit MassetProxyChanged(mAssetProxy);
     }
 
     /**
@@ -180,7 +180,7 @@ contract MetaAssetToken is ERC20Permit, Ownable {
      *
      * @dev By calling this function, the allowance will be overwritten by the total amount.
      *
-     * @param _from Sender of the token.
+     * @param _from Owner of the token.
      * @param _to Recipient of the token.
      * @param _amount The amount of the token that will be transferred.
      * @param _deadline Expiration time of the signature.

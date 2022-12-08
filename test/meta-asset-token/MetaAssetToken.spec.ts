@@ -16,7 +16,6 @@ import {
   PERMIT_TYPEHASH,
   domainSeparator,
 } from "../helpers/EIP712";
-import { MockProxyImplementationMetaAssetTokenInstance } from "../../types/generated/contracts/mocks/upgradability/MockProxyImplementation.sol/MockProxyImplementationMetaAssetToken";
 
 const MetaAssetToken = artifacts.require("MetaAssetToken");
 const MockMetaAssetToken = artifacts.require("MockMetaAssetToken");
@@ -48,13 +47,13 @@ const buildData = (
 });
 
 contract("MetaAssetToken", async (accounts) => {
-  const [owner, user, newAssetProxy] = accounts;
+  const [owner, user, newMassetProxy] = accounts;
 
   let token: MetaAssetTokenInstance;
   let mockToken: MockMetaAssetTokenInstance;
   let chainId;
   let admin: string;
-  let assetProxy: string;
+  let mAssetProxy: string;
   let assetImplementation: string;
   let basketManagerProxy: string;
   let basketManagerImplementation: string;
@@ -78,7 +77,7 @@ contract("MetaAssetToken", async (accounts) => {
       }
     );
 
-    assetProxy = assetProxyInstance.address;
+    mAssetProxy = assetProxyInstance.address;
     assetImplementation = await upgrades.erc1967.getImplementationAddress(
       assetProxyInstance.address
     );
@@ -96,7 +95,7 @@ contract("MetaAssetToken", async (accounts) => {
       accounts[9],
       { from: owner }
     );
-    await token.setAssetProxy(assetProxy, { from: owner });
+    await token.setMassetProxy(mAssetProxy, { from: owner });
     await token.setBasketManagerProxy(basketManagerProxy, { from: owner });
   });
 
@@ -114,26 +113,26 @@ contract("MetaAssetToken", async (accounts) => {
     });
   });
 
-  describe("setAssetProxy", async () => {
+  describe("setMassetProxy", async () => {
     context("should fail", async () => {
       it("when it's not called by owner", async () => {
         await expectRevert(
-          token.setAssetProxy(assetProxy, { from: user }),
+          token.setMassetProxy(mAssetProxy, { from: user }),
           NOT_OWNER_EXCEPTION
         );
       });
     });
     context("should succeed", async () => {
       it("when called by owner", async () => {
-        const tx = await token.setAssetProxy(assetProxy, { from: owner });
+        const tx = await token.setMassetProxy(mAssetProxy, { from: owner });
 
-        expectEvent(tx, "AssetProxyChanged", {
-          _newAssetProxy: assetProxy,
+        expectEvent(tx, "MassetProxyChanged", {
+          _newAssetProxy: mAssetProxy,
         });
 
         const [newAssetProxyPromised, newAssetImplementationPromised] =
-          await Promise.all([token.assetProxy(), token.assetImplementation()]);
-        expect(newAssetProxyPromised).to.equal(assetProxy);
+          await Promise.all([token.mAssetProxy(), token.assetImplementation()]);
+        expect(newAssetProxyPromised).to.equal(mAssetProxy);
         expect(newAssetImplementationPromised).to.equal(assetImplementation);
       });
     });
@@ -189,10 +188,10 @@ contract("MetaAssetToken", async (accounts) => {
         const initialBalance = await token.balanceOf(user);
         expect(initialBalance.toString()).to.equal("0");
 
-        assetProxy = newAssetProxy;
-        await token.setAssetProxy(assetProxy);
+        mAssetProxy = newMassetProxy;
+        await token.setMassetProxy(mAssetProxy);
 
-        const tx = await token.mint(user, mintAmount, { from: assetProxy });
+        const tx = await token.mint(user, mintAmount, { from: mAssetProxy });
         expectEvent(tx, "Transfer", {
           from: ZERO_ADDRESS,
           to: user,
@@ -217,11 +216,11 @@ contract("MetaAssetToken", async (accounts) => {
 
     context("should succeed", async () => {
       it("when it's called by mAsset proxy", async () => {
-        assetProxy = newAssetProxy;
-        await token.setAssetProxy(assetProxy);
+        mAssetProxy = newMassetProxy;
+        await token.setMassetProxy(mAssetProxy);
 
         const amount = toWei("50");
-        await token.mint(user, amount, { from: assetProxy });
+        await token.mint(user, amount, { from: mAssetProxy });
 
         const totalSupply = await token.totalSupply();
 
@@ -230,7 +229,7 @@ contract("MetaAssetToken", async (accounts) => {
         expect(initialBalance.toString()).to.equal(amount);
         expect(totalSupply.toString()).to.equal(initialBalance.toString());
 
-        const tx = await token.burn(user, amount, { from: assetProxy });
+        const tx = await token.burn(user, amount, { from: mAssetProxy });
         expectEvent(tx, "Transfer", {
           from: user,
           to: ZERO_ADDRESS,
@@ -262,7 +261,7 @@ contract("MetaAssetToken", async (accounts) => {
 
       it("when recipient is mAsset proxy address", async () => {
         await expectRevert(
-          token.transfer(assetProxy, toWei("100"), { from: owner }),
+          token.transfer(mAssetProxy, toWei("100"), { from: owner }),
           "DLLR: Invalid address. Cannot transfer DLLR directly to a Mynt protocol address"
         );
       });
@@ -276,7 +275,7 @@ contract("MetaAssetToken", async (accounts) => {
 
       it("when recipient is basket manager proxy address", async () => {
         await expectRevert(
-          token.transfer(assetProxy, toWei("100"), { from: owner }),
+          token.transfer(mAssetProxy, toWei("100"), { from: owner }),
           "DLLR: Invalid address. Cannot transfer DLLR directly to a Mynt protocol address"
         );
       });
@@ -294,14 +293,14 @@ contract("MetaAssetToken", async (accounts) => {
     context("should succeed", async () => {
       it("transfer to valid recipient", async () => {
         token = mockToken;
-        assetProxy = newAssetProxy;
-        await token.setAssetProxy(assetProxy);
+        mAssetProxy = newMassetProxy;
+        await token.setMassetProxy(mAssetProxy);
 
         const amount = toWei("100");
         const initialBalance = await token.balanceOf(user);
         expect(initialBalance.toString()).to.equal("0");
 
-        const tx = await token.mint(user, amount, { from: assetProxy });
+        const tx = await token.mint(user, amount, { from: mAssetProxy });
         expectEvent(tx, "Transfer", {
           from: ZERO_ADDRESS,
           to: user,
@@ -343,7 +342,7 @@ contract("MetaAssetToken", async (accounts) => {
 
       it("when recipient is mAsset proxy address", async () => {
         await expectRevert(
-          token.transferFrom(user, assetProxy, toWei("100"), { from: owner }),
+          token.transferFrom(user, mAssetProxy, toWei("100"), { from: owner }),
           "DLLR: Invalid address. Cannot transfer DLLR directly to a Mynt protocol address"
         );
       });
@@ -359,7 +358,7 @@ contract("MetaAssetToken", async (accounts) => {
 
       it("when recipient is basket manager proxy address", async () => {
         await expectRevert(
-          token.transferFrom(user, assetProxy, toWei("100"), { from: owner }),
+          token.transferFrom(user, mAssetProxy, toWei("100"), { from: owner }),
           "DLLR: Invalid address. Cannot transfer DLLR directly to a Mynt protocol address"
         );
       });
@@ -377,14 +376,14 @@ contract("MetaAssetToken", async (accounts) => {
     context("should succeed", async () => {
       it("transferFrom to valid recipient", async () => {
         token = mockToken;
-        assetProxy = newAssetProxy;
-        await token.setAssetProxy(assetProxy);
+        mAssetProxy = newMassetProxy;
+        await token.setMassetProxy(mAssetProxy);
 
         const amount = toWei("100");
         const initialBalance = await token.balanceOf(user);
         expect(initialBalance.toString()).to.equal("0");
 
-        const tx = await token.mint(user, amount, { from: assetProxy });
+        const tx = await token.mint(user, amount, { from: mAssetProxy });
         expectEvent(tx, "Transfer", {
           from: ZERO_ADDRESS,
           to: user,
@@ -590,9 +589,9 @@ contract("MetaAssetToken", async (accounts) => {
         value: toWei("10"),
       });
 
-      // funding assetProxy address
+      // funding mAssetProxy address
       await funder.sendTransaction({
-        to: assetProxy,
+        to: mAssetProxy,
         value: toWei("10"),
       });
     });
@@ -748,7 +747,7 @@ contract("MetaAssetToken", async (accounts) => {
         await expectRevert(
           tokenInstance.transferWithPermit(
             ownerPermit,
-            assetProxy,
+            mAssetProxy,
             amount,
             deadline.toString(),
             v,
@@ -935,7 +934,7 @@ contract("MetaAssetToken", async (accounts) => {
 
     context("should succeed", async () => {
       it("transferFrom to valid recipient", async () => {
-        const oldAssetProxyAddress = assetProxy;
+        const oldAssetProxyAddress = mAssetProxy;
         const deadline = MAX_UINT256;
         const initialOwnerBalance = toWei("1000000");
         const amount = toWei("100");
@@ -959,13 +958,13 @@ contract("MetaAssetToken", async (accounts) => {
           method: "hardhat_impersonateAccount",
           params: [spender],
         });
-        assetProxy = newAssetProxy;
-        await token.setAssetProxy(assetProxy);
+        mAssetProxy = newMassetProxy;
+        await token.setMassetProxy(mAssetProxy);
         await token.mint(ownerPermit, initialOwnerBalance, {
-          from: assetProxy,
+          from: mAssetProxy,
         });
 
-        await token.setAssetProxy(oldAssetProxyAddress);
+        await token.setMassetProxy(oldAssetProxyAddress);
 
         const userInitialBalance = await token.balanceOf(user);
         const ownerInitialBalance = await token.balanceOf(ownerPermit);

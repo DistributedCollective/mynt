@@ -5,7 +5,6 @@ import { BN } from "@utils/tools";
 import envSetup from "@utils/env_setup";
 import { ZERO } from "@utils/constants";
 import { StandardAccounts } from "@utils/standardAccounts";
-import { Fees } from "types";
 import { FeesManagerInstance } from "types/generated";
 
 const { expect } = envSetup.configure();
@@ -13,6 +12,13 @@ const { expect } = envSetup.configure();
 const FeesManager = artifacts.require("FeesManager");
 
 let standardAccounts: StandardAccounts;
+
+type Fees = {
+    deposit: BN;
+    depositBridge: BN;
+    withdrawal: BN;
+    withdrawalBridge: BN;
+};
 
 const standardFees: Fees = {
   deposit: new BN(100),

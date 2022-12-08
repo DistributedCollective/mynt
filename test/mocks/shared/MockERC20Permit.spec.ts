@@ -4,13 +4,13 @@ import Wallet from "ethereumjs-wallet";
 import { fromRpcSig } from "ethereumjs-util";
 import { signTypedMessage } from "eth-sig-util";
 
-import { EIP712Domain, Permit, domainSeparator } from "../helpers/EIP712";
+import { EIP712Domain, Permit, domainSeparator } from "../../helpers/EIP712";
 
 const { MAX_UINT256 } = constants;
 
 const ERC20PermitMock = artifacts.require("MockERC20Permit");
 
-contract("ERC20Permit", function (accounts) {
+contract("MockERC20Permit", function (accounts) {
   const [initialHolder, spender] = accounts;
 
   const name = "MetaAsset";
@@ -30,7 +30,7 @@ contract("ERC20Permit", function (accounts) {
     // We get the chain id from the contract because Ganache (used for coverage) does not return the same chain id
     // from within the EVM as from the JSON RPC interface.
     // See https://github.com/trufflesuite/ganache-core/issues/515
-    this.chainId = await this.token.getChainID();
+    this.chainId = await this.token.getChainId();
   });
 
   it("initial nonce is 0", async function () {
@@ -88,7 +88,7 @@ contract("ERC20Permit", function (accounts) {
 
       await expectRevert(
         this.token.permit(owner, spender, value, maxDeadline, v, r, s),
-        "MetaAsset:INVALID_SIGNATURE"
+        "ERC20Permit: invalid signature"
       );
     });
 
@@ -100,7 +100,7 @@ contract("ERC20Permit", function (accounts) {
 
       await expectRevert(
         this.token.permit(owner, spender, value, maxDeadline, v, r, s),
-        "MetaAsset:INVALID_SIGNATURE"
+        "ERC20Permit: invalid signature"
       );
     });
 
@@ -113,7 +113,7 @@ contract("ERC20Permit", function (accounts) {
 
       await expectRevert(
         this.token.permit(owner, spender, value, deadline, v, r, s),
-        "MetaAsset:AUTH_EXPIRED"
+        "ERC20Permit: expired deadline"
       );
     });
   });
