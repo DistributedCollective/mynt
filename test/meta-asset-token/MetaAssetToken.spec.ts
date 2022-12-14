@@ -47,14 +47,14 @@ const buildData = (
 });
 
 contract("MetaAssetToken", async (accounts) => {
-  const [owner, user, newMassetProxy] = accounts;
+  const [owner, user, newMassetManagerProxy] = accounts;
 
   let token: MetaAssetTokenInstance;
   let mockToken: MockMetaAssetTokenInstance;
   let chainId;
   let admin: string;
-  let mAssetProxy: string;
-  let assetImplementation: string;
+  let massetManagerProxy: string;
+  let massetManagerImplementation: string;
   let basketManagerProxy: string;
   let basketManagerImplementation: string;
 
@@ -77,10 +77,11 @@ contract("MetaAssetToken", async (accounts) => {
       }
     );
 
-    mAssetProxy = assetProxyInstance.address;
-    assetImplementation = await upgrades.erc1967.getImplementationAddress(
-      assetProxyInstance.address
-    );
+    massetManagerProxy = assetProxyInstance.address;
+    massetManagerImplementation =
+      await upgrades.erc1967.getImplementationAddress(
+        assetProxyInstance.address
+      );
     basketManagerProxy = basketManagerProxyInstance.address;
     basketManagerImplementation =
       await upgrades.erc1967.getImplementationAddress(
@@ -95,7 +96,7 @@ contract("MetaAssetToken", async (accounts) => {
       accounts[9],
       { from: owner }
     );
-    await token.setMassetProxy(mAssetProxy, { from: owner });
+    await token.setMassetManagerProxy(massetManagerProxy, { from: owner });
     await token.setBasketManagerProxy(basketManagerProxy, { from: owner });
   });
 
@@ -113,27 +114,34 @@ contract("MetaAssetToken", async (accounts) => {
     });
   });
 
-  describe("setMassetProxy", async () => {
+  describe("setMassetManagerProxy", async () => {
     context("should fail", async () => {
       it("when it's not called by owner", async () => {
         await expectRevert(
-          token.setMassetProxy(mAssetProxy, { from: user }),
+          token.setMassetManagerProxy(massetManagerProxy, { from: user }),
           NOT_OWNER_EXCEPTION
         );
       });
     });
     context("should succeed", async () => {
       it("when called by owner", async () => {
-        const tx = await token.setMassetProxy(mAssetProxy, { from: owner });
-
-        expectEvent(tx, "MassetProxyChanged", {
-          _newAssetProxy: mAssetProxy,
+        const tx = await token.setMassetManagerProxy(massetManagerProxy, {
+          from: owner,
         });
 
-        const [newAssetProxyPromised, newAssetImplementationPromised] =
-          await Promise.all([token.mAssetProxy(), token.assetImplementation()]);
-        expect(newAssetProxyPromised).to.equal(mAssetProxy);
-        expect(newAssetImplementationPromised).to.equal(assetImplementation);
+        expectEvent(tx, "MassetManagerProxyChanged", {
+          _newMassetManagerProxy: massetManagerProxy,
+        });
+
+        const [newAssetProxyPromised, newMassetManagerImplementationPromised] =
+          await Promise.all([
+            token.massetManagerProxy(),
+            token.massetManagerImplementation(),
+          ]);
+        expect(newAssetProxyPromised).to.equal(massetManagerProxy);
+        expect(newMassetManagerImplementationPromised).to.equal(
+          massetManagerImplementation
+        );
       });
     });
   });
@@ -174,10 +182,10 @@ contract("MetaAssetToken", async (accounts) => {
 
   describe("mint", async () => {
     context("should fail", async () => {
-      it("when it's not called by mAsset proxy", async () => {
+      it("when it's not called by MassetManager proxy", async () => {
         await expectRevert(
           token.mint(user, toWei("100"), { from: user }),
-          "DLLR:unauthorized mAsset proxy"
+          "DLLR:unauthorized MassetManager proxy"
         );
       });
     });
@@ -188,10 +196,12 @@ contract("MetaAssetToken", async (accounts) => {
         const initialBalance = await token.balanceOf(user);
         expect(initialBalance.toString()).to.equal("0");
 
-        mAssetProxy = newMassetProxy;
-        await token.setMassetProxy(mAssetProxy);
+        massetManagerProxy = newMassetManagerProxy;
+        await token.setMassetManagerProxy(massetManagerProxy);
 
-        const tx = await token.mint(user, mintAmount, { from: mAssetProxy });
+        const tx = await token.mint(user, mintAmount, {
+          from: massetManagerProxy,
+        });
         expectEvent(tx, "Transfer", {
           from: ZERO_ADDRESS,
           to: user,
@@ -209,18 +219,18 @@ contract("MetaAssetToken", async (accounts) => {
       it("when it's not called by presale or by a user", async () => {
         await expectRevert(
           token.burn(user, toWei("50"), { from: owner }),
-          "DLLR:unauthorized mAsset proxy"
+          "DLLR:unauthorized MassetManager proxy"
         );
       });
     });
 
     context("should succeed", async () => {
-      it("when it's called by mAsset proxy", async () => {
-        mAssetProxy = newMassetProxy;
-        await token.setMassetProxy(mAssetProxy);
+      it("when it's called by MassetManager proxy", async () => {
+        massetManagerProxy = newMassetManagerProxy;
+        await token.setMassetManagerProxy(massetManagerProxy);
 
         const amount = toWei("50");
-        await token.mint(user, amount, { from: mAssetProxy });
+        await token.mint(user, amount, { from: massetManagerProxy });
 
         const totalSupply = await token.totalSupply();
 
@@ -229,7 +239,7 @@ contract("MetaAssetToken", async (accounts) => {
         expect(initialBalance.toString()).to.equal(amount);
         expect(totalSupply.toString()).to.equal(initialBalance.toString());
 
-        const tx = await token.burn(user, amount, { from: mAssetProxy });
+        const tx = await token.burn(user, amount, { from: massetManagerProxy });
         expectEvent(tx, "Transfer", {
           from: user,
           to: ZERO_ADDRESS,
@@ -259,23 +269,25 @@ contract("MetaAssetToken", async (accounts) => {
         );
       });
 
-      it("when recipient is mAsset proxy address", async () => {
+      it("when recipient is MassetManager proxy address", async () => {
         await expectRevert(
-          token.transfer(mAssetProxy, toWei("100"), { from: owner }),
+          token.transfer(massetManagerProxy, toWei("100"), { from: owner }),
           "DLLR: Invalid address. Cannot transfer DLLR directly to a Mynt protocol address"
         );
       });
 
-      it("when recipient is mAsset implementation address", async () => {
+      it("when recipient is MassetManager implementation address", async () => {
         await expectRevert(
-          token.transfer(assetImplementation, toWei("100"), { from: owner }),
+          token.transfer(massetManagerImplementation, toWei("100"), {
+            from: owner,
+          }),
           "DLLR: Invalid address. Cannot transfer DLLR directly to a Mynt protocol address"
         );
       });
 
       it("when recipient is basket manager proxy address", async () => {
         await expectRevert(
-          token.transfer(mAssetProxy, toWei("100"), { from: owner }),
+          token.transfer(massetManagerProxy, toWei("100"), { from: owner }),
           "DLLR: Invalid address. Cannot transfer DLLR directly to a Mynt protocol address"
         );
       });
@@ -293,14 +305,14 @@ contract("MetaAssetToken", async (accounts) => {
     context("should succeed", async () => {
       it("transfer to valid recipient", async () => {
         token = mockToken;
-        mAssetProxy = newMassetProxy;
-        await token.setMassetProxy(mAssetProxy);
+        massetManagerProxy = newMassetManagerProxy;
+        await token.setMassetManagerProxy(massetManagerProxy);
 
         const amount = toWei("100");
         const initialBalance = await token.balanceOf(user);
         expect(initialBalance.toString()).to.equal("0");
 
-        const tx = await token.mint(user, amount, { from: mAssetProxy });
+        const tx = await token.mint(user, amount, { from: massetManagerProxy });
         expectEvent(tx, "Transfer", {
           from: ZERO_ADDRESS,
           to: user,
@@ -340,16 +352,18 @@ contract("MetaAssetToken", async (accounts) => {
         );
       });
 
-      it("when recipient is mAsset proxy address", async () => {
+      it("when recipient is MassetManager proxy address", async () => {
         await expectRevert(
-          token.transferFrom(user, mAssetProxy, toWei("100"), { from: owner }),
+          token.transferFrom(user, massetManagerProxy, toWei("100"), {
+            from: owner,
+          }),
           "DLLR: Invalid address. Cannot transfer DLLR directly to a Mynt protocol address"
         );
       });
 
-      it("when recipient is mAsset implementation address", async () => {
+      it("when recipient is MassetManager implementation address", async () => {
         await expectRevert(
-          token.transferFrom(user, assetImplementation, toWei("100"), {
+          token.transferFrom(user, massetManagerImplementation, toWei("100"), {
             from: owner,
           }),
           "DLLR: Invalid address. Cannot transfer DLLR directly to a Mynt protocol address"
@@ -358,7 +372,9 @@ contract("MetaAssetToken", async (accounts) => {
 
       it("when recipient is basket manager proxy address", async () => {
         await expectRevert(
-          token.transferFrom(user, mAssetProxy, toWei("100"), { from: owner }),
+          token.transferFrom(user, massetManagerProxy, toWei("100"), {
+            from: owner,
+          }),
           "DLLR: Invalid address. Cannot transfer DLLR directly to a Mynt protocol address"
         );
       });
@@ -376,14 +392,14 @@ contract("MetaAssetToken", async (accounts) => {
     context("should succeed", async () => {
       it("transferFrom to valid recipient", async () => {
         token = mockToken;
-        mAssetProxy = newMassetProxy;
-        await token.setMassetProxy(mAssetProxy);
+        massetManagerProxy = newMassetManagerProxy;
+        await token.setMassetManagerProxy(massetManagerProxy);
 
         const amount = toWei("100");
         const initialBalance = await token.balanceOf(user);
         expect(initialBalance.toString()).to.equal("0");
 
-        const tx = await token.mint(user, amount, { from: mAssetProxy });
+        const tx = await token.mint(user, amount, { from: massetManagerProxy });
         expectEvent(tx, "Transfer", {
           from: ZERO_ADDRESS,
           to: user,
@@ -589,9 +605,9 @@ contract("MetaAssetToken", async (accounts) => {
         value: toWei("10"),
       });
 
-      // funding mAssetProxy address
+      // funding massetManagerProxy address
       await funder.sendTransaction({
-        to: mAssetProxy,
+        to: massetManagerProxy,
         value: toWei("10"),
       });
     });
@@ -715,7 +731,7 @@ contract("MetaAssetToken", async (accounts) => {
         );
       });
 
-      it("when recipient is mAsset proxy address", async () => {
+      it("when recipient is MassetManager proxy address", async () => {
         const deadline = MAX_UINT256;
         const amount = toWei("100");
         const nonce = await token.nonces(ownerPermit);
@@ -747,7 +763,7 @@ contract("MetaAssetToken", async (accounts) => {
         await expectRevert(
           tokenInstance.transferWithPermit(
             ownerPermit,
-            mAssetProxy,
+            massetManagerProxy,
             amount,
             deadline.toString(),
             v,
@@ -758,7 +774,7 @@ contract("MetaAssetToken", async (accounts) => {
         );
       });
 
-      it("when recipient is mAsset implementation address", async () => {
+      it("when recipient is MassetManager implementation address", async () => {
         const deadline = MAX_UINT256;
         const amount = toWei("100");
         const nonce = await token.nonces(ownerPermit);
@@ -790,7 +806,7 @@ contract("MetaAssetToken", async (accounts) => {
         await expectRevert(
           tokenInstance.transferWithPermit(
             ownerPermit,
-            assetImplementation,
+            massetManagerImplementation,
             amount,
             deadline.toString(),
             v,
@@ -934,7 +950,7 @@ contract("MetaAssetToken", async (accounts) => {
 
     context("should succeed", async () => {
       it("transferFrom to valid recipient", async () => {
-        const oldAssetProxyAddress = mAssetProxy;
+        const oldAssetProxyAddress = massetManagerProxy;
         const deadline = MAX_UINT256;
         const initialOwnerBalance = toWei("1000000");
         const amount = toWei("100");
@@ -958,13 +974,13 @@ contract("MetaAssetToken", async (accounts) => {
           method: "hardhat_impersonateAccount",
           params: [spender],
         });
-        mAssetProxy = newMassetProxy;
-        await token.setMassetProxy(mAssetProxy);
+        massetManagerProxy = newMassetManagerProxy;
+        await token.setMassetManagerProxy(massetManagerProxy);
         await token.mint(ownerPermit, initialOwnerBalance, {
-          from: mAssetProxy,
+          from: massetManagerProxy,
         });
 
-        await token.setMassetProxy(oldAssetProxyAddress);
+        await token.setMassetManagerProxy(oldAssetProxyAddress);
 
         const userInitialBalance = await token.balanceOf(user);
         const ownerInitialBalance = await token.balanceOf(ownerPermit);

@@ -3,7 +3,7 @@ import { DeployFunction } from "hardhat-deploy/types";
 const func: DeployFunction = async ({ deployments, getNamedAccounts }) => {
   const { deploy } = deployments;
   const { deployer } = await getNamedAccounts();
-  const deployedMasset = await deployments.get("MassetV3");
+  const deployedMassetManager = await deployments.get("MassetManager");
   const deployedToken = await deployments.get("DLLR");
   const deployedFeesVault = await deployments.get("FeesVault");
   const deployedFeesManager = await deployments.get("FeesManager");
@@ -19,7 +19,7 @@ const func: DeployFunction = async ({ deployments, getNamedAccounts }) => {
       execute: {
         init: {
           methodName: "initialize",
-          args: [deployedMasset.address],
+          args: [deployedMassetManager.address],
         },
       },
     },
@@ -27,12 +27,12 @@ const func: DeployFunction = async ({ deployments, getNamedAccounts }) => {
     log: true,
   });
 
-  // Initialize Masset
+  // Initialize  MassetManager
   const deployedBasketManager = await deployments.get("BasketManagerV3");
   console.log(deployedBasketManager.address);
   console.log(deployedToken.address);
   await deployments.execute(
-    "MassetV3",
+    "MassetManager",
     { from: deployer },
     "initialize",
     deployedBasketManager.address,
@@ -40,9 +40,9 @@ const func: DeployFunction = async ({ deployments, getNamedAccounts }) => {
     false
   );
 
-  // Upgrade Masset To V3
+  // Upgrade  MassetManager To V3
   await deployments.execute(
-    "MassetV3",
+    "MassetManager",
     { from: deployer },
     "upgradeToV3",
     deployedBasketManager.address,
@@ -51,15 +51,15 @@ const func: DeployFunction = async ({ deployments, getNamedAccounts }) => {
     deployedFeesManager.address
   );
 
-  const mAssetVersion = await deployments.read("MassetV3", "getVersion");
-  console.log("Masset Version :", mAssetVersion);
+  const massetManagerVersion = await deployments.read("MassetManager", "getVersion");
+  console.log("Masset Version :", massetManagerVersion);
 
-  // Set Masset & Basket Manager in DLLR contract
+  // Set  MassetManager & Basket Manager in DLLR contract
   await deployments.execute(
     "DLLR",
     { from: deployer },
-    "setMassetProxy",
-    deployedMasset.address
+    "setMassetManagerProxy",
+    deployedMassetManager.address
   );
 
   await deployments.execute(

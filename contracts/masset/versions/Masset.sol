@@ -12,8 +12,8 @@ import "../../meta-asset-token/MetaAssetToken.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 
+///@dev the next v3 was MassetV3, then renamed to MassetManager
 contract Masset is IERC777Recipient, OwnableUpgradeable, ReentrancyGuardUpgradeable {
-
     using SafeMath for uint256;
 
     // Events
@@ -43,12 +43,7 @@ contract Masset is IERC777Recipient, OwnableUpgradeable, ReentrancyGuardUpgradea
         bytes operatorData
     );
 
-    event onTokensMintedCalled(
-        address indexed sender,
-        uint256 orderAmount,
-        address tokenAddress,
-        bytes userData
-    );
+    event onTokensMintedCalled(address indexed sender, uint256 orderAmount, address tokenAddress, bytes userData);
 
     // state
     string private version;
@@ -67,8 +62,8 @@ contract Masset is IERC777Recipient, OwnableUpgradeable, ReentrancyGuardUpgradea
     function initialize(
         address _basketManagerAddress,
         address _tokenAddress,
-        bool _registerAsERC777RecipientFlag) public initializer {
-
+        bool _registerAsERC777RecipientFlag
+    ) public initializer {
         require(address(basketManager) == address(0) && address(token) == address(0), "already initialized");
         require(_basketManagerAddress != address(0), "invalid basket manager");
         require(_tokenAddress != address(0), "invalid token");
@@ -78,7 +73,7 @@ contract Masset is IERC777Recipient, OwnableUpgradeable, ReentrancyGuardUpgradea
 
         basketManager = BasketManager(_basketManagerAddress);
         token = MetaAssetToken(_tokenAddress);
-        if(_registerAsERC777RecipientFlag) {
+        if (_registerAsERC777RecipientFlag) {
             registerAsERC777Recipient();
         }
 
@@ -96,14 +91,7 @@ contract Masset is IERC777Recipient, OwnableUpgradeable, ReentrancyGuardUpgradea
      * @param _bAssetQuantity Quantity in bAsset units
      * @return massetMinted   Number of newly minted mAssets
      */
-    function mint(
-        address _bAsset,
-        uint256 _bAssetQuantity
-    )
-    external
-    nonReentrant
-    returns (uint256 massetMinted)
-    {
+    function mint(address _bAsset, uint256 _bAssetQuantity) external nonReentrant returns (uint256 massetMinted) {
         return _mintTo(_bAsset, _bAssetQuantity, msg.sender);
     }
 
@@ -119,11 +107,7 @@ contract Masset is IERC777Recipient, OwnableUpgradeable, ReentrancyGuardUpgradea
         address _bAsset,
         uint256 _bAssetQuantity,
         address _recipient
-    )
-    external
-    nonReentrant
-    returns (uint256 massetMinted)
-    {
+    ) external nonReentrant returns (uint256 massetMinted) {
         return _mintTo(_bAsset, _bAssetQuantity, _recipient);
     }
 
@@ -135,10 +119,7 @@ contract Masset is IERC777Recipient, OwnableUpgradeable, ReentrancyGuardUpgradea
         address _basset,
         uint256 _bassetQuantity,
         address _recipient
-    )
-    internal
-    returns (uint256 massetMinted)
-    {
+    ) internal returns (uint256 massetMinted) {
         require(_recipient != address(0), "must be a valid recipient");
         require(_bassetQuantity > 0, "quantity must not be 0");
 
@@ -166,16 +147,13 @@ contract Masset is IERC777Recipient, OwnableUpgradeable, ReentrancyGuardUpgradea
      * @param _massetQuantity   Units of the masset to redeem
      * @return massetRedeemed     Relative number of mAsset units burned to pay for the bAssets
      */
-    function redeem(
-        address _bAsset,
-        uint256 _massetQuantity
-    ) external nonReentrant returns (uint256 massetRedeemed) {
+    function redeem(address _bAsset, uint256 _massetQuantity) external nonReentrant returns (uint256 massetRedeemed) {
         return _redeemTo(_bAsset, _massetQuantity, msg.sender, false);
     }
 
     /**
      * @dev Credits a recipient with a certain quantity of selected bAsset, in exchange for burning the
-     *      relative Masset quantity from the sender. Sender also incurs a small fee, if any.
+     *      relative mAsset quantity from the sender. Sender also incurs a small fee, if any.
      * @param _bAsset           Address of the bAsset to redeem
      * @param _massetQuantity   Units of the masset to redeem
      * @param _recipient        Address to credit with withdrawn bAssets
@@ -207,13 +185,14 @@ contract Masset is IERC777Recipient, OwnableUpgradeable, ReentrancyGuardUpgradea
 
         require(basketManager.checkBasketBalanceForWithdrawal(_basset, bassetQuantity), "invalid basket");
 
-        if(bridgeFlag) {
+        if (bridgeFlag) {
             address bridgeAddress = basketManager.getBridge(_basset);
             require(bridgeAddress != address(0), "invalid bridge");
             IERC20(_basset).approve(bridgeAddress, bassetQuantity);
             require(
                 IBridge(bridgeAddress).receiveTokensAt(_basset, bassetQuantity, _recipient, bytes("")),
-                "call to bridge failed");
+                "call to bridge failed"
+            );
         } else {
             IERC20(_basset).transfer(_recipient, bassetQuantity);
         }
@@ -283,14 +262,7 @@ contract Masset is IERC777Recipient, OwnableUpgradeable, ReentrancyGuardUpgradea
         bytes calldata _userData,
         bytes calldata _operatorData
     ) external {
-        emit onTokensReceivedCalled(
-            _operator,
-            _from,
-            _to,
-            _amount,
-            _userData,
-            _operatorData
-        );
+        emit onTokensReceivedCalled(_operator, _from, _to, _amount, _userData, _operatorData);
     }
 
     /**
@@ -309,7 +281,7 @@ contract Masset is IERC777Recipient, OwnableUpgradeable, ReentrancyGuardUpgradea
 
         require(_orderAmount > 0, "amount must be > 0");
 
-        address recipient =  _decodeAddress(_userData);
+        address recipient = _decodeAddress(_userData);
         address basset = _tokenAddress;
 
         address bridgeAddress = basketManager.getBridge(basset);

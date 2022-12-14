@@ -17,13 +17,13 @@ import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.
 import "@openzeppelin/contracts-upgradeable/proxy/ERC1967/ERC1967UpgradeUpgradeable.sol";
 
 /**
- * @title MassetV3
+ * @title MassetManager
  * @dev Contract is responsible for managing mAsset and bAsset.
  * Used for minting and burning tokens, calculating fees and calling the bridge
  * if transaction based on token from another blockchain.
  */
 
-contract MassetV3 is IERC777Recipient, OwnableUpgradeable, ReentrancyGuardUpgradeable, ERC1967UpgradeUpgradeable {
+contract MassetManager is IERC777Recipient, OwnableUpgradeable, ReentrancyGuardUpgradeable, ERC1967UpgradeUpgradeable {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
     using SafeERC20 for MetaAssetToken;
@@ -283,7 +283,7 @@ contract MassetV3 is IERC777Recipient, OwnableUpgradeable, ReentrancyGuardUpgrad
         bool _useCallback
     ) internal returns (uint256 massetRedeemed) {
         require(_recipient != address(0), "must be a valid recipient");
-        require(_massetQuantity > 0, "masset quantity must be greater than 0");
+        require(_massetQuantity > 0, "mAsset quantity must be greater than 0");
         require(basketManager.isValidBasset(_basset), "invalid basset");
 
         address massetSource = (_bridgeFlag && !_useCallback) ? _recipient : msg.sender;
@@ -320,7 +320,7 @@ contract MassetV3 is IERC777Recipient, OwnableUpgradeable, ReentrancyGuardUpgrad
 
     /**
      * @dev Transfers fee to vault contract and return the amount of massets that will be burned
-     *      must have approval to spend the senders Masset.
+     *      must have approval to spend the sender's mAasset.
      * @param massetQuantity        Amount of massets to withdraw.
      * @param sender                Owner of massets.
      * @param _bridgeFlag           Flag that indicates if the proces is used with conjunction with bridge.
