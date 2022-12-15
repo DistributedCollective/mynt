@@ -4,38 +4,34 @@ import { expectRevert, expectEvent } from "@openzeppelin/test-helpers";
 import { ZERO_ADDRESS } from "@utils/constants";
 import { StandardAccounts } from "@utils/standardAccounts";
 import envSetup from "@utils/env_setup";
-import { MassetManagerInstance } from "types/generated";
+import { MassetInstance } from "types/generated";
 
 const { expect } = envSetup.configure();
 
 const BasketManager = artifacts.require("BasketManager");
-const MassetManager = artifacts.require("MassetManager");
+const Masset = artifacts.require("Masset");
 const Token = artifacts.require("Token");
 const MockERC20 = artifacts.require("MockERC20");
 
 let standardAccounts;
 
-contract("MassetManager", async (accounts) => {
+contract("Masset", async (accounts) => {
   standardAccounts = new StandardAccounts(accounts);
 
   before("before all", async () => {});
 
   describe("initialize", async () => {
-    let massetManager;
+    let masset;
     let basketManagerObj;
     let token;
     beforeEach(async () => {
-      massetManager = await MassetManager.new();
-      basketManagerObj = await createBasketManager(
-        massetManager,
-        [18, 18],
-        [1, 1]
-      );
-      token = await createToken(massetManager);
+      masset = await Masset.new();
+      basketManagerObj = await createBasketManager(masset, [18, 18], [1, 1]);
+      token = await createToken(masset);
     });
     context("should succeed", async () => {
       it("when given a valid basket manager", async () => {
-        await massetManager.initialize(
+        await masset.initialize(
           basketManagerObj.basketManager.address,
           token.address,
           false
@@ -45,13 +41,13 @@ contract("MassetManager", async (accounts) => {
     context("should fail", async () => {
       it("when basket manager missing", async () => {
         await expectRevert(
-          massetManager.initialize(ZERO_ADDRESS, token.address, false),
+          masset.initialize(ZERO_ADDRESS, token.address, false),
           "VM Exception while processing transaction: reverted with reason string 'invalid basket manager'"
         );
       });
       it("when token missing", async () => {
         await expectRevert(
-          massetManager.initialize(
+          masset.initialize(
             basketManagerObj.basketManager.address,
             ZERO_ADDRESS,
             false
@@ -60,13 +56,13 @@ contract("MassetManager", async (accounts) => {
         );
       });
       it("when already initialized", async () => {
-        await massetManager.initialize(
+        await masset.initialize(
           basketManagerObj.basketManager.address,
           token.address,
           false
         );
         await expectRevert(
-          massetManager.initialize(
+          masset.initialize(
             basketManagerObj.basketManager.address,
             token.address,
             false
@@ -78,19 +74,15 @@ contract("MassetManager", async (accounts) => {
   });
 
   describe("mint", async () => {
-    let massetManager;
+    let masset;
     let basketManagerObj;
     let token;
     let mockTokenDummy;
     beforeEach(async () => {
-      massetManager = await MassetManager.new();
-      token = await createToken(MassetManager);
-      basketManagerObj = await createBasketManager(
-        massetManager,
-        [18, 18],
-        [1, 1]
-      );
-      await massetManager.initialize(
+      masset = await Masset.new();
+      token = await createToken(masset);
+      basketManagerObj = await createBasketManager(masset, [18, 18], [1, 1]);
+      await masset.initialize(
         basketManagerObj.basketManager.address,
         token.address,
         false
@@ -106,16 +98,12 @@ contract("MassetManager", async (accounts) => {
     context("should succeed", () => {
       it("if all params are valid", async () => {
         const sum = "1000000000000000000";
-        await basketManagerObj.mockToken1.approve(massetManager.address, sum, {
+        await basketManagerObj.mockToken1.approve(masset.address, sum, {
           from: standardAccounts.dummy1,
         });
-        const tx = await massetManager.mint(
-          basketManagerObj.mockToken1.address,
-          sum,
-          {
-            from: standardAccounts.dummy1,
-          }
-        );
+        const tx = await masset.mint(basketManagerObj.mockToken1.address, sum, {
+          from: standardAccounts.dummy1,
+        });
         await expectEvent(tx.receipt, "Minted", {
           minter: standardAccounts.dummy1,
           recipient: standardAccounts.dummy1,
@@ -130,42 +118,35 @@ contract("MassetManager", async (accounts) => {
     context("should fail", () => {
       it("if basset is invalid", async () => {
         await expectRevert(
-          massetManager.mint(ZERO_ADDRESS, 10),
+          masset.mint(ZERO_ADDRESS, 10),
           "VM Exception while processing transaction: reverted with reason string 'invalid basset'"
         );
       });
       it("if basset is not in the basket", async () => {
         await expectRevert(
-          massetManager.mint(mockTokenDummy.address, 10),
+          masset.mint(mockTokenDummy.address, 10),
           "VM Exception while processing transaction: reverted with reason string 'invalid basset'"
         );
       });
       it("if amount is greater than the balance", async () => {
-        await basketManagerObj.mockToken1.approve(
-          massetManager.address,
-          100000
-        );
+        await basketManagerObj.mockToken1.approve(masset.address, 100000);
 
         await expectRevert(
-          massetManager.mint(basketManagerObj.mockToken1.address, 100000),
+          masset.mint(basketManagerObj.mockToken1.address, 100000),
           "VM Exception while processing transaction: reverted with reason string 'ERC20: transfer amount exceeds balance'"
         );
       });
     });
   });
   describe("mintTo", async () => {
-    let massetManager;
+    let masset;
     let basketManagerObj;
     let token;
     beforeEach(async () => {
-      massetManager = await MassetManager.new();
-      basketManagerObj = await createBasketManager(
-        massetManager,
-        [18, 18],
-        [1, 1]
-      );
-      token = await createToken(massetManager);
-      await massetManager.initialize(
+      masset = await Masset.new();
+      basketManagerObj = await createBasketManager(masset, [18, 18], [1, 1]);
+      token = await createToken(masset);
+      await masset.initialize(
         basketManagerObj.basketManager.address,
         token.address,
         false
@@ -174,10 +155,10 @@ contract("MassetManager", async (accounts) => {
     context("should succeed", () => {
       it("if all params are valid", async () => {
         const sum = "100000000000000000";
-        await basketManagerObj.mockToken1.approve(massetManager.address, sum, {
+        await basketManagerObj.mockToken1.approve(masset.address, sum, {
           from: standardAccounts.dummy1,
         });
-        const tx = await massetManager.mintTo(
+        const tx = await masset.mintTo(
           basketManagerObj.mockToken1.address,
           sum,
           standardAccounts.dummy4,
@@ -199,19 +180,15 @@ contract("MassetManager", async (accounts) => {
   });
 
   describe("redeem", async () => {
-    let massetManager;
+    let masset;
     let basketManagerObj;
     let token;
     let mockTokenDummy;
     beforeEach(async () => {
-      massetManager = await MassetManager.new();
-      token = await createToken(massetManager);
-      basketManagerObj = await createBasketManager(
-        massetManager,
-        [18, 18],
-        [1, 1]
-      );
-      await massetManager.initialize(
+      masset = await Masset.new();
+      token = await createToken(masset);
+      basketManagerObj = await createBasketManager(masset, [18, 18], [1, 1]);
+      await masset.initialize(
         basketManagerObj.basketManager.address,
         token.address,
         false
@@ -227,10 +204,10 @@ contract("MassetManager", async (accounts) => {
     context("should succeed", () => {
       it("if all params are valid", async () => {
         const sum = "100000000000000000";
-        await basketManagerObj.mockToken1.approve(massetManager.address, sum, {
+        await basketManagerObj.mockToken1.approve(masset.address, sum, {
           from: standardAccounts.dummy1,
         });
-        await massetManager.mint(basketManagerObj.mockToken1.address, sum, {
+        await masset.mint(basketManagerObj.mockToken1.address, sum, {
           from: standardAccounts.dummy1,
         });
         let balance = await token.balanceOf(standardAccounts.dummy1);
@@ -239,7 +216,7 @@ contract("MassetManager", async (accounts) => {
           standardAccounts.dummy1
         );
         expect(balance.toString()).to.equal("900000000000000000");
-        const tx = await massetManager.redeem(
+        const tx = await masset.redeem(
           basketManagerObj.mockToken1.address,
           sum,
           {
@@ -264,19 +241,19 @@ contract("MassetManager", async (accounts) => {
     context("should fail", () => {
       it("if basset is invalid", async () => {
         await expectRevert(
-          massetManager.redeem(ZERO_ADDRESS, 10),
+          masset.redeem(ZERO_ADDRESS, 10),
           "VM Exception while processing transaction: reverted with reason string 'invalid basset'"
         );
       });
       it("if basset is not in the basket", async () => {
         await expectRevert(
-          massetManager.redeem(mockTokenDummy.address, 10),
+          masset.redeem(mockTokenDummy.address, 10),
           "VM Exception while processing transaction: reverted with reason string 'invalid basset'"
         );
       });
       it("if amount is greater than the balance", async () => {
         await expectRevert(
-          massetManager.redeem(basketManagerObj.mockToken1.address, 100000),
+          masset.redeem(basketManagerObj.mockToken1.address, 100000),
           "VM Exception while processing transaction: reverted with reason string 'ERC20: transfer amount exceeds balance'"
         );
       });
@@ -284,18 +261,18 @@ contract("MassetManager", async (accounts) => {
   });
 
   describe("precision conversion", async () => {
-    let massetManager;
+    let masset;
     let basketManagerObj;
     let token;
     beforeEach(async () => {
-      massetManager = await MassetManager.new();
-      token = await createToken(massetManager);
+      masset = await Masset.new();
+      token = await createToken(masset);
       basketManagerObj = await createBasketManager(
-        massetManager,
+        masset,
         [20, 12],
         [100, -1000000]
       );
-      await massetManager.initialize(
+      await masset.initialize(
         basketManagerObj.basketManager.address,
         token.address,
         false
@@ -310,13 +287,13 @@ contract("MassetManager", async (accounts) => {
       ).to.equal("1000000000000");
 
       await basketManagerObj.mockToken1.approve(
-        massetManager.address,
+        masset.address,
         "100000000000000000000",
         {
           from: standardAccounts.dummy1,
         }
       );
-      await massetManager.mint(
+      await masset.mint(
         basketManagerObj.mockToken1.address,
         "100000000000000000000",
         {
@@ -324,19 +301,15 @@ contract("MassetManager", async (accounts) => {
         }
       );
       await basketManagerObj.mockToken2.approve(
-        massetManager.address,
+        masset.address,
         "1000000000000",
         {
           from: standardAccounts.dummy1,
         }
       );
-      await massetManager.mint(
-        basketManagerObj.mockToken2.address,
-        "1000000000000",
-        {
-          from: standardAccounts.dummy1,
-        }
-      );
+      await masset.mint(basketManagerObj.mockToken2.address, "1000000000000", {
+        from: standardAccounts.dummy1,
+      });
 
       expect(await getBalance(token, standardAccounts.dummy1)).to.equal(
         "2000000000000000000"
@@ -355,7 +328,7 @@ contract("MassetManager", async (accounts) => {
         "1000000000000000000"
       );
 
-      await massetManager.redeem(
+      await masset.redeem(
         basketManagerObj.mockToken2.address,
         "1000000000000000000",
         {
@@ -371,7 +344,7 @@ contract("MassetManager", async (accounts) => {
 });
 
 async function createBasketManager(
-  massetManager: MassetManagerInstance,
+  masset: MassetInstance,
   decimals: Array<number>,
   factors: Array<number>
 ): Promise<any> {
@@ -400,9 +373,9 @@ async function createBasketManager(
   };
 }
 
-async function createToken(massetManager: MassetManagerInstance): Promise<any> {
+async function createToken(masset: MassetInstance): Promise<any> {
   const token = await Token.new("Mock1", "MK1", 18);
-  token.transferOwnership(massetManager.address);
+  token.transferOwnership(masset.address);
   return token;
 }
 
