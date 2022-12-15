@@ -12,7 +12,7 @@ import "../../meta-asset-token/MetaAssetToken.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 
-///@dev the next v3 was MassetV3, then renamed to MassetManager
+///@dev the next v3 was MassetV3, now renamed to MassetManager
 contract Masset is IERC777Recipient, OwnableUpgradeable, ReentrancyGuardUpgradeable {
     using SafeMath for uint256;
 

@@ -149,7 +149,7 @@ contract MassetManager is IERC777Recipient, OwnableUpgradeable, ReentrancyGuardU
      *      must have approval to spend the senders bAsset.
      * @param _bAsset         Address of the bAsset.
      * @param _bAssetQuantity Quantity in bAsset units.
-     * @return massetMinted   Number of newly minted mAssets.
+     * @return massetMinted   Quantity of newly minted mAsset.
      */
     function mint(address _bAsset, uint256 _bAssetQuantity) external nonReentrant returns (uint256 massetMinted) {
         return _mintTo(_bAsset, _bAssetQuantity, msg.sender);
