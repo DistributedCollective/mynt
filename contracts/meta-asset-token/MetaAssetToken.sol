@@ -42,19 +42,8 @@ contract MetaAssetToken is ERC20Permit, Ownable {
     modifier requireValidRecipient(address _recipient) {
         require(
             _recipient != address(0) && _recipient != address(this),
-            "DLLR: Invalid address. Cannot transfer DLLR directly to the DLLR contract or the null address"
+            "DLLR: Invalid address. Cannot transfer DLLR to the null address."
         );
-
-        address _massetManagerImplementation = massetManagerImplementation();
-        address _basketManagerImplementation = basketManagerImplementation();
-        require(
-            _recipient != massetManagerProxy &&
-                _recipient != _massetManagerImplementation &&
-                _recipient != basketManagerProxy &&
-                _recipient != _basketManagerImplementation,
-            "DLLR: Invalid address. Cannot transfer DLLR directly to a Mynt protocol address"
-        );
-
         _;
     }
 
