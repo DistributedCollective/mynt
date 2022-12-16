@@ -96,7 +96,7 @@ contract MassetManager is IERC777Recipient, OwnableUpgradeable, ReentrancyGuardU
     string private version;
 
     BasketManagerV3 private basketManager;
-    MetaAssetToken private token;
+    MetaAssetToken private mAssetToken;
 
     FeesVault private feesVault;
     FeesManager private feesManager;
@@ -116,23 +116,23 @@ contract MassetManager is IERC777Recipient, OwnableUpgradeable, ReentrancyGuardU
     /**
      * @dev Contract initializer.
      * @param _basketManagerAddress           Address of the basket manager.
-     * @param _tokenAddress                   Address of the mAsset token.
+     * @param _mAssetTokenAddress             Address of the mAsset mAssetToken.
      * @param _registerAsERC777RecipientFlag  Bool determine if contract should be register as ERC777 recipient.
      */
     function initialize(
         address _basketManagerAddress,
-        address _tokenAddress,
+        address _mAssetTokenAddress,
         bool _registerAsERC777RecipientFlag
     ) public initializer {
-        require(address(basketManager) == address(0) && address(token) == address(0), "already initialized");
+        require(address(basketManager) == address(0) && address(mAssetToken) == address(0), "already initialized");
         require(_basketManagerAddress != address(0), "invalid basket manager");
-        require(_tokenAddress != address(0), "invalid token");
+        require(_mAssetTokenAddress != address(0), "invalid mAssetToken");
 
         __Ownable_init_unchained();
         __ReentrancyGuard_init_unchained();
 
         basketManager = BasketManagerV3(_basketManagerAddress);
-        token = MetaAssetToken(_tokenAddress);
+        mAssetToken = MetaAssetToken(_mAssetTokenAddress);
         if (_registerAsERC777RecipientFlag) {
             registerAsERC777Recipient();
         }
@@ -202,7 +202,7 @@ contract MassetManager is IERC777Recipient, OwnableUpgradeable, ReentrancyGuardU
         IERC20(_basset).safeTransferFrom(msg.sender, address(this), bassetQuantity);
 
         uint256 massetsToMint = _mintAndCalculateFee(massetQuantity, false);
-        token.mint(_recipient, massetsToMint);
+        mAssetToken.mint(_recipient, massetsToMint);
 
         emit Minted(msg.sender, _recipient, massetsToMint, _basset, bassetQuantity);
 
@@ -225,7 +225,7 @@ contract MassetManager is IERC777Recipient, OwnableUpgradeable, ReentrancyGuardU
 
         massetsToMint = massetQuantity.sub(fee);
 
-        token.mint(address(feesVault), fee);
+        mAssetToken.mint(address(feesVault), fee);
 
         return massetsToMint;
     }
@@ -298,7 +298,7 @@ contract MassetManager is IERC777Recipient, OwnableUpgradeable, ReentrancyGuardU
 
         require(basketManager.checkBasketBalanceForWithdrawal(_basset, bassetQuantity), "invalid basket");
 
-        token.burn(massetSource, massetsToBurn);
+        mAssetToken.burn(massetSource, massetsToBurn);
         // In case of withdrawal to bridge the receiveTokensAt is called instead of transfer.
         if (_bridgeFlag && _useCallback) {
             address bridgeAddress = basketManager.getBridge(_basset);
@@ -340,7 +340,7 @@ contract MassetManager is IERC777Recipient, OwnableUpgradeable, ReentrancyGuardU
 
         massetsToBurn = massetQuantity.sub(fee);
 
-        token.safeTransferFrom(sender, address(feesVault), fee);
+        mAssetToken.safeTransferFrom(sender, address(feesVault), fee);
 
         return massetsToBurn;
     }
@@ -477,7 +477,7 @@ contract MassetManager is IERC777Recipient, OwnableUpgradeable, ReentrancyGuardU
             _orderAmount
         );
         uint256 massetsToMint = _mintAndCalculateFee(massetQuantity, true);
-        token.mint(recipient, massetsToMint);
+        mAssetToken.mint(recipient, massetsToMint);
 
         emit Minted(msg.sender, recipient, massetsToMint, basset, bassetQuantity);
     }
@@ -497,7 +497,7 @@ contract MassetManager is IERC777Recipient, OwnableUpgradeable, ReentrancyGuardU
     }
 
     function getToken() external view returns (address) {
-        return address(token);
+        return address(mAssetToken);
     }
 
     function getBasketManager() external view returns (address) {
@@ -533,7 +533,7 @@ contract MassetManager is IERC777Recipient, OwnableUpgradeable, ReentrancyGuardU
         feesVault = FeesVault(_feesVaultAddress);
         feesManager = FeesManager(_feesManagerAddress);
         basketManager = BasketManagerV3(_basketManagerAddress);
-        token = MetaAssetToken(_tokenAddress);
+        mAssetToken = MetaAssetToken(_tokenAddress);
         version = "3.0";
     }
 

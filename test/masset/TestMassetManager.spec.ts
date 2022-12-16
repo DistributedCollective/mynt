@@ -115,7 +115,7 @@ contract("MassetManager", async (accounts) => {
             ZERO_ADDRESS,
             false
           ),
-          "VM Exception while processing transaction: reverted with reason string 'invalid token'"
+          "VM Exception while processing transaction: reverted with reason string 'invalid mAssetToken'"
         );
       });
       it("when already initialized", async () => {
