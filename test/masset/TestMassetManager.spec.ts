@@ -11,7 +11,6 @@ import {
   MassetManagerInstance,
   MockBridgeInstance,
   MockERC20Instance,
-  TokenInstance,
   FeesVaultInstance,
   FeesManagerInstance,
   MetaAssetTokenInstance,
@@ -23,7 +22,7 @@ const { expect } = envSetup.configure();
 
 const BasketManagerV3 = artifacts.require("BasketManagerV3");
 const MassetManager = artifacts.require("MassetManager");
-const Token = artifacts.require("MetaAssetToken");
+const MetaAssetToken = artifacts.require("MetaAssetToken");
 const MockERC20 = artifacts.require("MockERC20");
 const MockBridge = artifacts.require("MockBridge");
 const FeesVault = artifacts.require("FeesVault");
@@ -48,7 +47,7 @@ const standardFees: Fees = {
 contract("MassetManager", async (accounts) => {
   let massetManager: MassetManagerInstance;
   let basketManagerObj: BasketManagerObj;
-  let token: TokenInstance;
+  let mAsset: MetaAssetTokenInstance;
   let vault: FeesVaultInstance;
   let mockTokenDummy: MockERC20Instance;
   let mockBridge: MockBridgeInstance;
@@ -69,14 +68,14 @@ contract("MassetManager", async (accounts) => {
         [18, 18],
         [1, 1]
       );
-      token = await createToken(massetManager);
+      mAsset = await createMassetToken(massetManager);
     });
 
     context("should succeed", async () => {
       it("when given a valid basket manager", async () => {
         await massetManager.initialize(
           basketManagerObj.basketManager.address,
-          token.address,
+          mAsset.address,
           false
         );
 
@@ -84,7 +83,7 @@ contract("MassetManager", async (accounts) => {
         expect(version).to.eq("1.0");
 
         const setToken = await massetManager.getToken();
-        expect(setToken).to.eq(token.address);
+        expect(setToken).to.eq(mAsset.address);
 
         const setBasketManager = await massetManager.getBasketManager();
         expect(setBasketManager).to.eq(basketManagerObj.basketManager.address);
@@ -92,7 +91,7 @@ contract("MassetManager", async (accounts) => {
         // migrate to V3
         await massetManager.upgradeToV3(
           basketManagerObj.basketManager.address,
-          token.address,
+          mAsset.address,
           vault.address,
           feesManager.address
         );
@@ -104,7 +103,7 @@ contract("MassetManager", async (accounts) => {
     context("should fail", async () => {
       it("when basket manager missing", async () => {
         await expectRevert(
-          massetManager.initialize(ZERO_ADDRESS, token.address, false),
+          massetManager.initialize(ZERO_ADDRESS, mAsset.address, false),
           "VM Exception while processing transaction: reverted with reason string 'invalid basket manager'"
         );
       });
@@ -121,13 +120,13 @@ contract("MassetManager", async (accounts) => {
       it("when already initialized", async () => {
         await massetManager.initialize(
           basketManagerObj.basketManager.address,
-          token.address,
+          mAsset.address,
           false
         );
         await expectRevert(
           massetManager.initialize(
             basketManagerObj.basketManager.address,
-            token.address,
+            mAsset.address,
             false
           ),
           "VM Exception while processing transaction: reverted with reason string 'Initializable: contract is already initialized'"
@@ -140,7 +139,7 @@ contract("MassetManager", async (accounts) => {
     beforeEach(async () => {
       massetManager = await MassetManager.new();
       vault = await FeesVault.new();
-      token = await createToken(massetManager);
+      mAsset = await createMassetToken(massetManager);
       basketManagerObj = await createBasketManager(
         massetManager,
         [18, 18],
@@ -149,12 +148,12 @@ contract("MassetManager", async (accounts) => {
       await initMassetManager(
         massetManager,
         basketManagerObj.basketManager.address,
-        token.address,
+        mAsset.address,
         vault.address,
         standardFees
       );
 
-      await setTokenProxies(token, massetManager);
+      await setTokenProxies(mAsset, massetManager);
 
       mockTokenDummy = await MockERC20.new(
         "",
@@ -193,10 +192,10 @@ contract("MassetManager", async (accounts) => {
           bassetQuantity: sum,
         });
 
-        const balance = await token.balanceOf(standardAccounts.dummy1);
+        const balance = await mAsset.balanceOf(standardAccounts.dummy1);
         expect(balance).bignumber.to.eq(expectedMassetQuantity);
 
-        const vaultBalance = await token.balanceOf(vault.address);
+        const vaultBalance = await mAsset.balanceOf(vault.address);
         expect(vaultBalance).bignumber.to.eq(
           expectedFee,
           "fee should be transfered to vault contract"
@@ -240,10 +239,10 @@ contract("MassetManager", async (accounts) => {
           bassetQuantity: bassetsLeft,
         });
 
-        const balance = await token.balanceOf(standardAccounts.dummy1);
+        const balance = await mAsset.balanceOf(standardAccounts.dummy1);
         expect(balance).bignumber.to.eq(expectedMassetQuantity);
 
-        const vaultBalance = await token.balanceOf(vault.address);
+        const vaultBalance = await mAsset.balanceOf(vault.address);
         expect(vaultBalance).bignumber.to.eq(
           expectedFee,
           "fee should be transfered to vault contract"
@@ -286,16 +285,16 @@ contract("MassetManager", async (accounts) => {
         [18, 18],
         [1, 1]
       );
-      token = await createToken(massetManager);
+      mAsset = await createMassetToken(massetManager);
 
       await initMassetManager(
         massetManager,
         basketManagerObj.basketManager.address,
-        token.address,
+        mAsset.address,
         vault.address,
         standardFees
       );
-      await setTokenProxies(token, massetManager);
+      await setTokenProxies(mAsset, massetManager);
     });
     context("should succeed", () => {
       it("if all params are valid", async () => {
@@ -321,10 +320,10 @@ contract("MassetManager", async (accounts) => {
           bAsset: basketManagerObj.mockToken1.address,
           bassetQuantity: sum,
         });
-        const balance = await token.balanceOf(standardAccounts.dummy4);
+        const balance = await mAsset.balanceOf(standardAccounts.dummy4);
         expect(balance).bignumber.to.eq(expectedMassetQuantity);
 
-        const vaultBalance = await token.balanceOf(vault.address);
+        const vaultBalance = await mAsset.balanceOf(vault.address);
         expect(vaultBalance).bignumber.to.eq(
           expectedFee,
           "fee should be transfered to vault contract"
@@ -337,7 +336,7 @@ contract("MassetManager", async (accounts) => {
     beforeEach(async () => {
       vault = await FeesVault.new();
       massetManager = await MassetManager.new();
-      token = await createToken(massetManager);
+      mAsset = await createMassetToken(massetManager);
       basketManagerObj = await createBasketManager(
         massetManager,
         [18, 18],
@@ -347,11 +346,11 @@ contract("MassetManager", async (accounts) => {
       await initMassetManager(
         massetManager,
         basketManagerObj.basketManager.address,
-        token.address,
+        mAsset.address,
         vault.address,
         standardFees
       );
-      await setTokenProxies(token, massetManager);
+      await setTokenProxies(mAsset, massetManager);
 
       mockTokenDummy = await MockERC20.new(
         "",
@@ -387,7 +386,7 @@ contract("MassetManager", async (accounts) => {
 
         mintedMassets = mintedMassets.sub(mintFee);
 
-        let balance = await token.balanceOf(standardAccounts.dummy1);
+        let balance = await mAsset.balanceOf(standardAccounts.dummy1);
         expect(balance).bignumber.to.equal(mintedMassets);
 
         balance = await basketManagerObj.mockToken1.balanceOf(
@@ -400,7 +399,7 @@ contract("MassetManager", async (accounts) => {
           .div(FEE_PRECISION);
         const withdrawnBassets = mintedMassets.sub(withdrawalFee);
 
-        await token.approve(massetManager.address, mintedMassets, {
+        await mAsset.approve(massetManager.address, mintedMassets, {
           from: standardAccounts.dummy1,
         });
 
@@ -419,7 +418,7 @@ contract("MassetManager", async (accounts) => {
           bassetQuantity: withdrawnBassets,
         });
 
-        balance = await token.balanceOf(standardAccounts.dummy1);
+        balance = await mAsset.balanceOf(standardAccounts.dummy1);
         expect(balance).bignumber.to.equal(tokens(0));
 
         balance = await basketManagerObj.mockToken1.balanceOf(
@@ -429,7 +428,7 @@ contract("MassetManager", async (accounts) => {
           initialBalance.sub(mintFee).sub(withdrawalFee)
         );
 
-        const vaultBalance = await token.balanceOf(vault.address);
+        const vaultBalance = await mAsset.balanceOf(vault.address);
         expect(vaultBalance).bignumber.to.eq(mintFee.add(withdrawalFee));
       });
 
@@ -468,7 +467,7 @@ contract("MassetManager", async (accounts) => {
 
         mintedMassets = mintedMassets.sub(mintFee);
 
-        let balance = await token.balanceOf(standardAccounts.dummy1);
+        let balance = await mAsset.balanceOf(standardAccounts.dummy1);
         expect(balance).bignumber.to.equal(mintedMassets);
 
         balance = await basketManagerObj.mockToken1.balanceOf(
@@ -484,7 +483,7 @@ contract("MassetManager", async (accounts) => {
         const massetsLeft = massetsSubFee.sub(redeemReminder);
         const withdrawnBassets = massetsLeft.div(factor.abs());
 
-        await token.approve(massetManager.address, mintedMassets, {
+        await mAsset.approve(massetManager.address, mintedMassets, {
           from: standardAccounts.dummy1,
         });
 
@@ -503,7 +502,7 @@ contract("MassetManager", async (accounts) => {
           bassetQuantity: withdrawnBassets,
         });
 
-        balance = await token.balanceOf(standardAccounts.dummy1);
+        balance = await mAsset.balanceOf(standardAccounts.dummy1);
         expect(balance).bignumber.to.equal(redeemReminder);
 
         balance = await basketManagerObj.mockToken1.balanceOf(
@@ -524,7 +523,7 @@ contract("MassetManager", async (accounts) => {
           "check that sum of funds in system after deposit and redeem is the same as before"
         );
 
-        const vaultBalance = await token.balanceOf(vault.address);
+        const vaultBalance = await mAsset.balanceOf(vault.address);
         expect(vaultBalance).bignumber.to.eq(mintFee.add(withdrawalFee));
       });
     });
@@ -549,7 +548,7 @@ contract("MassetManager", async (accounts) => {
           from: standardAccounts.dummy1,
         });
 
-        await token.approve(massetManager.address, 100, {
+        await mAsset.approve(massetManager.address, 100, {
           from: standardAccounts.dummy1,
         });
 
@@ -569,7 +568,7 @@ contract("MassetManager", async (accounts) => {
           from: standardAccounts.dummy1,
         });
 
-        await token.approve(massetManager.address, sum, {
+        await mAsset.approve(massetManager.address, sum, {
           from: standardAccounts.dummy1,
         });
 
@@ -588,7 +587,7 @@ contract("MassetManager", async (accounts) => {
     beforeEach(async () => {
       vault = await FeesVault.new();
       massetManager = await MassetManager.new();
-      token = await createToken(massetManager);
+      mAsset = await createMassetToken(massetManager);
       basketManagerObj = await createBasketManager(
         massetManager,
         [18, 18],
@@ -597,11 +596,11 @@ contract("MassetManager", async (accounts) => {
       await initMassetManager(
         massetManager,
         basketManagerObj.basketManager.address,
-        token.address,
+        mAsset.address,
         vault.address,
         standardFees
       );
-      await setTokenProxies(token, massetManager);
+      await setTokenProxies(mAsset, massetManager);
     });
 
     context("should fail", () => {
@@ -635,7 +634,7 @@ contract("MassetManager", async (accounts) => {
           from: standardAccounts.dummy1,
         });
 
-        await token.approve(massetManager.address, withdrawAmount, {
+        await mAsset.approve(massetManager.address, withdrawAmount, {
           from: standardAccounts.dummy1,
         });
 
@@ -646,7 +645,7 @@ contract("MassetManager", async (accounts) => {
           { from: standardAccounts.dummy1 }
         );
 
-        const tokenBalance = await token.balanceOf(standardAccounts.dummy1);
+        const tokenBalance = await mAsset.balanceOf(standardAccounts.dummy1);
         expect(tokenBalance).bignumber.to.eq("0");
 
         const balance = await basketManagerObj.mockToken1.balanceOf(recipient);
@@ -655,7 +654,7 @@ contract("MassetManager", async (accounts) => {
           "should transfer bassets to correct recipient"
         );
 
-        const vaultBalance = await token.balanceOf(vault.address);
+        const vaultBalance = await mAsset.balanceOf(vault.address);
         expect(vaultBalance).bignumber.to.eq(mintFee.add(withdrawalFee));
       });
     });
@@ -669,7 +668,7 @@ contract("MassetManager", async (accounts) => {
     beforeEach(async () => {
       vault = await FeesVault.new();
       massetManager = await MassetManager.new();
-      token = await createToken(massetManager);
+      mAsset = await createMassetToken(massetManager);
       mockBridge = await MockBridge.new();
 
       basketManagerObj = await createBasketManager(
@@ -682,14 +681,14 @@ contract("MassetManager", async (accounts) => {
       await initMassetManager(
         massetManager,
         basketManagerObj.basketManager.address,
-        token.address,
+        mAsset.address,
         vault.address,
         standardFees,
         {
           from: standardAccounts.default,
         }
       );
-      await setTokenProxies(token, massetManager);
+      await setTokenProxies(mAsset, massetManager);
 
       await basketManagerObj.mockToken1.approve(
         massetManager.address,
@@ -705,7 +704,7 @@ contract("MassetManager", async (accounts) => {
           from: standardAccounts.dummy1,
         }
       );
-      await token.approve(massetManager.address, mintAmount, {
+      await mAsset.approve(massetManager.address, mintAmount, {
         from: standardAccounts.dummy1,
       });
     });
@@ -754,7 +753,7 @@ contract("MassetManager", async (accounts) => {
           "should transfer bassets to bridge"
         );
 
-        const vaultBalance = await token.balanceOf(vault.address);
+        const vaultBalance = await mAsset.balanceOf(vault.address);
         expect(vaultBalance).bignumber.to.eq(mintFee.add(withdrawalFee));
       });
     });
@@ -764,7 +763,7 @@ contract("MassetManager", async (accounts) => {
     beforeEach(async () => {
       vault = await FeesVault.new();
       massetManager = await MassetManager.new();
-      token = await createToken(massetManager);
+      mAsset = await createMassetToken(massetManager);
       mockBridge = await MockBridge.new();
 
       basketManagerObj = await createBasketManager(
@@ -777,11 +776,11 @@ contract("MassetManager", async (accounts) => {
       await initMassetManager(
         massetManager,
         basketManagerObj.basketManager.address,
-        token.address,
+        mAsset.address,
         vault.address,
         standardFees
       );
-      await setTokenProxies(token, massetManager);
+      await setTokenProxies(mAsset, massetManager);
     });
 
     context("should fail", async () => {
@@ -897,13 +896,13 @@ contract("MassetManager", async (accounts) => {
           {}
         );
 
-        const balance = await token.balanceOf(recipient);
+        const balance = await mAsset.balanceOf(recipient);
         expect(balance).bignumber.to.eq(
           expectedMassetQuantity,
           "should mint proper amount of tokens to recipient"
         );
 
-        const vaultBalance = await token.balanceOf(vault.address);
+        const vaultBalance = await mAsset.balanceOf(vault.address);
         expect(vaultBalance).bignumber.to.eq(
           expectedFee,
           "should mint proper amount of tokens to recipient"
@@ -921,7 +920,7 @@ contract("MassetManager", async (accounts) => {
     beforeEach(async () => {
       vault = await FeesVault.new();
       massetManager = await MassetManager.new();
-      token = await createToken(massetManager);
+      mAsset = await createMassetToken(massetManager);
       mockBridge = await MockBridge.new();
 
       basketManagerObj = await createBasketManager(
@@ -934,11 +933,11 @@ contract("MassetManager", async (accounts) => {
       await initMassetManager(
         massetManager,
         basketManagerObj.basketManager.address,
-        token.address,
+        mAsset.address,
         vault.address,
         fees
       );
-      await setTokenProxies(token, massetManager);
+      await setTokenProxies(mAsset, massetManager);
     });
 
     context("should fail", async () => {
@@ -1053,7 +1052,7 @@ contract("MassetManager", async (accounts) => {
 
         const bassetBalanceAfterMint =
           await basketManagerObj.mockToken1.balanceOf(recipient);
-        const massetBalanceAfterMint = await token.balanceOf(recipient);
+        const massetBalanceAfterMint = await mAsset.balanceOf(recipient);
 
         // ----- withdraw tokens using bridge -----
 
@@ -1085,7 +1084,7 @@ contract("MassetManager", async (accounts) => {
           {}
         );
 
-        const massetBalance = await token.balanceOf(recipient);
+        const massetBalance = await mAsset.balanceOf(recipient);
         expect(massetBalance).bignumber.to.eq(
           massetBalanceAfterMint.sub(amount),
           "should take proper amount of tokens from recipient"
@@ -1099,7 +1098,7 @@ contract("MassetManager", async (accounts) => {
           "should give proper amount of bassets to recipient"
         );
 
-        const bridgeMassetBalance = await token.balanceOf(mockBridge.address);
+        const bridgeMassetBalance = await mAsset.balanceOf(mockBridge.address);
         expect(bridgeMassetBalance).bignumber.to.eq(
           ZERO,
           "should not take any massets from bridge"
@@ -1113,7 +1112,7 @@ contract("MassetManager", async (accounts) => {
           "bridge should not get any bassets"
         );
 
-        const vaultBalance = await token.balanceOf(vault.address);
+        const vaultBalance = await mAsset.balanceOf(vault.address);
         expect(vaultBalance).bignumber.to.eq(
           expectedMintFee.add(expectedFee),
           "should use proper fee (withdrawBridgeFee)"
@@ -1129,7 +1128,7 @@ contract("MassetManager", async (accounts) => {
     beforeEach(async () => {
       vault = await FeesVault.new();
       massetManager = await MassetManager.new();
-      token = await createToken(massetManager);
+      mAsset = await createMassetToken(massetManager);
       basketManagerObj = await createBasketManager(
         massetManager,
         [20, 12],
@@ -1139,11 +1138,11 @@ contract("MassetManager", async (accounts) => {
       await initMassetManager(
         massetManager,
         basketManagerObj.basketManager.address,
-        token.address,
+        mAsset.address,
         vault.address,
         standardFees
       );
-      await setTokenProxies(token, massetManager);
+      await setTokenProxies(mAsset, massetManager);
     });
     it("works both ways", async () => {
       const amount = tokens(10000);
@@ -1188,7 +1187,7 @@ contract("MassetManager", async (accounts) => {
       const account1BalanceAfterMint = amount.sub(fee).mul(new BN(2));
 
       expect(
-        await getBalance(token, standardAccounts.dummy1)
+        await getBalance(mAsset, standardAccounts.dummy1)
       ).bignumber.to.equal(account1BalanceAfterMint);
       expect(
         await getBalance(basketManagerObj.mockToken1, standardAccounts.dummy1)
@@ -1197,21 +1196,21 @@ contract("MassetManager", async (accounts) => {
         await getBalance(basketManagerObj.mockToken2, standardAccounts.dummy1)
       ).bignumber.to.equal(tokens(0));
 
-      await token.transfer(standardAccounts.dummy2, amount, {
+      await mAsset.transfer(standardAccounts.dummy2, amount, {
         from: standardAccounts.dummy1,
       });
       expect(
-        await getBalance(token, standardAccounts.dummy1)
+        await getBalance(mAsset, standardAccounts.dummy1)
       ).bignumber.to.equal(account1BalanceAfterMint.sub(amount));
 
-      await token.approve(massetManager.address, amount, {
+      await mAsset.approve(massetManager.address, amount, {
         from: standardAccounts.dummy2,
       });
       await massetManager.redeem(basketManagerObj.mockToken2.address, amount, {
         from: standardAccounts.dummy2,
       });
       expect(
-        await getBalance(token, standardAccounts.dummy2)
+        await getBalance(mAsset, standardAccounts.dummy2)
       ).bignumber.to.equal(tokens(0));
 
       const withdrawalFee = amount
@@ -1225,7 +1224,7 @@ contract("MassetManager", async (accounts) => {
       ).bignumber.to.equal(expectedBalance);
 
       const totalFee = fee.mul(new BN(2)).add(withdrawalFee); // 2 mints and one redeem
-      const vaultBalance = await token.balanceOf(vault.address);
+      const vaultBalance = await mAsset.balanceOf(vault.address);
       expect(vaultBalance).bignumber.to.eq(totalFee);
     });
   });
@@ -1319,25 +1318,25 @@ async function createBasketManager(
   };
 }
 
-async function createToken(massetManager: MassetManagerInstance) {
-  const token = await Token.new("Mock1", "MK1");
-  return token;
+async function createMassetToken(massetManager: MassetManagerInstance) {
+  const mAsset = await MetaAssetToken.new("Mock1", "MK1");
+  return mAsset;
 }
 
 async function setTokenProxies(
-  token: MetaAssetTokenInstance,
+  mAsset: MetaAssetTokenInstance,
   massetManager: MassetManagerContract
 ) {
-  await token.setMassetManagerProxy(massetManager.address);
-  await token.setBasketManagerProxy(await massetManager.getBasketManager());
-  await token.transferOwnership(massetManager.address);
+  await mAsset.setMassetManagerProxy(massetManager.address);
+  await mAsset.setBasketManagerProxy(await massetManager.getBasketManager());
+  await mAsset.transferOwnership(massetManager.address);
 }
 
 async function getBalance(
-  token: TokenInstance | MockERC20Instance,
+  mAsset: MetaAssetTokenInstance | MockERC20Instance,
   who: string
 ): Promise<BN> {
-  return token.balanceOf(who);
+  return mAsset.balanceOf(who);
 }
 
 type BasketManagerObj = {
