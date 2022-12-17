@@ -65,4 +65,4 @@ Fees are currently disabled. But if they are ever enabled, here is how they will
 
 ## 5. Graph
 
-<img src="images/UML_diagram.png" />
+<img src="images/UML_diagram_2.png" />
