@@ -1,10 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/token/ERC20/extensions/draft-ERC20Permit.sol";
-import "../interfaces/IApproveAndCall.sol";
-import "../interfaces/IProxy.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 /**
  * @title MetaAssetToken
@@ -13,7 +10,7 @@ import "../interfaces/IProxy.sol";
  * mint and burn functions.
  */
 
-contract MetaAssetToken is ERC20Permit, Ownable {
+interface IDLLR is IERC20 {
     // events
 
     /**
@@ -28,68 +25,31 @@ contract MetaAssetToken is ERC20Permit, Ownable {
      */
     event BasketManagerProxyChanged(address indexed _newBasketManagerProxy);
 
-    // state
-
-    address public massetManagerProxy;
-    address public basketManagerProxy;
-
-    // modifiers
-    modifier onlyMassetManagerProxy() {
-        require(msg.sender == massetManagerProxy, "DLLR:unauthorized MassetManager proxy");
-        _;
-    }
-
-    modifier requireValidRecipient(address _recipient) {
-        require(
-            _recipient != address(0) && _recipient != address(this),
-            "DLLR: Invalid address. Cannot transfer DLLR to the null address."
-        );
-        _;
-    }
-
-    /**
-     * @notice Constructor called on deployment, initiates the contract.
-     */
-    constructor(string memory _tokenName, string memory _symbol) ERC20(_tokenName, _symbol) ERC20Permit("MetaAsset") {}
-
     /**
      * @dev getter function of MassetManager implementation address
      *
      * @return MassetManager implementation address
      */
-    function massetManagerImplementation() public view virtual returns (address) {
-        return IProxy(massetManagerProxy).getProxyImplementation();
-    }
+    function massetManagerImplementation() external view returns (address);
 
     /**
      * @dev getter function of basket manager implementation address
      *
      * @return basket manager implementation address
      */
-    function basketManagerImplementation() public view virtual returns (address) {
-        return IProxy(basketManagerProxy).getProxyImplementation();
-    }
+    function basketManagerImplementation() external view returns (address);
 
     /**
      * @notice setMassetManagerProxy sets the MassetManager proxy address
      * @param _massetManagerProxy The address of the MassetManager proxy contract
      */
-    function setMassetManagerProxy(address _massetManagerProxy) external onlyOwner {
-        require(_massetManagerProxy != address(0), "invalid MassetManager proxy address");
-        massetManagerProxy = _massetManagerProxy;
-
-        emit MassetManagerProxyChanged(massetManagerProxy);
-    }
+    function setMassetManagerProxy(address _massetManagerProxy) external;
 
     /**
      * @notice setBasketManagerConfig sets the Basket Manager proxy address
      * @param _basketManagerProxy The address of the Basket Manager proxy contract
      */
-    function setBasketManagerProxy(address _basketManagerProxy) external onlyOwner {
-        require(_basketManagerProxy != address(0), "invalid address");
-        basketManagerProxy = _basketManagerProxy;
-        emit BasketManagerProxyChanged(basketManagerProxy);
-    }
+    function setBasketManagerProxy(address _basketManagerProxy) external;
 
     /**
      * @notice Creates new tokens and sends them to the recipient.
@@ -98,9 +58,7 @@ contract MetaAssetToken is ERC20Permit, Ownable {
      * @param _account The recipient address to get the minted tokens.
      * @param _amount The amount of tokens to be minted.
      */
-    function mint(address _account, uint256 _amount) external onlyMassetManagerProxy {
-        _mint(_account, _amount);
-    }
+    function mint(address _account, uint256 _amount) external;
 
     /**
      * @notice Burns tokens for the given account.
@@ -109,9 +67,7 @@ contract MetaAssetToken is ERC20Permit, Ownable {
      * @param _account The recipient address to get the minted tokens.
      * @param _amount The amount of tokens to be minted.
      */
-    function burn(address _account, uint256 _amount) external onlyMassetManagerProxy {
-        _burn(_account, _amount);
-    }
+    function burn(address _account, uint256 _amount) external;
 
     /**
      * @notice Only owner who can transfer the token.
@@ -123,13 +79,7 @@ contract MetaAssetToken is ERC20Permit, Ownable {
      *
      * @return true / false.
      */
-    function transfer(
-        address _recipient,
-        uint256 _amount
-    ) public override requireValidRecipient(_recipient) returns (bool) {
-        _transfer(_msgSender(), _recipient, _amount);
-        return true;
-    }
+    function transfer(address _recipient, uint256 _amount) external returns (bool);
 
     /**
      * @notice Only owner who can transfer the token.
@@ -142,15 +92,7 @@ contract MetaAssetToken is ERC20Permit, Ownable {
      *
      * @return true / false.
      */
-    function transferFrom(
-        address _from,
-        address _to,
-        uint256 _amount
-    ) public override requireValidRecipient(_to) returns (bool) {
-        _approve(_from, msg.sender, allowance(_from, msg.sender) - _amount);
-        _transfer(_from, _to, _amount);
-        return true;
-    }
+    function transferFrom(address _from, address _to, uint256 _amount) external returns (bool);
 
     /**
      * @notice transfer utilizing EIP-2612, to reduce the additional sending transaction for doing the approval to the spender.
@@ -176,10 +118,7 @@ contract MetaAssetToken is ERC20Permit, Ownable {
         uint8 _v,
         bytes32 _r,
         bytes32 _s
-    ) external requireValidRecipient(_to) {
-        permit(_from, msg.sender, _amount, _deadline, _v, _r, _s);
-        transferFrom(_from, _to, _amount);
-    }
+    ) external;
 
     /**
      * @notice Approves and then calls the receiving contract.
@@ -190,10 +129,7 @@ contract MetaAssetToken is ERC20Permit, Ownable {
      * @param _amount The amount of tokens to be sent.
      * @param _data Parameters for the contract call, such as endpoint signature.
      */
-    function approveAndCall(address _spender, uint256 _amount, bytes calldata _data) external {
-        approve(_spender, _amount);
-        IApproveAndCall(_spender).receiveApproval(msg.sender, _amount, address(this), _data);
-    }
+    function approveAndCall(address _spender, uint256 _amount, bytes calldata _data) external;
 
     /**
      * @dev to support EIP712, will need the token contract to return the chain id.
@@ -201,7 +137,5 @@ contract MetaAssetToken is ERC20Permit, Ownable {
      * @return chain id.
      *
      */
-    function getChainId() external view returns (uint256) {
-        return block.chainid;
-    }
+    function getChainId() external view returns (uint256);
 }
