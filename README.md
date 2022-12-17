@@ -15,8 +15,6 @@ Here is the list of available scripts:
      "deploy-governance:ropsten" - run migrations of governance contracts, ropsten network
      "deploy-governance:kovan" - run migrations of governance contracts, kovan network
      "deploy-governance:rskTestnet" - run migrations of governance contracts, rskTestnet network
-     "deploy-mynt-token" - deploy MyntToken, development network
-     "deploy-fish-token" - deploy FishToken, development network
 -    "lint" - run linter
 -    "lint-ts" - run typescript linter
 -    "lint-sol" - run solidity linter

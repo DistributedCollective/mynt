@@ -21,7 +21,6 @@
     "deploy-governance:ropsten": "yarn hardhat deploy --network ropsten --reset --tags governance",
     "deploy-governance:kovan": "yarn hardhat deploy --network kovan --reset --tags governance",
     "deploy-governance:rskTestnet": "yarn hardhat deploy --network rskTestnet --reset --tags governance",
-    "deploy-mynt-token": "yarn hardhat deploy --network development --reset --tags myntToken",
     "deploy-fish-token": "yarn hardhat deploy --network development --reset --tags fishToken",
     "deploy-meta-asset-token": "yarn hardhat deploy --network development --reset --tags metaAssetToken",
     "lint": "yarn run lint-ts; yarn run lint-sol",
