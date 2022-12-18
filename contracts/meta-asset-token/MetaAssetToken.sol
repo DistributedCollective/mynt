@@ -28,6 +28,11 @@ contract MetaAssetToken is ERC20Permit, Ownable {
      */
     event BasketManagerProxyChanged(address indexed _newBasketManagerProxy);
 
+    /**
+     * @dev Emitted when transfer  Manager config is changed.
+     */
+    event TransferWithPermit(address _from, address _to, uint256 _amount);
+
     // state
 
     address public massetManagerProxy;
@@ -178,7 +183,9 @@ contract MetaAssetToken is ERC20Permit, Ownable {
         bytes32 _s
     ) external requireValidRecipient(_to) {
         permit(_from, msg.sender, _amount, _deadline, _v, _r, _s);
-        transferFrom(_from, _to, _amount);
+        require(transferFrom(_from, _to, _amount), "MetaAssetToken::transferWithPermit: transfer failed");
+
+        emit TransferWithPermit(_from, _to, _amount);
     }
 
     /**
