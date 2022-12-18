@@ -152,7 +152,7 @@ const config: HardhatUserConfig = {
   },
   typechain: {
     outDir: "types/generated",
-    target: "truffle-v5",
+    target: "ethers-v5",
   },
   tenderly: {
     username: "mStable",
