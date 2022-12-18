@@ -4,7 +4,7 @@ import * as dotenv from "dotenv";
 import "hardhat-gas-reporter";
 import "solidity-coverage";
 import "@nomiclabs/hardhat-web3";
-import "@nomiclabs/hardhat-waffle";
+import "@nomicfoundation/hardhat-chai-matchers";
 import "@nomiclabs/hardhat-ethers";
 import "@nomiclabs/hardhat-truffle5";
 import "@tenderly/hardhat-tenderly";
