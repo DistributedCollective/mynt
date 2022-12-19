@@ -38,7 +38,7 @@ state_rskDev.json
 # truffle / buidler
 cache/
 build/
-artifacts/
+/artifacts/
 contracts-output/
 
 # TSC
