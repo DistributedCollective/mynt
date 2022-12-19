@@ -1,4 +1,5 @@
 import { HardhatUserConfig } from "hardhat/types";
+import "@nomicfoundation/hardhat-toolbox";
 
 import * as dotenv from "dotenv";
 import "hardhat-gas-reporter";
@@ -153,6 +154,7 @@ const config: HardhatUserConfig = {
   typechain: {
     outDir: "types/generated",
     target: "ethers-v5",
+    externalArtifacts: ["external-artifacts/*.sol/!(*.dbg.json)"], // optional array of glob patterns with external artifacts to process (for example external libs from node_modules)
   },
   tenderly: {
     username: "mStable",
