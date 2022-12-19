@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/ERC1967/ERC1967UpgradeUpgradeable.sol";
 import { IMocMintRedeemDoc, PermitParams } from "./IMoC.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "../../meta-asset-token/DLLR.sol";
@@ -8,10 +10,10 @@ import "../../interfaces/IMassetManager.sol";
 import "../../interfaces/IDLLR.sol";
 
 /// @notice This contract provides compound functions with Money On Chain wrapping them in one transaction for convenience and to save on gas
-contract MocIntegration {
-    // Address of the MoC contract
+contract MocIntegration is OwnableUpgradeable, ERC1967UpgradeUpgradeable {
+    // Money On Chain DoC redeem interface at MoC main contract address
     IMocMintRedeemDoc public immutable moc;
-    // Address of the DoC token
+    // IERC20@[DoC token]
     IERC20 public immutable doc;
     IDLLR public immutable dllr;
     IMassetManager public immutable massetManager;
@@ -40,7 +42,7 @@ contract MocIntegration {
      * -------------------------------------------------------------------------------------------
      * |               Mynt                         |                Money On Chain              |
      * -------------------------------------------------------------------------------------------
-     * | Get DLLR (EIP-2612) -> convert DLLR to DoC | -> get RBTC from DLLR -> send RBTC to user |
+     * | get DLLR (EIP-2612) -> convert DLLR to DoC | -> get RBTC from DoC -> send RBTC to user  |
      * -------------------------------------------------------------------------------------------
      *
      * @param _dllrAmount The amount of the DLLR (mAsset) that will be burned in exchange for _toToken
@@ -83,5 +85,14 @@ contract MocIntegration {
         require(success, "MocIntegration:: error transferring redeemed RBTC");
 
         emit GetDocFromDllrAndRedeemRBTC(_dllrAmount, rbtcAmount);
+    }
+
+    /**
+     * @dev get the implementation logic address referring to ERC1967 standard.
+     *
+     * @return logic implementation address.
+     */
+    function getProxyImplementation() external view returns (address) {
+        return ERC1967UpgradeUpgradeable._getImplementation();
     }
 }
