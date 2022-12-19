@@ -99,16 +99,16 @@ const config: HardhatUserConfig = {
         : [],
       url: "https://testnet.sovryn.app/rpc",
       chainId: 31,
-      gasPrice: 71680400, // 71GWei,
+      gasPrice: 66000010, // 71GWei,
       timeout: 1e9,
     },
-    rsk: {
+    rskMainnet: {
       accounts: process.env.DEPLOYER_PRIVATE_KEY
         ? [process.env.DEPLOYER_PRIVATE_KEY]
         : [],
       url: "wss://mainnet.sovryn.app/ws",
       chainId: 30,
-      gasPrice: 71680400, // 71GWei,
+      gasPrice: 66000010, // 71GWei,
       timeout: 1e9,
     },
   },
@@ -140,7 +140,6 @@ const config: HardhatUserConfig = {
     ],
   },
   paths: {
-    artifacts: "./build/contracts",
     deployments: "./deployments",
     sources: "./contracts",
   },
@@ -154,7 +153,22 @@ const config: HardhatUserConfig = {
   typechain: {
     outDir: "types/generated",
     target: "ethers-v5",
-    externalArtifacts: ["external-artifacts/*.sol/!(*.dbg.json)"], // optional array of glob patterns with external artifacts to process (for example external libs from node_modules)
+    externalArtifacts: ["external/artifacts/*.sol/!(*.dbg.json)"], // optional array of glob patterns with external artifacts to process (for example external libs from node_modules)
+  },
+  external: {
+    contracts: [
+      {
+        artifacts: "external/artifacts/*.sol/!(*.dbg.json)",
+        // deploy: "node_modules/@cartesi/arbitration/export/deploy",
+      },
+      {
+        artifacts: "node_modules/someotherpackage/artifacts",
+      },
+    ],
+    deployments: {
+      rskTestnet: ["external/deployments/rskTestnet"],
+      rskMainnet: ["external/deployments/rskMainnet"],
+    },
   },
   tenderly: {
     username: "mStable",
