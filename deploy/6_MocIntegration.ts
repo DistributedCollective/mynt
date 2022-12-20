@@ -24,6 +24,6 @@ const func: DeployFunction = async ({ deployments, getNamedAccounts }) => {
   });
 };
 
-func.tags = ["BasketManager"];
+func.tags = ["MocIntegration"];
 
 export default func;
