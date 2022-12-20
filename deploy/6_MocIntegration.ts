@@ -1,5 +1,4 @@
 import { DeployFunction } from "hardhat-deploy/types";
-import { abi as IERC20 } from "@openzeppelin/contracts/build/contracts/IERC20.json";
 
 const func: DeployFunction = async ({ deployments, getNamedAccounts }) => {
   const { deploy, get } = deployments;
