@@ -21,5 +21,6 @@ const func: DeployFunction = async ({
 };
 
 func.tags = ["MassetManager"];
+func.dependencies = ["MyntAdminProxy"];
 
 export default func;

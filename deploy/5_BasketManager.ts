@@ -1,7 +1,7 @@
 import { DeployFunction } from "hardhat-deploy/types";
 
 const func: DeployFunction = async ({ deployments, getNamedAccounts }) => {
-  const { deploy } = deployments;
+  const { deploy, log } = deployments;
   const { deployer } = await getNamedAccounts();
   const deployedMassetManager = await deployments.get("MassetManager");
   const deployedToken = await deployments.get("DLLR");
@@ -29,8 +29,8 @@ const func: DeployFunction = async ({ deployments, getNamedAccounts }) => {
 
   // Initialize  MassetManager
   const deployedBasketManager = await deployments.get("BasketManagerV3");
-  console.log(deployedBasketManager.address);
-  console.log(deployedToken.address);
+  log(deployedBasketManager.address);
+  log(deployedToken.address);
   await deployments.execute(
     "MassetManager",
     { from: deployer },
@@ -51,8 +51,11 @@ const func: DeployFunction = async ({ deployments, getNamedAccounts }) => {
     deployedFeesManager.address
   );
 
-  const massetManagerVersion = await deployments.read("MassetManager", "getVersion");
-  console.log("Masset Version :", massetManagerVersion);
+  const massetManagerVersion = await deployments.read(
+    "MassetManager",
+    "getVersion"
+  );
+  log("Masset Version :", massetManagerVersion);
 
   // Set  MassetManager & Basket Manager in DLLR contract
   await deployments.execute(
@@ -71,5 +74,6 @@ const func: DeployFunction = async ({ deployments, getNamedAccounts }) => {
 };
 
 func.tags = ["BasketManager"];
+func.dependencies = ["MyntAdminProxy", "MassetManager", "DLLR"];
 
 export default func;

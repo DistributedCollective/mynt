@@ -37,5 +37,6 @@ const func: DeployFunction = async ({
 };
 
 func.tags = ["FeesManager"];
+func.dependencies = ["MyntAdminProxy"];
 
 export default func;
