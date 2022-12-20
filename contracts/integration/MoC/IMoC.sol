@@ -1,13 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-struct PermitParams {
-    uint256 deadline;
-    uint8 v;
-    bytes32 r;
-    bytes32 s;
-}
-
 /// Interface to the Money OnChain main contract MoC to mint DoC and redeem RBTC
 interface IMocMintRedeemDoc {
     /**

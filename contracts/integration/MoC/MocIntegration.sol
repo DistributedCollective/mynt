@@ -3,11 +3,11 @@ pragma solidity ^0.8.17;
 
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/ERC1967/ERC1967UpgradeUpgradeable.sol";
-import { IMocMintRedeemDoc, PermitParams } from "./IMoC.sol";
+import { IMocMintRedeemDoc } from "./IMoC.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "../../meta-asset-token/DLLR.sol";
 import "../../interfaces/IMassetManager.sol";
-import "../../interfaces/IDLLR.sol";
+import { IDLLR, PermitParams } from "../../interfaces/IDLLR.sol";
 
 /// @notice This contract provides compound functions with Money On Chain wrapping them in one transaction for convenience and to save on gas
 contract MocIntegration is OwnableUpgradeable, ERC1967UpgradeUpgradeable {
@@ -29,7 +29,7 @@ contract MocIntegration is OwnableUpgradeable, ERC1967UpgradeUpgradeable {
     constructor(address _moc, address _doc, address _dllr, address _massetManager) {
         require(
             _moc != address(0) && _doc != address(0) && _dllr != address(0) && _massetManager != address(0),
-            "No null addresses allowed"
+            "MocIntegration:: no null addresses allowed"
         );
         moc = IMocMintRedeemDoc(_moc);
         doc = IERC20(_doc);

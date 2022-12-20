@@ -4,12 +4,21 @@ pragma solidity ^0.8.17;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 /**
- * @title MetaAssetToken
+ * @dev Permit params (EIP-2612) wrapper struct
+ */
+struct PermitParams {
+    uint256 deadline;
+    uint8 v;
+    bytes32 r;
+    bytes32 s;
+}
+
+/**
+ * @title DLLR mAsset interface.
  * @dev mAsset - Meta Asset Token implementation.
  * Inherits from ERC20.
  * mint and burn functions.
  */
-
 interface IDLLR is IERC20 {
     // events
 
