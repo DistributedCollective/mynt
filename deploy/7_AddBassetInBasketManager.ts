@@ -15,7 +15,16 @@ const func: DeployFunction = async ({
   let maxs = [0,0];
   let pausedFlags = [false, false];
 
-  if(network === 'development' || network === 'rskTestnet') {
+  if(network === 'development') {
+    // @todo for local node (hardhat node), need to deploy MOCK ERC20 for the bAssets
+    // @todo for forked testnet no need to change the bAssets addresses below since it's already using the testnet addresses.
+    // @todo for forked mainnet, need to change the below addresses with the mainnet addresses.
+    // for now we will just update it manually.
+    bAssets = [
+      "0x6b41566353d6c7b8c2a7931d498f11489dacac29", // ZUSD Testnet
+      "0xcb46c0ddc60d18efeb0e586c17af6ea36452dae0", // DOC Tesnet
+    ];
+  } else if(network === 'rskTestnet') {
     bAssets = [
       "0x6b41566353d6c7b8c2a7931d498f11489dacac29", // ZUSD Testnet
       "0xcb46c0ddc60d18efeb0e586c17af6ea36452dae0", // DOC Tesnet
