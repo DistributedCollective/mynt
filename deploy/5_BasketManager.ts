@@ -8,7 +8,8 @@ const func: DeployFunction = async ({ deployments, getNamedAccounts }) => {
   const deployedFeesVault = await deployments.get("FeesVault");
   const deployedFeesManager = await deployments.get("FeesManager");
 
-  await deploy("BasketManagerV3", {
+  await deploy("BasketManager", {
+    contract: "BasketManagerV3",
     proxy: {
       owner: deployer,
       proxyContract: "OpenZeppelinTransparentProxy",
@@ -28,7 +29,7 @@ const func: DeployFunction = async ({ deployments, getNamedAccounts }) => {
   });
 
   // Initialize  MassetManager
-  const deployedBasketManager = await deployments.get("BasketManagerV3");
+  const deployedBasketManager = await deployments.get("BasketManager");
   log(deployedBasketManager.address);
   log(deployedToken.address);
   await deployments.execute(
@@ -74,6 +75,12 @@ const func: DeployFunction = async ({ deployments, getNamedAccounts }) => {
 };
 
 func.tags = ["BasketManager"];
-func.dependencies = ["MyntAdminProxy", "MassetManager", "DLLR"];
+func.dependencies = [
+  "MyntAdminProxy",
+  "MassetManager",
+  "DLLR",
+  "FeesVault",
+  "FeesManager",
+];
 
 export default func;
