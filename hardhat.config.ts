@@ -8,7 +8,7 @@ import "@nomiclabs/hardhat-web3";
 import "@nomicfoundation/hardhat-chai-matchers";
 import "@nomiclabs/hardhat-ethers";
 import "@nomiclabs/hardhat-truffle5";
-import "@tenderly/hardhat-tenderly";
+// import "@tenderly/hardhat-tenderly";
 import "hardhat-deploy";
 import "tsconfig-paths/register";
 import "@typechain/hardhat";
@@ -170,10 +170,10 @@ const config: HardhatUserConfig = {
       rskMainnet: ["external/deployments/rskMainnet"],
     },
   },
-  tenderly: {
+  /* tenderly: {
     username: "mStable",
     project: "mStable-contracts",
-  },
+  }, */
   contractSizer: {
     alphaSort: true,
     disambiguatePaths: false,
