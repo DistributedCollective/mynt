@@ -28,7 +28,10 @@ contract MocIntegration is OwnableUpgradeable, ERC1967UpgradeUpgradeable {
      */
     constructor(address _moc, address _doc, address _dllr, address _massetManager) {
         require(
-            _moc != address(0) && _doc != address(0) && _dllr != address(0) && _massetManager != address(0),
+            _moc != address(0) &&
+                _doc != address(0) &&
+                _dllr != address(0) &&
+                _massetManager != address(0),
             "MocIntegration:: no null addresses allowed"
         );
         moc = IMocMintRedeemDoc(_moc);
@@ -52,7 +55,10 @@ contract MocIntegration is OwnableUpgradeable, ERC1967UpgradeUpgradeable {
      *        _r First 32 bytes of ECDSA signature.
      *        _s 32 bytes after _r in ECDSA signature.
      */
-    function getDocFromDllrAndRedeemRBTC(uint256 _dllrAmount, PermitParams calldata _permitParams) external {
+    function getDocFromDllrAndRedeemRBTC(
+        uint256 _dllrAmount,
+        PermitParams calldata _permitParams
+    ) external {
         // transfer _dllrAmount to this contract by permit (EIP-2612)
         address thisAddress = address(this);
         uint256 dllrBalanceBefore = dllr.balanceOf(thisAddress);
