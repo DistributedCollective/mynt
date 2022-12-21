@@ -1,4 +1,5 @@
 import { HardhatUserConfig } from "hardhat/types";
+import { task } from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox";
 
 import * as dotenv from "dotenv";
@@ -16,6 +17,43 @@ import "hardhat-docgen";
 import "hardhat-contract-sizer";
 import "@openzeppelin/hardhat-upgrades";
 import "@nomiclabs/hardhat-solhint";
+
+/*
+ * Test hardhat forking with patched hardhat
+ *
+ * If you get this error:
+ * InvalidResponseError: Invalid JSON-RPC response's result.
+ * Errors: Invalid value null supplied to : RpcBlockWithTransactions | null/transactions: RpcTransaction Array/2:
+ * RpcTransaction/v: QUANTITY, Invalid value null supplied to : RpcBlockWithTransactions | null/transactions:
+ * RpcTransaction Array/2: RpcTransaction/r: QUANTITY, Invalid value null supplied to :
+ * RpcBlockWithTransactions | null/transactions: RpcTransaction Array/2: RpcTransaction/s: QUANTITY
+ *
+ * Then the forking doesn't work correctly (ie. hardhat was not properly patched)
+ */
+task("check-fork-patch", "Check Hardhat Fork Patch by Rainer").setAction(
+  async (taskArgs, hre) => {
+    await hre.network.provider.request({
+      method: "hardhat_reset",
+      params: [
+        {
+          forking: {
+            jsonRpcUrl: "https://mainnet.sovryn.app/rpc",
+            blockNumber: 4272658,
+          },
+        },
+      ],
+    });
+    // const xusd = await IERC20.at("0xb5999795BE0EbB5bAb23144AA5FD6A02D080299F");
+    const xusd = await hre.ethers.getContractAt(
+      "ERC20",
+      "0xb5999795BE0EbB5bAb23144AA5FD6A02D080299F"
+    );
+    const totalSupply = await xusd.totalSupply();
+    if (totalSupply.toString() === "12346114443582774719512874")
+      console.log("Hardhat mainnet forking works properly!");
+    else console.log("Hardhat mainnet forking does NOT work properly!");
+  }
+);
 
 dotenv.config();
 
