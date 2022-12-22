@@ -58,7 +58,7 @@ contract MetaAssetToken is ERC20Permit, Ownable {
     constructor(
         string memory _tokenName,
         string memory _symbol
-    ) ERC20(_tokenName, _symbol) ERC20Permit("MetaAsset") {}
+    ) ERC20(_tokenName, _symbol) ERC20Permit(_tokenName) {}
 
     /**
      * @dev getter function of MassetManager implementation address
