@@ -1,11 +1,17 @@
-## **1. Documentation**
+## 0. About
 
-Documentation for contracts can be found in /docs directory.
+Mynt is a stablecoin aggregator based on [BabelFish](https://github.com/BabelFishProtocol/babelfish-phase-1). In contrast to BabelFish, which supports stablecoins with many different types of collateral backing, the stablecoins that Mynt supports are exclusively backed by BTC. Users can use Mynt to convert between supported "bAsset" stablecoins and the Mynt "mAsset" stablecoin at a 1:1 ratio. The Mynt mAsset stablecoin is the Sovryn Dollar (DLLR).
+
+By aggregating multiple different BTC-backed stablecoins, each with their own issuance and stability mechanisms, DLLR has the potential to be more resilient, stable, and scalable than any of the underlying stablecoins on their own.
+
+## 1. Documentation
+
+Documentation for contracts can be found in `/docs` directory.
 To generate documentation use "yarn docgen" command.
 
-## **2. Scripts**
+## 2. Scripts
 
-Project scripts are defined in _pachage.json_ file. To execute the script run the following command: _yarn command_, for example _'yarn migrate'_. 
+Project scripts are defined in `package.json` file. To execute the script run the following command: `yarn command`, for example `yarn migrate`. 
 Here is the list of available scripts:
 -    "deploy" - run migrations, development network
 -    "deploy:ropsten" - run migrations, ropsten network
@@ -28,19 +34,21 @@ Here is the list of available scripts:
 -    "test-file" - run just one test file
 -    "test:fork" run tests on fork network
 -    "compile" - install project dependencies and compile
--    "prettify" - run prettifyier on source files
+-    "prettify" - run prettifier on source files
 -    "flatten" - run flattener on source files
 -    "prepublishOnly" - compile
 -    "docgen" - generate documentation from solidity Natspecs
 
-## **3. Governance migration**
+## 3. Governance migration
 
-##### Here are the steps needed to properly deploy and integrate governance system:
+##### Here are the steps needed to properly deploy and integrate a governance system:
 -   Run contracts migrations: `yarn migrate-governance` (this script will queue the transferAdmin call)
 -   To set the proper admin you need to execute the "transferAdmin" task after sufficient time delay. `yarn hardhat transferAdmin`
 -   Integrate governance system by changing owner of selected contracts by executing `yarn hardhat run scripts/governanceIntegration.ts`
 
-## **4. How does fees work**
+## 4. How do fees work
+
+Fees are currently disabled. But if they are ever enabled, here is how they will work:
 
 ##### **`- mint`**( take bAssets, mint mAssets in exchange )
 &NewLine;
@@ -55,6 +63,6 @@ Here is the list of available scripts:
 -   transfer calculated amount before all conversions
 -   substract from massets to burn and bassets to transfer
 
-## **5. Graph**
+## 5. Graph
 
-<img src="images/UML_diagram.png" />
+<img src="images/UML_diagram_2.png" />
