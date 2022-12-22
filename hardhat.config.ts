@@ -65,16 +65,18 @@ const config: HardhatUserConfig = {
   },
   networks: {
     development: {
-      accounts: process.env.DEPLOYER_PRIVATE_KEY
-        ? [process.env.DEPLOYER_PRIVATE_KEY]
-        : [],
       url: "http://127.0.0.1:8545",
+      allowUnlimitedContractSize: true,
+      initialBaseFeePerGas: 0,
+      blockGasLimit: 6800000,
       // saveDeployments: false
     },
     hardhat: {
       live: false,
       chainId: 31337,
       blockGasLimit: 6800000,
+      allowUnlimitedContractSize: true,
+      initialBaseFeePerGas: 0,
     },
     rskDev: {
       from: "0xcd2a3d9f938e13cd947ec05abc7fe734df8dd826",
@@ -137,7 +139,7 @@ const config: HardhatUserConfig = {
         : [],
       url: "https://testnet.sovryn.app/rpc",
       chainId: 31,
-      gasPrice: 66000010, // 71GWei,
+      gasPrice: 66000010, // 66GWei,
       timeout: 1e9,
     },
     rskMainnet: {
