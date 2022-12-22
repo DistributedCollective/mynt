@@ -8,7 +8,8 @@ const func: DeployFunction = async ({ deployments, getNamedAccounts }) => {
   const deployedFeesVault = await deployments.get("FeesVault");
   const deployedFeesManager = await deployments.get("FeesManager");
 
-  await deploy("BasketManager", {
+  await deploy("BasketManagerV3", {
+    // @todo - replace BasketManagerV3 -> BasketManager (requires removing or renaming legacy BasketManager contract)
     contract: "BasketManagerV3",
     proxy: {
       owner: deployer,
@@ -29,9 +30,12 @@ const func: DeployFunction = async ({ deployments, getNamedAccounts }) => {
   });
 
   // Initialize  MassetManager
-  const deployedBasketManager = await deployments.get("BasketManager");
-  log(deployedBasketManager.address);
-  log(deployedToken.address);
+  const deployedBasketManager = await deployments.get("BasketManagerV3");
+  console.log(
+    "5_BasketManager:: BasketManager:",
+    deployedBasketManager.address
+  );
+  console.log("5_BasketManager:: DLLR:", deployedToken.address);
   await deployments.execute(
     "MassetManager",
     { from: deployer },
@@ -72,6 +76,8 @@ const func: DeployFunction = async ({ deployments, getNamedAccounts }) => {
     "setBasketManagerProxy",
     deployedBasketManager.address
   );
+
+  log("5_BasketManager:: DLLR In The End:", deployedToken.address);
 };
 
 func.tags = ["BasketManager"];

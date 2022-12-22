@@ -1,7 +1,7 @@
 import { DeployFunction } from "hardhat-deploy/types";
 
 const func: DeployFunction = async ({
-  deployments: { deploy },
+  deployments: { deploy, get },
   getNamedAccounts,
 }) => {
   const { deployer } = await getNamedAccounts();
@@ -18,6 +18,8 @@ const func: DeployFunction = async ({
     from: deployer,
     log: true,
   });
+  const mm = await get("MassetManager");
+  console.log("2_MassetManager:: MassetManager:", mm.address);
 };
 
 func.tags = ["MassetManager"];
