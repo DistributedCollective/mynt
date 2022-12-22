@@ -6,7 +6,6 @@ import hre, { deployments, expect } from "hardhat"; // expect => https://hardhat
 // import { FakeContract, smock } from "@defi-wonderland/smock";
 import {
     DLLR,
-    ERC20,
     MassetManager,
     MocIntegration,
     BasketManagerV3,
@@ -22,21 +21,14 @@ describe("MoC Integration", async () => {
     // let mocFake: FakeContract<IMocMintRedeemDoc>;
     let moc: MocMock;
     let mocIntegration: MocIntegration;
-    let deployer: SignerWithAddress;
     let alice: SignerWithAddress;
-    let bob: SignerWithAddress;
-    let funder: SignerWithAddress;
-    let user: SignerWithAddress;
     let accounts: SignerWithAddress[];
     let dllr: DLLR;
-    let doc: ERC20;
     let massetManager: MassetManager;
     let basketManager: BasketManagerV3;
     let bAssetZusd: MockERC20;
     let bAssetDoc: MockERC20;
-    const { deploy, get } = deployments;
     const { ethers } = hre;
-    // let dllr: DLLR, doc: DoC,
 
     // to test DLLR -> DoC -> RBTC
     // instantiation:
@@ -59,10 +51,10 @@ describe("MoC Integration", async () => {
             "MocIntegration",
         ]);
 
-        [deployer, alice, bob] = accounts;
+        [, alice] = accounts;
 
-        const mocFactory = await ethers.getContractFactory("MocMock");
-        moc = (await mocFactory.deploy()) as MocMock;
+        // const mocFactory = await ethers.getContractFactory("MocMock");
+        // moc = (await mocFactory.deploy()) as MocMock;
 
         dllr = (await ethers.getContract("DLLR")) as DLLR;
         massetManager = (await ethers.getContract("MassetManager")) as MassetManager;
@@ -71,6 +63,7 @@ describe("MoC Integration", async () => {
 
         // bAssetDoc = (await ethers.getContract("DoC")) as MockERC20;
         bAssetDoc = await ethers.getContractAt("MockERC20", await mocIntegration.doc());
+        moc = (await ethers.getContractAt("MocMock", await mocIntegration.moc())) as MocMock;
 
         const erc20Factory = await ethers.getContractFactory("MockERC20");
         bAssetZusd = (await erc20Factory.deploy(
@@ -86,24 +79,14 @@ describe("MoC Integration", async () => {
             [1, 1],
             [ZERO_ADDRESS, ZERO_ADDRESS],
             [0, 0],
-            [0, 0],
+            [1000, 1000],
             [false, false]
         );
-
-        const adminProxy = await get("MyntAdminProxy");
-        console.log(`adminProxy: ${adminProxy.address}
-                        alice:${alice.address}
-                        dllr.address:${dllr.address}
-                        alice.address:${alice.address}
-                        mocIntegration.address:${mocIntegration.address}
-                        doc.address: ${bAssetDoc.address}
-                        moc.address: ${moc.address}`);
     });
 
     describe("deployment", async () => {
         it("should redeem from DLLR Money on Chain DoC and then redeem RBTC from DoC, all in one transaction", async () => {
             const dllrAmount = ethers.utils.parseEther("500").toString();
-            console.log(`dllrAmount: ${dllrAmount}`);
 
             // alice gets DLLR by minting it for
             // fund alice with 500 DoC
@@ -128,7 +111,8 @@ describe("MoC Integration", async () => {
 
             // prerequisites:
             // calc expected RBTC for alice to receive
-            const expectedRbtcValue = (await moc.docToRbtcRate()).mul(dllrAmount);
+            const expectedRbtcValue = await moc.getRbtcValue(dllrAmount);
+
             // fund Money On Chain MoC contract with RBTC
             await setBalance(moc.address, expectedRbtcValue.mul(2));
 
@@ -137,20 +121,19 @@ describe("MoC Integration", async () => {
             // mocIntegration contract gets DLLR by permission from alice and calls
             // MocMock (MoC mock contract) redeem func to exchange DLLR to RBTC
 
-            await mocIntegration.connect(alice).getDocFromDllrAndRedeemRBTC(dllrAmount, permit);
+            // await mocIntegration.connect(alice).getDocFromDllrAndRedeemRBTC(dllrAmount, permit);
 
-            /* await expect(
+            await expect(
                 mocIntegration.connect(alice).getDocFromDllrAndRedeemRBTC(dllrAmount, permit)
             )
                 .to.changeEtherBalances(
                     [alice.address, moc.address],
-                    [expectedRbtcValue, -expectedRbtcValue]
+                    [expectedRbtcValue, `-${expectedRbtcValue}`]
                 )
-                .to.changeTokenBalance(dllr, alice.address, -dllrAmount);
-                */
-            // expect((await alice.getBalance()).toString()).eq(expectedRbtcValue);
-            // expect((await dllr.balanceOf(alice.address)).toString()).eq(0);
-            // expect(await ethers.provider.getBalance(moc.address)).eq(expectedRbtcValue);
+                .to.changeTokenBalance(dllr, alice.address, `-${dllrAmount}`);
+
+            expect((await dllr.balanceOf(alice.address)).toString()).eq("0");
+            expect(await ethers.provider.getBalance(moc.address)).eq(expectedRbtcValue);
         });
     });
 });

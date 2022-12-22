@@ -40,6 +40,9 @@ contract MocIntegration is OwnableUpgradeable, ERC1967UpgradeUpgradeable {
         massetManager = IMassetManager(_massetManager);
     }
 
+    ///@dev the contract requires receiving funds temporarily before transferring them to users
+    receive() external payable {}
+
     /**
      * @notice how getDocFromDllrAndRedeemRBTC function works:
      * -------------------------------------------------------------------------------------------

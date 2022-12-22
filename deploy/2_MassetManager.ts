@@ -19,7 +19,6 @@ const func: DeployFunction = async ({
     log: true,
   });
   const mm = await get("MassetManager");
-  console.log("2_MassetManager:: MassetManager:", mm.address);
 };
 
 func.tags = ["MassetManager"];

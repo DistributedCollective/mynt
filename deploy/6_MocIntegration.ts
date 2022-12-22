@@ -9,8 +9,6 @@ const func: DeployFunction = async ({ deployments, getNamedAccounts }) => {
 
   const deployedDLLR = await deployments.get("DLLR");
 
-  console.log("6_MocIntegration.ts:: deployedDLLR:", deployedDLLR.address);
-
   const networkName = deployments.getNetworkName();
   let mocAddress;
   let docAddress;
@@ -37,7 +35,7 @@ const func: DeployFunction = async ({ deployments, getNamedAccounts }) => {
       .address;
   }
   const dllrAddress = (await get("DLLR")).address; // "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512"; //
-  console.log("6_MocIntegration.ts:: dllrAddress ", dllrAddress);
+
   const massetManagerAddress = (await get("MassetManager")).address;
 
   const result = await deploy("MocIntegration", {
@@ -53,7 +51,6 @@ const func: DeployFunction = async ({ deployments, getNamedAccounts }) => {
     from: deployer,
     log: true,
   });
-  console.log("6_MocIntegration.ts:: MocIntegration address:", result.address);
 };
 
 func.tags = ["MocIntegration"];

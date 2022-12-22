@@ -3,7 +3,7 @@ pragma solidity ^0.8.17;
 
 /// Interface to the Money OnChain main contract MoC to mint DoC and redeem RBTC
 contract MocMock {
-    uint256 public docToRbtcRate = uint256(1 ether / 16000); //62500000000000
+    uint256 public docToRbtcRate = uint256(1 ether / 16000); // 62500000000000 sat/DoC
 
     function setExRate(uint256 _newRate) external {
         docToRbtcRate = _newRate;
@@ -16,12 +16,13 @@ contract MocMock {
       @param _vendor Vendor adddress (not used here)
     */
     function redeemFreeDocVendors(uint256 _docAmount, address _vendor) external {
-        (bool success, ) = msg.sender.call{ value: getRbtcValue(_docAmount) }("");
+        (bool success, ) = msg.sender.call{ value: this.getRbtcValue(_docAmount) }("");
+
         require(success, "MocMintRedeemDoc::redeemFreeDoc fail");
     }
 
-    function getRbtcValue(uint256 _docAmount) internal view returns (uint256) {
-        return _docAmount * docToRbtcRate;
+    function getRbtcValue(uint256 _docAmount) external view returns (uint256) {
+        return (_docAmount * docToRbtcRate) / 1 ether;
     }
 
     /*

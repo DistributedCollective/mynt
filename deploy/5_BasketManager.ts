@@ -31,11 +31,7 @@ const func: DeployFunction = async ({ deployments, getNamedAccounts }) => {
 
   // Initialize  MassetManager
   const deployedBasketManager = await deployments.get("BasketManagerV3");
-  console.log(
-    "5_BasketManager:: BasketManager:",
-    deployedBasketManager.address
-  );
-  console.log("5_BasketManager:: DLLR:", deployedToken.address);
+
   await deployments.execute(
     "MassetManager",
     { from: deployer },

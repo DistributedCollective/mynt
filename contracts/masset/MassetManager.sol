@@ -23,7 +23,12 @@ import "@openzeppelin/contracts-upgradeable/proxy/ERC1967/ERC1967UpgradeUpgradea
  * if transaction based on token from another blockchain.
  */
 
-contract MassetManager is IERC777Recipient, OwnableUpgradeable, ReentrancyGuardUpgradeable, ERC1967UpgradeUpgradeable {
+contract MassetManager is
+    IERC777Recipient,
+    OwnableUpgradeable,
+    ReentrancyGuardUpgradeable,
+    ERC1967UpgradeUpgradeable
+{
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
     using SafeERC20 for MetaAssetToken;
@@ -87,7 +92,12 @@ contract MassetManager is IERC777Recipient, OwnableUpgradeable, ReentrancyGuardU
      * @param tokenAddress     Address of the bAsset to redeem.
      * @param userData         Address of the final recipient as ABI encoded bytes.
      */
-    event onTokensMintedCalled(address indexed sender, uint256 orderAmount, address tokenAddress, bytes userData);
+    event onTokensMintedCalled(
+        address indexed sender,
+        uint256 orderAmount,
+        address tokenAddress,
+        bytes userData
+    );
 
     // state
 
@@ -108,7 +118,11 @@ contract MassetManager is IERC777Recipient, OwnableUpgradeable, ReentrancyGuardU
      */
     function registerAsERC777Recipient() internal {
         IERC1820Registry ERC1820 = IERC1820Registry(0x1820a4B7618BdE71Dce8cdc73aAB6C95905faD24);
-        ERC1820.setInterfaceImplementer(address(this), ERC777_RECIPIENT_INTERFACE_HASH, address(this));
+        ERC1820.setInterfaceImplementer(
+            address(this),
+            ERC777_RECIPIENT_INTERFACE_HASH,
+            address(this)
+        );
     }
 
     // public
@@ -124,7 +138,10 @@ contract MassetManager is IERC777Recipient, OwnableUpgradeable, ReentrancyGuardU
         address _mAssetTokenAddress,
         bool _registerAsERC777RecipientFlag
     ) public initializer {
-        require(address(basketManager) == address(0) && address(mAssetToken) == address(0), "already initialized");
+        require(
+            address(basketManager) == address(0) && address(mAssetToken) == address(0),
+            "already initialized"
+        );
         require(_basketManagerAddress != address(0), "invalid basket manager");
         require(_mAssetTokenAddress != address(0), "invalid mAssetToken");
 
@@ -151,7 +168,10 @@ contract MassetManager is IERC777Recipient, OwnableUpgradeable, ReentrancyGuardU
      * @param _bAssetQuantity Quantity in bAsset units.
      * @return massetMinted   Quantity of newly minted mAsset.
      */
-    function mint(address _bAsset, uint256 _bAssetQuantity) external nonReentrant returns (uint256 massetMinted) {
+    function mint(
+        address _bAsset,
+        uint256 _bAssetQuantity
+    ) external nonReentrant returns (uint256 massetMinted) {
         return _mintTo(_bAsset, _bAssetQuantity, msg.sender);
     }
 
@@ -192,12 +212,14 @@ contract MassetManager is IERC777Recipient, OwnableUpgradeable, ReentrancyGuardU
         require(_bassetQuantity > 0, "quantity must not be 0");
 
         require(basketManager.isValidBasset(_basset), "invalid basset");
-        require(basketManager.checkBasketBalanceForDeposit(_basset, _bassetQuantity), "invalid basket");
 
-        (uint256 massetQuantity, uint256 bassetQuantity) = basketManager.convertBassetToMassetQuantity(
-            _basset,
-            _bassetQuantity
+        require(
+            basketManager.checkBasketBalanceForDeposit(_basset, _bassetQuantity),
+            "invalid basket"
         );
+
+        (uint256 massetQuantity, uint256 bassetQuantity) = basketManager
+            .convertBassetToMassetQuantity(_basset, _bassetQuantity);
 
         IERC20(_basset).safeTransferFrom(msg.sender, address(this), bassetQuantity);
 
@@ -215,7 +237,10 @@ contract MassetManager is IERC777Recipient, OwnableUpgradeable, ReentrancyGuardU
      * @param _bridgeFlag       Flag that indicates if the proces is used with conjunction with bridge.
      * @return massetsToMint    Amount of massets that is left to mint for user.
      */
-    function _mintAndCalculateFee(uint256 massetQuantity, bool _bridgeFlag) internal returns (uint256 massetsToMint) {
+    function _mintAndCalculateFee(
+        uint256 massetQuantity,
+        bool _bridgeFlag
+    ) internal returns (uint256 massetsToMint) {
         uint256 fee;
         if (_bridgeFlag) {
             fee = feesManager.calculateDepositBridgeFee(massetQuantity);
@@ -241,7 +266,10 @@ contract MassetManager is IERC777Recipient, OwnableUpgradeable, ReentrancyGuardU
      * @param _massetQuantity   Units of the masset to redeem.
      * @return massetRedeemed   Relative number of mAsset units burned to pay for the bAssets.
      */
-    function redeem(address _bAsset, uint256 _massetQuantity) external nonReentrant returns (uint256 massetRedeemed) {
+    function redeem(
+        address _bAsset,
+        uint256 _massetQuantity
+    ) external nonReentrant returns (uint256 massetRedeemed) {
         return _redeemTo(_bAsset, _massetQuantity, msg.sender, false, false);
     }
 
@@ -290,13 +318,18 @@ contract MassetManager is IERC777Recipient, OwnableUpgradeable, ReentrancyGuardU
 
         // massetsToBurn is the amount of massets that is left to burn after the fee was taken.
         // It is used to calculate amount of bassets that are transfered to user.
-        uint256 massetsAfterFee = _transferAndCalulateFee(_massetQuantity, massetSource, _bridgeFlag);
-        (uint256 bassetQuantity, uint256 massetsToBurn) = basketManager.convertMassetToBassetQuantity(
-            _basset,
-            massetsAfterFee
+        uint256 massetsAfterFee = _transferAndCalulateFee(
+            _massetQuantity,
+            massetSource,
+            _bridgeFlag
         );
+        (uint256 bassetQuantity, uint256 massetsToBurn) = basketManager
+            .convertMassetToBassetQuantity(_basset, massetsAfterFee);
 
-        require(basketManager.checkBasketBalanceForWithdrawal(_basset, bassetQuantity), "invalid basket");
+        require(
+            basketManager.checkBasketBalanceForWithdrawal(_basset, bassetQuantity),
+            "invalid basket"
+        );
 
         mAssetToken.burn(massetSource, massetsToBurn);
         // In case of withdrawal to bridge the receiveTokensAt is called instead of transfer.
@@ -306,7 +339,12 @@ contract MassetManager is IERC777Recipient, OwnableUpgradeable, ReentrancyGuardU
 
             IERC20(_basset).approve(bridgeAddress, bassetQuantity);
             require(
-                IBridge(bridgeAddress).receiveTokensAt(_basset, bassetQuantity, _recipient, bytes("")),
+                IBridge(bridgeAddress).receiveTokensAt(
+                    _basset,
+                    bassetQuantity,
+                    _recipient,
+                    bytes("")
+                ),
                 "call to bridge failed"
             );
         } else {
@@ -470,12 +508,13 @@ contract MassetManager is IERC777Recipient, OwnableUpgradeable, ReentrancyGuardU
         require(msg.sender == bridgeAddress, "only bridge may call");
 
         require(basketManager.isValidBasset(basset), "invalid basset");
-        require(basketManager.checkBasketBalanceForDeposit(basset, _orderAmount), "basket out of balance");
-
-        (uint256 massetQuantity, uint256 bassetQuantity) = basketManager.convertBassetToMassetQuantity(
-            basset,
-            _orderAmount
+        require(
+            basketManager.checkBasketBalanceForDeposit(basset, _orderAmount),
+            "basket out of balance"
         );
+
+        (uint256 massetQuantity, uint256 bassetQuantity) = basketManager
+            .convertBassetToMassetQuantity(basset, _orderAmount);
         uint256 massetsToMint = _mintAndCalculateFee(massetQuantity, true);
         mAssetToken.mint(recipient, massetsToMint);
 
@@ -524,7 +563,8 @@ contract MassetManager is IERC777Recipient, OwnableUpgradeable, ReentrancyGuardU
             "wrong version (1)"
         );
         require(
-            keccak256(bytes(BasketManagerV3(_basketManagerAddress).getVersion())) == keccak256(bytes("3.0")),
+            keccak256(bytes(BasketManagerV3(_basketManagerAddress).getVersion())) ==
+                keccak256(bytes("3.0")),
             "wrong version (2)"
         );
         require(_feesVaultAddress != address(0), "invalid vault address");
