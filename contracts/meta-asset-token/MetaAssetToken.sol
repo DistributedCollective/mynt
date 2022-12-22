@@ -55,7 +55,10 @@ contract MetaAssetToken is ERC20Permit, Ownable {
     /**
      * @notice Constructor called on deployment, initiates the contract.
      */
-    constructor(string memory _tokenName, string memory _symbol) ERC20(_tokenName, _symbol) ERC20Permit("MetaAsset") {}
+    constructor(
+        string memory _tokenName,
+        string memory _symbol
+    ) ERC20(_tokenName, _symbol) ERC20Permit("MetaAsset") {}
 
     /**
      * @dev getter function of MassetManager implementation address
@@ -183,7 +186,10 @@ contract MetaAssetToken is ERC20Permit, Ownable {
         bytes32 _s
     ) external requireValidRecipient(_to) {
         permit(_from, msg.sender, _amount, _deadline, _v, _r, _s);
-        require(transferFrom(_from, _to, _amount), "MetaAssetToken::transferWithPermit: transfer failed");
+        require(
+            transferFrom(_from, _to, _amount),
+            "MetaAssetToken::transferWithPermit: transfer failed"
+        );
 
         emit TransferWithPermit(_from, _to, _amount);
     }
