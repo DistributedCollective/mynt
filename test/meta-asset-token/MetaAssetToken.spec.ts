@@ -27,7 +27,7 @@ const tokenName = "Meta Asset Token";
 const tokenSymbol = "MAT";
 const decimals = 18;
 const maxDeadline = MAX_UINT256;
-const name = "MetaAsset";
+const name = tokenName;
 const version = "1";
 const { getContractFactory } = ethers;
 

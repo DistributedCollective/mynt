@@ -9,7 +9,7 @@ const func: DeployFunction = async ({ deployments, getNamedAccounts }) => {
   const factors = [1, 1];
   const bridges = [constants.AddressZero, constants.AddressZero];
   const mins = [0, 0];
-  const maxs = [0, 0];
+  const maxs = [1000, 1000]; // need to set to what MAX_VALUE defined in BasketManager contract
   const pausedFlags = [false, false];
 
   if (networkName === "development") {
