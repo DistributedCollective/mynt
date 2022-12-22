@@ -64,7 +64,7 @@ contract BasketManagerV3 is OwnableUpgradeable, ERC1967UpgradeUpgradeable {
 
     // state
     string version;
-    address masset;
+    address massetManager;
     address[] private bassetsArray;
     mapping(address => int256) private factorMap;
     mapping(address => address) private bridgeMap;
@@ -110,17 +110,17 @@ contract BasketManagerV3 is OwnableUpgradeable, ERC1967UpgradeUpgradeable {
 
     /**
      * @dev Contract initializer.
-     * @param _masset     Address of the mAsset contract.
+     * @param _massetManager     Address of the MassetManager contract.
      */
-    function initialize(address _masset) external initializer {
-        require(masset == address(0), "already initialized");
-        masset = _masset;
+    function initialize(address _massetManager) external initializer {
+        require(massetManager == address(0), "already initialized");
+        massetManager = _massetManager;
         version = "3.0";
 
         __Ownable_init_unchained();
     }
 
-    // Methods for Masset logic
+    // Methods for MassetManager logic
 
     /**
      * @dev Checks if bAasset is valid by checking its presence in the bAssets factors list.
@@ -140,9 +140,12 @@ contract BasketManagerV3 is OwnableUpgradeable, ERC1967UpgradeUpgradeable {
         uint256 _bassetQuantity
     ) public view validBasset(_basset) notPaused(_basset) returns (bool) {
         (uint256 massetQuantity, ) = convertBassetToMassetQuantity(_basset, _bassetQuantity);
-        uint256 bassetBalance = IERC20(_basset).balanceOf(masset);
+        uint256 bassetBalance = IERC20(_basset).balanceOf(massetManager);
 
-        (uint256 totalBassetBalanceInMasset, ) = convertBassetToMassetQuantity(_basset, bassetBalance);
+        (uint256 totalBassetBalanceInMasset, ) = convertBassetToMassetQuantity(
+            _basset,
+            bassetBalance
+        );
 
         uint256 balance = totalBassetBalanceInMasset.add(massetQuantity);
         uint256 total = getTotalMassetBalance().add(massetQuantity);
@@ -162,14 +165,16 @@ contract BasketManagerV3 is OwnableUpgradeable, ERC1967UpgradeUpgradeable {
         uint256 _bassetQuantity
     ) public view validBasset(_basset) notPaused(_basset) returns (bool) {
         (uint256 massetQuantity, ) = convertBassetToMassetQuantity(_basset, _bassetQuantity);
-        uint256 bassetBalance = IERC20(_basset).balanceOf(masset);
-        (uint256 totalBassetBalanceInMasset, ) = convertBassetToMassetQuantity(_basset, bassetBalance);
+        uint256 bassetBalance = IERC20(_basset).balanceOf(massetManager);
+        (uint256 totalBassetBalanceInMasset, ) = convertBassetToMassetQuantity(
+            _basset,
+            bassetBalance
+        );
 
         require(totalBassetBalanceInMasset >= massetQuantity, "basset balance is not sufficient");
 
         uint256 balance = totalBassetBalanceInMasset.sub(massetQuantity);
         uint256 total = getTotalMassetBalance().sub(massetQuantity);
-
         uint256 min = minMap[_basset];
         if (total == 0) return min == 0;
 
@@ -232,14 +237,14 @@ contract BasketManagerV3 is OwnableUpgradeable, ERC1967UpgradeUpgradeable {
     function getTotalMassetBalance() public view returns (uint256 total) {
         for (uint i = 0; i < bassetsArray.length; i++) {
             address basset = bassetsArray[i];
-            uint256 balance = IERC20(basset).balanceOf(masset);
+            uint256 balance = IERC20(basset).balanceOf(massetManager);
             (uint256 massetQuantity, ) = convertBassetToMassetQuantity(basset, balance);
             total += massetQuantity;
         }
     }
 
     function getBassetBalance(address _basset) public view returns (uint256) {
-        return IERC20(_basset).balanceOf(masset);
+        return IERC20(_basset).balanceOf(massetManager);
     }
 
     function getVersion() external view returns (string memory) {
@@ -258,7 +263,9 @@ contract BasketManagerV3 is OwnableUpgradeable, ERC1967UpgradeUpgradeable {
         return bridgeMap[_basset];
     }
 
-    function getRange(address _basset) public view validBasset(_basset) returns (uint256 min, uint256 max) {
+    function getRange(
+        address _basset
+    ) public view validBasset(_basset) returns (uint256 min, uint256 max) {
         min = minMap[_basset];
         max = maxMap[_basset];
     }
@@ -327,7 +334,11 @@ contract BasketManagerV3 is OwnableUpgradeable, ERC1967UpgradeUpgradeable {
         }
     }
 
-    function setRange(address _basset, uint256 _min, uint256 _max) public validBasset(_basset) onlyOwner {
+    function setRange(
+        address _basset,
+        uint256 _min,
+        uint256 _max
+    ) public validBasset(_basset) onlyOwner {
         require(_min <= MAX_VALUE, "invalid minimum");
         require(_max <= MAX_VALUE, "invalid maximum");
         require(_max >= _min, "invalid range");

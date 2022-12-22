@@ -34,7 +34,8 @@ module.exports = {
         "import/prefer-default-export": 0,
         "lines-between-class-members": 0,
         "@typescript-eslint/explicit-function-return-type": 0,
-        "@typescript-eslint/camelcase": "off"
+        "@typescript-eslint/camelcase": "off",
+        "no-console": "off",
     },
     "overrides": [
         {

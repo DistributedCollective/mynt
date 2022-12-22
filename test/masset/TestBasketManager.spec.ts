@@ -6,7 +6,7 @@ import { StandardAccounts } from "@utils/standardAccounts";
 import envSetup from "@utils/env_setup";
 
 const BasketManager = artifacts.require("BasketManager");
-const Masset = artifacts.require("Masset");
+const MassetManager = artifacts.require("MassetManager");
 const MockERC20 = artifacts.require("MockERC20");
 
 contract("BasketManager", async (accounts) => {
@@ -16,12 +16,12 @@ contract("BasketManager", async (accounts) => {
 
   describe("constructor", async () => {
     it("should succeed", async () => {
-      const inst = await Masset.new();
+      const inst = await MassetManager.new();
     });
   });
 
   describe("initialize", async () => {
-    let masset;
+    let massetManager;
     let mockToken1;
     let mockToken2;
     let mockToken3;
@@ -30,7 +30,7 @@ contract("BasketManager", async (accounts) => {
     let factors;
     let bridges;
     before(async () => {
-      masset = await Masset.new();
+      massetManager = await MassetManager.new();
       mockToken1 = await MockERC20.new("", "", 18, sa.dummy1, 1);
       mockToken2 = await MockERC20.new("", "", 18, sa.dummy1, 1);
       mockToken3 = await MockERC20.new("", "", 18, sa.dummy1, 1);

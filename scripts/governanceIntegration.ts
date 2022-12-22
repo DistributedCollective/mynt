@@ -7,33 +7,33 @@ import { TransferOwnershipParams } from "./tasks/transferOwnership";
 const logger = new Logs().showInConsole(true);
 
 const main = async () => {
-    const { run } = hre;
+  const { run } = hre;
 
-    const transferForSymbol = async (symbol: Instances) => {
-        const contractsList: TransferOwnershipParams = {
-            contracts: [
-                `${symbol}_FeesVaultProxy`,
-                `${symbol}_MassetProxy`,
-                `${symbol}_BasketManagerV3`,
-                `${symbol}_RewardsManager`,
-            ],
-            instance: symbol
-        };
-        await run("transferOwnership", contractsList);
+  const transferForSymbol = async (symbol: Instances) => {
+    const contractsList: TransferOwnershipParams = {
+      contracts: [
+        `${symbol}_FeesVaultProxy`,
+        `${symbol}_MassetManagerProxy`,
+        `${symbol}_BasketManagerV3`,
+        `${symbol}_RewardsManager`,
+      ],
+      instance: symbol,
     };
+    await run("transferOwnership", contractsList);
+  };
 
-    // await transferForSymbol('XUSD');
-    // await transferForSymbol('ETHs');
-    // await transferForSymbol('BNBs');
-    await transferForSymbol('MYNT');
+  // await transferForSymbol('XUSD');
+  // await transferForSymbol('ETHs');
+  // await transferForSymbol('BNBs');
+  await transferForSymbol("MYNT");
 
-    logger.success("Finish");
+  logger.success("Finish");
 };
 
 main()
-    .then(() => process.exit(0))
-    .catch((error) => {
-        logger.err('ERROR');
-        console.error(error);
-        process.exit(1);
-    });
+  .then(() => process.exit(0))
+  .catch((error) => {
+    logger.err("ERROR");
+    console.error(error);
+    process.exit(1);
+  });

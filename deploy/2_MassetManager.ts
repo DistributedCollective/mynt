@@ -1,12 +1,12 @@
 import { DeployFunction } from "hardhat-deploy/types";
 
 const func: DeployFunction = async ({
-  deployments: { deploy },
+  deployments: { deploy, get },
   getNamedAccounts,
 }) => {
   const { deployer } = await getNamedAccounts();
 
-  await deploy("MassetV3", {
+  await deploy("MassetManager", {
     proxy: {
       owner: deployer,
       proxyContract: "OpenZeppelinTransparentProxy",
@@ -18,8 +18,10 @@ const func: DeployFunction = async ({
     from: deployer,
     log: true,
   });
+  const mm = await get("MassetManager");
 };
 
-func.tags = ["Masset"];
+func.tags = ["MassetManager"];
+func.dependencies = ["MyntAdminProxy"];
 
 export default func;
