@@ -72,8 +72,6 @@ const func: DeployFunction = async ({ deployments, getNamedAccounts }) => {
     "setBasketManagerProxy",
     deployedBasketManager.address
   );
-
-  log("5_BasketManager:: DLLR In The End:", deployedToken.address);
 };
 
 func.tags = ["BasketManager"];

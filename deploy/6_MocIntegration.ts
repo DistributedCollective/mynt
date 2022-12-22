@@ -1,20 +1,20 @@
-import hre, { ethers } from "hardhat";
-import { providers } from "ethers";
+import { ethers } from "hardhat";
 import { DeployFunction } from "hardhat-deploy/types";
-import { MockERC20 } from "types/generated";
 
 const func: DeployFunction = async ({ deployments, getNamedAccounts }) => {
   const { deploy, get, log } = deployments;
   const { deployer } = await getNamedAccounts();
 
-  const deployedDLLR = await deployments.get("DLLR");
-
   const networkName = deployments.getNetworkName();
   let mocAddress;
   let docAddress;
+
   if (["rskMainnet", "rskTestnet"].includes(networkName)) {
     mocAddress = (await get("MocMintRedeemDoc")).address;
     docAddress = (await get("DoC")).address;
+    log(`using addresses on the '${networkName}'
+    MoC main contract address: ${mocAddress}
+    DoC address: ${docAddress}`);
   } else if (["development", "hardhat"].includes(networkName)) {
     // @todo add handling forked networks
     docAddress = (
@@ -33,12 +33,16 @@ const func: DeployFunction = async ({ deployments, getNamedAccounts }) => {
     ).address;
     mocAddress = (await deploy("MocMock", { from: deployer, log: true }))
       .address;
+
+    log(`using Money On Chain addresses on the '${networkName}'
+    MoC main contract address: ${mocAddress}
+    DoC address: ${docAddress}`);
   }
-  const dllrAddress = (await get("DLLR")).address; // "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512"; //
+  const dllrAddress = (await get("DLLR")).address;
 
   const massetManagerAddress = (await get("MassetManager")).address;
 
-  const result = await deploy("MocIntegration", {
+  await deploy("MocIntegration", {
     args: [mocAddress, docAddress, dllrAddress, massetManagerAddress],
     proxy: {
       owner: deployer,

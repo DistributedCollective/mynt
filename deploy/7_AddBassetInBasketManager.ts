@@ -33,9 +33,11 @@ const func: DeployFunction = async ({ deployments, getNamedAccounts }) => {
     ];
   }
 
+  const bAssetsNames = ["ZUSD", "DoC"];
   log(
-    "adding bAssets with details: ",
+    "adding bAssets to the BasketManager: ",
     JSON.stringify({
+      bAssetsNames,
       bAssets,
       factors,
       bridges,
@@ -57,7 +59,7 @@ const func: DeployFunction = async ({ deployments, getNamedAccounts }) => {
     pausedFlags
   );
 
-  log("done");
+  log(`Done`);
 };
 
 func.tags = ["AddBassetsInBasketManager"];
