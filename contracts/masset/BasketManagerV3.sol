@@ -5,6 +5,7 @@ import { SafeMath } from "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/ERC1967/ERC1967UpgradeUpgradeable.sol";
+import "hardhat/console.sol";
 
 /**
  * @title BasketManagerV3
@@ -142,13 +143,27 @@ contract BasketManagerV3 is OwnableUpgradeable, ERC1967UpgradeUpgradeable {
         (uint256 massetQuantity, ) = convertBassetToMassetQuantity(_basset, _bassetQuantity);
         uint256 bassetBalance = IERC20(_basset).balanceOf(massetManager);
 
-        (uint256 totalBassetBalanceInMasset, ) = convertBassetToMassetQuantity(_basset, bassetBalance);
+        (uint256 totalBassetBalanceInMasset, ) = convertBassetToMassetQuantity(
+            _basset,
+            bassetBalance
+        );
 
         uint256 balance = totalBassetBalanceInMasset.add(massetQuantity);
         uint256 total = getTotalMassetBalance().add(massetQuantity);
-        uint256 ratio = balance.mul(MAX_VALUE).div(total);
+
+        return balance == total; // invariant
+        /* uint256 ratio = balance.mul(MAX_VALUE).div(total);
         uint256 max = maxMap[_basset];
-        return ratio <= max;
+        console.log("BM::_basset:", _basset);
+        console.log("BM::massetQuantity:", massetQuantity);
+        console.log("BM::bassetBalance:", bassetBalance);
+        console.log("BM::totalBassetBalanceInMasset:", totalBassetBalanceInMasset);
+        console.log("BM::balance:", balance);
+        console.log("BM::total:", total);
+        console.log("BM::ratio:", ratio);
+        console.log("BM::max:", max);
+
+        return ratio <= max;*/
     }
 
     /**
@@ -163,18 +178,24 @@ contract BasketManagerV3 is OwnableUpgradeable, ERC1967UpgradeUpgradeable {
     ) public view validBasset(_basset) notPaused(_basset) returns (bool) {
         (uint256 massetQuantity, ) = convertBassetToMassetQuantity(_basset, _bassetQuantity);
         uint256 bassetBalance = IERC20(_basset).balanceOf(massetManager);
-        (uint256 totalBassetBalanceInMasset, ) = convertBassetToMassetQuantity(_basset, bassetBalance);
+        (uint256 totalBassetBalanceInMasset, ) = convertBassetToMassetQuantity(
+            _basset,
+            bassetBalance
+        );
 
         require(totalBassetBalanceInMasset >= massetQuantity, "basset balance is not sufficient");
 
         uint256 balance = totalBassetBalanceInMasset.sub(massetQuantity);
         uint256 total = getTotalMassetBalance().sub(massetQuantity);
 
+        return balance == total; // invariant
+
+        /*
         uint256 min = minMap[_basset];
         if (total == 0) return min == 0;
 
         uint256 ratio = balance.mul(MAX_VALUE).div(total);
-        return ratio >= min;
+        return ratio >= min; */
     }
 
     /**
@@ -258,7 +279,9 @@ contract BasketManagerV3 is OwnableUpgradeable, ERC1967UpgradeUpgradeable {
         return bridgeMap[_basset];
     }
 
-    function getRange(address _basset) public view validBasset(_basset) returns (uint256 min, uint256 max) {
+    function getRange(
+        address _basset
+    ) public view validBasset(_basset) returns (uint256 min, uint256 max) {
         min = minMap[_basset];
         max = maxMap[_basset];
     }
@@ -327,7 +350,11 @@ contract BasketManagerV3 is OwnableUpgradeable, ERC1967UpgradeUpgradeable {
         }
     }
 
-    function setRange(address _basset, uint256 _min, uint256 _max) public validBasset(_basset) onlyOwner {
+    function setRange(
+        address _basset,
+        uint256 _min,
+        uint256 _max
+    ) public validBasset(_basset) onlyOwner {
         require(_min <= MAX_VALUE, "invalid minimum");
         require(_max <= MAX_VALUE, "invalid maximum");
         require(_max >= _min, "invalid range");
