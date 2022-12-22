@@ -5,7 +5,6 @@ import { SafeMath } from "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/ERC1967/ERC1967UpgradeUpgradeable.sol";
-import "hardhat/console.sol";
 
 /**
  * @title BasketManagerV3
@@ -150,20 +149,9 @@ contract BasketManagerV3 is OwnableUpgradeable, ERC1967UpgradeUpgradeable {
 
         uint256 balance = totalBassetBalanceInMasset.add(massetQuantity);
         uint256 total = getTotalMassetBalance().add(massetQuantity);
-
-        return balance == total; // invariant
-        /* uint256 ratio = balance.mul(MAX_VALUE).div(total);
+        uint256 ratio = balance.mul(MAX_VALUE).div(total);
         uint256 max = maxMap[_basset];
-        console.log("BM::_basset:", _basset);
-        console.log("BM::massetQuantity:", massetQuantity);
-        console.log("BM::bassetBalance:", bassetBalance);
-        console.log("BM::totalBassetBalanceInMasset:", totalBassetBalanceInMasset);
-        console.log("BM::balance:", balance);
-        console.log("BM::total:", total);
-        console.log("BM::ratio:", ratio);
-        console.log("BM::max:", max);
-
-        return ratio <= max;*/
+        return ratio <= max;
     }
 
     /**
@@ -187,15 +175,11 @@ contract BasketManagerV3 is OwnableUpgradeable, ERC1967UpgradeUpgradeable {
 
         uint256 balance = totalBassetBalanceInMasset.sub(massetQuantity);
         uint256 total = getTotalMassetBalance().sub(massetQuantity);
-
-        return balance == total; // invariant
-
-        /*
         uint256 min = minMap[_basset];
         if (total == 0) return min == 0;
 
         uint256 ratio = balance.mul(MAX_VALUE).div(total);
-        return ratio >= min; */
+        return ratio >= min;
     }
 
     /**
