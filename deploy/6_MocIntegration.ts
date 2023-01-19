@@ -7,37 +7,27 @@ const func: DeployFunction = async ({ deployments, getNamedAccounts }) => {
 
   const networkName = deployments.getNetworkName();
   let mocAddress;
-  let docAddress;
+  const docAddress = (await get("DoC")).address;
 
-  if (["rskMainnet", "rskTestnet"].includes(networkName)) {
+  if (
+    [
+      "rskMainnet",
+      "rskTestnet",
+      "rsForkedkMainnet",
+      "rskForkedTestnet",
+    ].includes(networkName)
+  ) {
     mocAddress = (await get("MocMintRedeemDoc")).address;
-    docAddress = (await get("DoC")).address;
-    log(`using addresses on the '${networkName}'
-    MoC main contract address: ${mocAddress}
-    DoC address: ${docAddress}`);
   } else if (["development", "hardhat"].includes(networkName)) {
     // @todo add handling forked networks
-    docAddress = (
-      await deploy("DoC", {
-        contract: "MockERC20",
-        args: [
-          "DoC Token",
-          "DoC",
-          18,
-          deployer,
-          ethers.utils.parseEther("100000000"),
-        ],
-        from: deployer,
-        log: true,
-      })
-    ).address;
     mocAddress = (await deploy("MocMock", { from: deployer, log: true }))
       .address;
+  }
 
-    log(`using Money On Chain addresses on the '${networkName}'
+  log(`using addresses on the '${networkName}'
     MoC main contract address: ${mocAddress}
     DoC address: ${docAddress}`);
-  }
+
   const dllrAddress = (await get("DLLR")).address;
 
   const massetManagerAddress = (await get("MassetManager")).address;
@@ -58,6 +48,11 @@ const func: DeployFunction = async ({ deployments, getNamedAccounts }) => {
 };
 
 func.tags = ["MocIntegration"];
-func.dependencies = ["DLLR", "MassetManager", "MyAdminProxy"];
+func.dependencies = [
+  "DLLR",
+  "MassetManager",
+  "MyAdminProxy",
+  "DeployMockBAssets",
+];
 
 export default func;

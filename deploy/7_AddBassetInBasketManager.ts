@@ -3,7 +3,7 @@ import { DeployFunction } from "hardhat-deploy/types";
 
 const func: DeployFunction = async ({ deployments, getNamedAccounts }) => {
   const networkName = deployments.getNetworkName();
-  const { log } = deployments;
+  const { log, get, getOrNull } = deployments;
   const { deployer } = await getNamedAccounts();
   let bAssets;
   const factors = [1, 1];
@@ -12,25 +12,22 @@ const func: DeployFunction = async ({ deployments, getNamedAccounts }) => {
   const maxs = [1000, 1000]; // need to set to what MAX_VALUE defined in BasketManager contract
   const pausedFlags = [false, false];
 
-  if (networkName === "development") {
-    // @todo for local node (hardhat node), need to deploy MOCK ERC20 for the bAssets
-    // @todo for forked testnet no need to change the bAssets addresses below since it's already using the testnet addresses.
-    // @todo for forked mainnet, need to change the below addresses with the mainnet addresses.
-    // for now we will just update it manually.
+  if (["rskTestnet", "rskForkedTestnet"].includes(networkName)) {
+    // @todo add forked nets to hh config
     bAssets = [
       "0x6b41566353d6c7b8c2a7931d498f11489dacac29", // ZUSD Testnet
       "0xcb46c0ddc60d18efeb0e586c17af6ea36452dae0", // DOC Tesnet
     ];
-  } else if (networkName === "rskTestnet") {
-    bAssets = [
-      "0x6b41566353d6c7b8c2a7931d498f11489dacac29", // ZUSD Testnet
-      "0xcb46c0ddc60d18efeb0e586c17af6ea36452dae0", // DOC Tesnet
-    ];
-  } else if (networkName === "rskMainnet") {
+  } else if (["rskMainnet", "rskForkedMainnet"].includes(networkName)) {
     bAssets = [
       "0xdb107fa69e33f05180a4c2ce9c2e7cb481645c2d", // ZUSD Mainnet
       "0xe700691da7b9851f2f35f8b8182c69c53ccad9db", // DOC Mainnet
     ];
+  } else if (["development", "hardhat"].includes(networkName)) {
+    // @todo for local node (hardhat node), need to deploy MOCK ERC20 for the bAssets
+    //       add deploy bAsset as a separate hh script returning bAsset addresses
+    //       because it is used here and in MocIntegration too - use the same deployment
+    bAssets = [(await get("ZUSD")).address, (await get("DoC")).address];
   }
 
   const bAssetsNames = ["ZUSD", "DoC"];
@@ -63,5 +60,7 @@ const func: DeployFunction = async ({ deployments, getNamedAccounts }) => {
 };
 
 func.tags = ["AddBassetsInBasketManager"];
+func.dependencies = ["DeployMockBAssets"];
+func.runAtTheEnd = true;
 
 export default func;
