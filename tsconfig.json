@@ -41,7 +41,8 @@
     "./test-utils/*.ts",
     "./test-utils/**/*.ts",
     "./migrations",
-    "./deploy",
+    "./deploy/**/*.ts",
+    "./tasks/**/*.ts",
     ".eslintrc.js"
   ],
   "files": [

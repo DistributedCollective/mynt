@@ -18,6 +18,8 @@ import "hardhat-contract-sizer";
 import "@openzeppelin/hardhat-upgrades";
 import "@nomiclabs/hardhat-solhint";
 
+import "tasks/contractsInteraction";
+
 /*
  * Test hardhat forking with patched hardhat
  *
@@ -201,9 +203,9 @@ const config: HardhatUserConfig = {
         artifacts: "external/artifacts/*.sol/!(*.dbg.json)",
         // deploy: "node_modules/@cartesi/arbitration/export/deploy",
       },
-      {
+      /* {
         artifacts: "node_modules/someotherpackage/artifacts",
-      },
+      }, */
     ],
     deployments: {
       rskTestnet: ["external/deployments/rskTestnet"],
