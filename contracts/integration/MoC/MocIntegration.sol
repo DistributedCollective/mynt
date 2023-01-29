@@ -41,7 +41,7 @@ contract MocIntegration is OwnableUpgradeable, ERC1967UpgradeUpgradeable {
     }
 
     function initialize() external initializer {
-        __Ownable_init_unchained();
+        __Ownable_init();
     }
 
     ///@dev the contract requires receiving funds temporarily before transferring them to users
