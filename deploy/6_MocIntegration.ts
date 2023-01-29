@@ -41,6 +41,12 @@ const func: DeployFunction = async ({ deployments, getNamedAccounts }) => {
         name: "MyntAdminProxy",
         artifact: "MyntAdminProxy",
       },
+      execute: {
+        init: {
+          methodName: "initialize",
+          args: [],
+        },
+      },
     },
     from: deployer,
     log: true,

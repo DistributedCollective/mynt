@@ -72,6 +72,7 @@ _flat/
 
 # local deployment
 deployments/development/
+deployments/localhost/
 .openzeppelin
 
 tmp/

@@ -1,12 +1,18 @@
 import { task, types } from "hardhat/config";
-import {
+/* import {
   BasketManagerV3,
   BasketManagerV3__factory,
   Ownable,
   Ownable__factory,
-} from "types/generated";
+} from "types/generated"; */
+
+import {
+  impersonateAccount,
+  stopImpersonatingAccount,
+} from "@nomicfoundation/hardhat-network-helpers";
 import * as helpers from "../scripts/utils/helpers";
 
+/// ------ REPLACE bAsset ----- ///
 task("interaction:replace-basset", "Replace bAsset")
   .addParam("prevBasset", "bAsset to replace", undefined, types.string, false)
   .addParam("newBasset", "New bAsset", undefined, types.string, false)
@@ -23,9 +29,7 @@ task("interaction:replace-basset", "Replace bAsset")
       getNamedAccounts,
       deployments: { get, getNetworkName },
     } = hre;
-    const basketManager: BasketManagerV3 = (await ethers.getContract(
-      "BasketManagerV3"
-    )) as BasketManagerV3;
+    const basketManager = await ethers.getContract("BasketManagerV3"); // as BasketManagerV3;
 
     helpers.injectHre(hre);
     const { deployer } = await getNamedAccounts();
@@ -36,8 +40,9 @@ task("interaction:replace-basset", "Replace bAsset")
       const multisigAddress = (await get("MultiSigWallet")).address;
       const contractAddress = basketManager.address;
       const sender = deployer;
+
       const BasketManagerV3Interface = new ethers.utils.Interface(
-        BasketManagerV3__factory.abi
+        (await get("BasketManagerV3")).abi
       );
 
       const dataRemove = pausePrevBasset
@@ -73,8 +78,20 @@ task("interaction:replace-basset", "Replace bAsset")
         sender
       );
     } else if (["rskMainnet", "rskForkedMainnet"].includes(networkName)) {
-      // governance or multisig
-      // @todo add governance or ms?
+      if (networkName === "rskMainnet") {
+        // @todo create a proposal - meanwhile use the core protocol py script
+      } else {
+        // @todo forked mainnet to replace bAsset - impersonate accounts: TimelockOwner, GvernorOwner, whale accounts
+        //   - create proposal (impersonate a whale account)
+        //   - timetravel
+        //   - impersonate or fund whale accounts to vote
+        //   - vote
+        //   - timetravel to queue and then execute proposal
+        //   - run (create?) tests to check the consistency
+        const timelockAddress = (await get("TimelockOwner")).address;
+        await impersonateAccount(timelockAddress);
+        const timelockSigner = ethers.provider.getSigner(timelockAddress);
+      }
     } else if (["development", "hardhat"].includes(networkName)) {
       // local ganache deployer
       console.log(`removing basset: ${prevBasset}`);
@@ -97,11 +114,12 @@ task("interaction:replace-basset", "Replace bAsset")
     console.log("Basset updated");
   });
 
+/// ------ TRANSFER OWNERSHIP ----- ///
 task("interaction:transfer-ownership", "Transfer contracts ownership")
-  .addParam("newOwner", "New ownerAddress", undefined, types.string, false)
+  .addParam("newOwner", "New owner address", undefined, types.string, false)
   .addParam(
-    "contractsList",
-    "bAsset to replace: e.g. '[DLLR, FeesManager, MassetManager]'",
+    "contracts",
+    "contracts to transfer ownership: e.g. [DLLR, FeesManager, MassetManager]",
     undefined,
     types.string,
     true
@@ -126,7 +144,7 @@ task("interaction:transfer-ownership", "Transfer contracts ownership")
       ];
     }
 
-    contracts = await Promise.all(
+    const contractsAddresses = await Promise.all(
       contractsList.map(async (contract): Promise<string> => {
         const addr = (await get(contract)).address;
         console.log(`${contract}: ${addr}`);
@@ -136,7 +154,11 @@ task("interaction:transfer-ownership", "Transfer contracts ownership")
 
     helpers.injectHre(hre);
     const { deployer } = await getNamedAccounts();
-    const ownableInterface = new ethers.utils.Interface(Ownable__factory.abi);
+    const ownableABI = [
+      "function transferOwnership(address newOwner)",
+      "function owner() view returns(address)",
+    ];
+    const ownableInterface = new ethers.utils.Interface(ownableABI);
     const networkName = getNetworkName();
 
     console.log("Transferring contracts ownership...");
@@ -149,7 +171,7 @@ task("interaction:transfer-ownership", "Transfer contracts ownership")
         newOwner,
       ]);
       await Promise.all(
-        contracts.map(async (contractAddress) => {
+        contractsAddresses.map(async (contractAddress) => {
           console.log(`processing ${contractAddress}:`);
           await helpers.sendWithMultisig(
             multisigAddress,
@@ -162,26 +184,81 @@ task("interaction:transfer-ownership", "Transfer contracts ownership")
     } else if (["rskMainnet", "rskForkedMainnet"].includes(networkName)) {
       // governance or multisig
       // @todo add governance or ms?
-    } else if (["development", "hardhat"].includes(networkName)) {
+    } else if (["localhost", "development", "hardhat"].includes(networkName)) {
       // local ganache deployer
       await Promise.all(
-        contracts.map(async (contractAddress) => {
-          console.log(`processing ${contractAddress}:`);
-
-          const ownable = (await ethers.getContractAt(
-            "Ownable",
+        contractsAddresses.map(async (contractAddress, index) => {
+          const ownable = await ethers.getContractAt(
+            ownableABI,
+            // contractsList[index],
             contractAddress
-          )) as Ownable;
+          );
 
-          const currentOwner = await ownable.owner();
-          await hre.network.provider.request({
-            method: "hardhat_impersonateAccount",
-            params: [currentOwner],
-          });
+          if (Object.keys(ownable.functions).includes("owner()")) {
+            const currentOwner = await ownable.owner();
+            console.log(
+              `processing ${contractsList[index]} @ ${contractAddress}, owner ${currentOwner}`
+            );
+            console.log("Impersonating", currentOwner);
+            await impersonateAccount(currentOwner);
+            const signer = await ethers.getSigner(currentOwner);
+            await ownable.connect(signer).transferOwnership(newOwner);
 
-          const signer = await ethers.getSigner(currentOwner);
-          await ownable.connect(signer).transferOwnership(newOwner);
+            console.log(
+              `processed contract ${contractsList[index]} @ ${contractAddress} - ownership transferred`
+            );
+          } else {
+            console.log(
+              `skipping contract ${contractsList[index]} @ ${contractAddress} as is not ownable - no owner() function`
+            );
+          }
         })
       );
     }
+  });
+
+task("interaction:get-contracts-owner", "Log contracts owners")
+  .addParam(
+    "contracts",
+    "contracts to transfer ownership: e.g. [DLLR, FeesManager, MassetManager]",
+    undefined,
+    types.string,
+    true
+  )
+  .setAction(async ({ contracts }, hre) => {
+    const {
+      ethers,
+      deployments: { get },
+    } = hre;
+    let contractsList: string[];
+    if (contracts) {
+      contractsList = JSON.parse(contracts) as Array<string>;
+    } else {
+      contractsList = [
+        "DLLR",
+        "MassetManager",
+        "BasketManagerV3",
+        "FeesManager",
+        "MocIntegration",
+        "MyntAdminProxy",
+      ];
+    }
+
+    const ownableABI = ["function owner() view returns(address)"];
+
+    console.log();
+    console.log("Contracts owners: ...");
+    console.log();
+
+    await Promise.all(
+      contractsList.map(async (contractName, index) => {
+        const contractAddress = (await get(contractName)).address;
+        const ownable = await ethers.getContractAt(ownableABI, contractAddress);
+        console.log(
+          `${
+            contractsList[index]
+          } @ ${contractAddress}: owner ${await ownable.owner()}`
+        );
+      })
+    );
   });

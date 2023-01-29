@@ -40,6 +40,10 @@ contract MocIntegration is OwnableUpgradeable, ERC1967UpgradeUpgradeable {
         massetManager = IMassetManager(_massetManager);
     }
 
+    function initialize() external initializer {
+        __Ownable_init_unchained();
+    }
+
     ///@dev the contract requires receiving funds temporarily before transferring them to users
     receive() external payable {}
 
@@ -64,7 +68,6 @@ contract MocIntegration is OwnableUpgradeable, ERC1967UpgradeUpgradeable {
     ) external {
         // transfer _dllrAmount to this contract by permit (EIP-2612)
         address thisAddress = address(this);
-        uint256 dllrBalanceBefore = dllr.balanceOf(thisAddress);
         dllr.transferWithPermit(
             msg.sender,
             thisAddress,
@@ -73,10 +76,6 @@ contract MocIntegration is OwnableUpgradeable, ERC1967UpgradeUpgradeable {
             _permitParams.v,
             _permitParams.r,
             _permitParams.s
-        );
-        require(
-            dllr.balanceOf(thisAddress) == dllrBalanceBefore + _dllrAmount,
-            "MocIntegration:: DLLR transfer with permit received wrong amount"
         );
 
         // redeem DoC from DLLR

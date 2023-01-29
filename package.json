@@ -64,6 +64,7 @@
     "@openzeppelin/upgrades": "2.7.2",
     "@tenderly/hardhat-tenderly": "^1.4.1",
     "@typechain/ethers-v5": "^10.2.0",
+    "@typechain/hardhat": "^6.1.5",
     "@typechain/truffle-v5": "^8.0.2",
     "@types/bn.js": "^5.1.1",
     "@types/chai": "^4.3.4",
@@ -107,7 +108,6 @@
     "web3": "^1.8.1"
   },
   "dependencies": {
-    "@typechain/hardhat": "^6.1.5",
     "dotenv": "^16.0.3",
     "hardhat-gas-reporter": "^1.0.9",
     "node-logs": "^1.1.0",
