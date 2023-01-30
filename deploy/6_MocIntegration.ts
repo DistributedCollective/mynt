@@ -13,12 +13,12 @@ const func: DeployFunction = async ({ deployments, getNamedAccounts }) => {
     [
       "rskMainnet",
       "rskTestnet",
-      "rsForkedkMainnet",
+      "rskForkedkMainnet",
       "rskForkedTestnet",
     ].includes(networkName)
   ) {
     mocAddress = (await get("MocMintRedeemDoc")).address;
-  } else if (["development", "hardhat"].includes(networkName)) {
+  } else if (["development", "hardhat", "localhost"].includes(networkName)) {
     // @todo add handling forked networks
     mocAddress = (await deploy("MocMock", { from: deployer, log: true }))
       .address;

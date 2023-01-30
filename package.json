@@ -39,7 +39,9 @@
     "prettier-check": "prettier --check .",
     "flatten": "sol-merger \"./contracts/[^fish]**/*.sol\" ./_flat",
     "prepublishOnly": "yarn run compile",
-    "docgen": "yarn hardhat compile --force && yarn run hardhat docgen"
+    "docgen": "yarn hardhat compile --force && yarn run hardhat docgen",
+    "fork:rsk-mainnet": "hardhat node --fork https://mainnet.sovryn.app/rpc --no-deploy",
+    "fork:rsk-testnet": "hardhat node --fork https://testnet.sovryn.app/rpc --no-deploy"
   },
   "repository": {
     "type": "git",

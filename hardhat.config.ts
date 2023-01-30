@@ -59,6 +59,16 @@ task("check-fork-patch", "Check Hardhat Fork Patch by Rainer").setAction(
 
 dotenv.config();
 
+const testnetAccounts: any = process.env.TESTNET_DEPLOYER_PRIVATE_KEY
+  ? [
+      process.env.TESTNET_DEPLOYER_PRIVATE_KEY,
+      process.env.TESTNET_SIGNER_PRIVATE_KEY,
+    ]
+  : [];
+const mainnetAccounts: any = process.env.MAINNET_DEPLOYER_PRIVATE_KEY
+  ? [process.env.MAINNET_DEPLOYER_PRIVATE_KEY]
+  : [];
+
 const config: HardhatUserConfig = {
   namedAccounts: {
     deployer: {
@@ -88,9 +98,22 @@ const config: HardhatUserConfig = {
       timeout: 1e9,
       gas: 6800000,
     },
-    fork: {
-      url: "http://127.0.0.1:7545",
-      gas: 8000000,
+    rskForkedTestnet: {
+      accounts: testnetAccounts,
+      url: "http://127.0.0.1:8545/",
+      gas: 6800000,
+      live: true,
+      tags: ["testnet"],
+      saveDeployments: true,
+    },
+    rskForkedMainnet: {
+      chainId: 31337,
+      accounts: mainnetAccounts,
+      url: "http://127.0.0.1:8545",
+      gas: 6800000,
+      live: true,
+      tags: ["mainnet"],
+      saveDeployments: true,
     },
     coverage: {
       url: "http://127.0.0.1:7546",
@@ -136,20 +159,16 @@ const config: HardhatUserConfig = {
       gas: 2000000,
     },
     rskTestnet: {
-      accounts: process.env.DEPLOYER_PRIVATE_KEY
-        ? [process.env.DEPLOYER_PRIVATE_KEY]
-        : [],
-      url: "https://testnet.sovryn.app/rpc",
       chainId: 31,
+      accounts: testnetAccounts,
+      url: "https://testnet.sovryn.app/rpc",
       gasPrice: 66000010, // 66GWei,
       timeout: 1e9,
     },
     rskMainnet: {
-      accounts: process.env.DEPLOYER_PRIVATE_KEY
-        ? [process.env.DEPLOYER_PRIVATE_KEY]
-        : [],
-      url: "wss://mainnet.sovryn.app/ws",
       chainId: 30,
+      accounts: mainnetAccounts,
+      url: "wss://mainnet.sovryn.app/ws",
       gasPrice: 66000010, // 71GWei,
       timeout: 1e9,
     },
