@@ -11,7 +11,6 @@ const func: DeployFunction = async ({ deployments, getNamedAccounts }) => {
   let zusdAddress;
 
   if (["development", "hardhat"].includes(networkName)) {
-    // @todo add handling forked networks
     docAddress = (
       await deploy("DoC", {
         contract: "MockERC20",
