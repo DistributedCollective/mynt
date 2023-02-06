@@ -73,6 +73,9 @@ _flat/
 # local deployment
 deployments/development/
 deployments/localhost/
+deployments/rskDev
+deployments/rskForkedTestnet
+deployments/rskForkedMainnet
 .openzeppelin
 
 tmp/
