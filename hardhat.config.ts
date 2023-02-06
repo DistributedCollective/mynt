@@ -98,13 +98,30 @@ const config: HardhatUserConfig = {
       timeout: 1e9,
       gas: 6800000,
     },
+    rskTestnet: {
+      chainId: 31,
+      accounts: testnetAccounts,
+      url: "https://testnet.sovryn.app/rpc",
+      gasPrice: 66000010, // 66GWei,
+      timeout: 1e9,
+      live: true,
+      tags: ["testnet"],
+    },
     rskForkedTestnet: {
       accounts: testnetAccounts,
       url: "http://127.0.0.1:8545/",
       gas: 6800000,
       live: true,
       tags: ["testnet"],
-      saveDeployments: true,
+    },
+    rskMainnet: {
+      chainId: 30,
+      accounts: mainnetAccounts,
+      url: "wss://mainnet.sovryn.app/ws",
+      gasPrice: 66000010, // ~66GWei,
+      timeout: 1e9,
+      live: true,
+      tags: ["mainnet"],
     },
     rskForkedMainnet: {
       chainId: 31337,
@@ -113,7 +130,6 @@ const config: HardhatUserConfig = {
       gas: 6800000,
       live: true,
       tags: ["mainnet"],
-      saveDeployments: true,
     },
     coverage: {
       url: "http://127.0.0.1:7546",
@@ -157,20 +173,6 @@ const config: HardhatUserConfig = {
       chainId: 42,
       gasPrice: 20000000000, // 20 GWei,
       gas: 2000000,
-    },
-    rskTestnet: {
-      chainId: 31,
-      accounts: testnetAccounts,
-      url: "https://testnet.sovryn.app/rpc",
-      gasPrice: 66000010, // 66GWei,
-      timeout: 1e9,
-    },
-    rskMainnet: {
-      chainId: 30,
-      accounts: mainnetAccounts,
-      url: "wss://mainnet.sovryn.app/ws",
-      gasPrice: 66000010, // 71GWei,
-      timeout: 1e9,
     },
   },
   solidity: {
@@ -228,7 +230,15 @@ const config: HardhatUserConfig = {
     ],
     deployments: {
       rskTestnet: ["external/deployments/rskTestnet"],
+      rskForkedTestnet: [
+        "external/deployments/rskTestnet",
+        "deployment/deployments/rskTestnet",
+      ],
       rskMainnet: ["external/deployments/rskMainnet"],
+      rskForkedMainnet: [
+        "external/deployments/rskMainnet",
+        "deployment/deployments/rskMainnet",
+      ],
     },
   },
   /* tenderly: {
