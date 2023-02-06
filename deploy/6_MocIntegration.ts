@@ -44,7 +44,7 @@ const func: DeployFunction = async ({ deployments, getNamedAccounts }) => {
       execute: {
         init: {
           methodName: "initialize",
-          args: [],
+          args: [ethers.constants.AddressZero],
         },
       },
     },

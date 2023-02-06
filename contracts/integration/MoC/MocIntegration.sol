@@ -18,7 +18,10 @@ contract MocIntegration is OwnableUpgradeable, ERC1967UpgradeUpgradeable {
     IDLLR public immutable dllr;
     IMassetManager public immutable massetManager;
 
+    address public mocVendorAccount;
+
     event GetDocFromDllrAndRedeemRBTC(uint256 fromDLLR, uint256 toRBTC);
+    event MocVendorAccountSet(address newMocVendorAccount);
 
     /**
      * @param _moc MoC main contract address
@@ -40,8 +43,9 @@ contract MocIntegration is OwnableUpgradeable, ERC1967UpgradeUpgradeable {
         massetManager = IMassetManager(_massetManager);
     }
 
-    function initialize() external initializer {
+    function initialize(address payable _mocVendorAccount) external initializer {
         __Ownable_init();
+        _setMocVendorAccount(_mocVendorAccount);
     }
 
     ///@dev the contract requires receiving funds temporarily before transferring them to users
@@ -86,13 +90,22 @@ contract MocIntegration is OwnableUpgradeable, ERC1967UpgradeUpgradeable {
 
         // redeem RBTC from DoC using Money On Chain and send to the user
         uint256 rbtcBalanceBefore = thisAddress.balance;
-        // TODO: clarify the vendor address param
-        moc.redeemFreeDocVendors(_dllrAmount, payable(address(0)));
+        moc.redeemFreeDocVendors(_dllrAmount, payable(mocVendorAccount));
         uint256 rbtcAmount = thisAddress.balance - rbtcBalanceBefore;
         (bool success, ) = msg.sender.call{ value: rbtcAmount }("");
         require(success, "MocIntegration:: error transferring redeemed RBTC");
 
         emit GetDocFromDllrAndRedeemRBTC(_dllrAmount, rbtcAmount);
+    }
+
+    /// Set MoC registered Vendor account to receive markup fees https://docs.moneyonchain.com/main-rbtc-contract/integration-with-moc-platform/vendors
+    function setMocVendorAccount(address payable newMocVedorAccount) external onlyOwner {
+        _setMocVendorAccount(newMocVedorAccount);
+    }
+
+    function _setMocVendorAccount(address newMocVedorAccount) internal {
+        mocVendorAccount = newMocVedorAccount;
+        emit MocVendorAccountSet(mocVendorAccount);
     }
 
     /**

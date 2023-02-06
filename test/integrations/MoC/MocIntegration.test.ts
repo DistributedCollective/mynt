@@ -85,6 +85,24 @@ describe("MoC Integration", async () => {
     });
 
     describe("deployment", async () => {
+        it("initial mocVendorAccount address should be null", async () => {
+            expect(await mocIntegration.mocVendorAccount()).equal(ethers.constants.AddressZero);
+        });
+
+        it("only owner can set mocVendorAccount", async () => {
+            await expect(
+                mocIntegration.connect(alice).setMocVendorAccount(accounts[2].address)
+            ).to.be.revertedWith("Ownable: caller is not the owner");
+
+            await mocIntegration.connect(accounts[0]).setMocVendorAccount(accounts[2].address);
+            expect(await mocIntegration.mocVendorAccount()).equal(accounts[2].address);
+
+            await mocIntegration
+                .connect(accounts[0])
+                .setMocVendorAccount(ethers.constants.AddressZero);
+            expect(await mocIntegration.mocVendorAccount()).equal(ethers.constants.AddressZero);
+        });
+
         it("should redeem from DLLR Money on Chain DoC and then redeem RBTC from DoC, all in one transaction", async () => {
             const dllrAmount = ethers.utils.parseEther("500").toString();
 
