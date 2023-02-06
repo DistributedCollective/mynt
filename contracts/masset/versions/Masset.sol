@@ -38,7 +38,7 @@ contract Masset is IERC777Recipient, OwnableUpgradeable, ReentrancyGuardUpgradea
         address operator,
         address from,
         address to,
-        uint amount,
+        uint256 amount,
         bytes userData,
         bytes operatorData
     );
@@ -258,7 +258,7 @@ contract Masset is IERC777Recipient, OwnableUpgradeable, ReentrancyGuardUpgradea
         address _operator,
         address _from,
         address _to,
-        uint _amount,
+        uint256 _amount,
         bytes calldata _userData,
         bytes calldata _operatorData
     ) external {

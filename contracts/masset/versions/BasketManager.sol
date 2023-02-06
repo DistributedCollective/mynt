@@ -24,7 +24,7 @@ contract BasketManager {
         require(_bridges.length == _factors.length, "bridge array length mismatch");
 
         bassetsArray = _bassets;
-        for(uint i=0; i<bassetsArray.length; i++) {
+        for(uint256 i=0; i<bassetsArray.length; i++) {
             address basset = bassetsArray[i];
             require(basset != address(0), "invalid basset address");
             require(!bassetsMap[basset], "basset not unique");

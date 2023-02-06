@@ -235,7 +235,7 @@ contract BasketManagerV3 is OwnableUpgradeable, ERC1967UpgradeUpgradeable {
      * @return total Calculated total balance.
      */
     function getTotalMassetBalance() public view returns (uint256 total) {
-        for (uint i = 0; i < bassetsArray.length; i++) {
+        for (uint256 i = 0; i < bassetsArray.length; i++) {
             address basset = bassetsArray[i];
             uint256 balance = IERC20(basset).balanceOf(massetManager);
             (uint256 massetQuantity, ) = convertBassetToMassetQuantity(basset, balance);
@@ -319,7 +319,7 @@ contract BasketManagerV3 is OwnableUpgradeable, ERC1967UpgradeUpgradeable {
         uint256[] memory _maxs,
         bool[] memory _pausedFlags
     ) public onlyOwner {
-        uint length = _bassets.length;
+        uint256 length = _bassets.length;
         require(
             _factors.length == length &&
                 _bridges.length == length &&
@@ -329,7 +329,7 @@ contract BasketManagerV3 is OwnableUpgradeable, ERC1967UpgradeUpgradeable {
             "invalid lengths"
         );
 
-        for (uint i = 0; i < length; i++) {
+        for (uint256 i = 0; i < length; i++) {
             addBasset(_bassets[i], _factors[i], _bridges[i], _mins[i], _maxs[i], _pausedFlags[i]);
         }
     }
@@ -395,7 +395,7 @@ contract BasketManagerV3 is OwnableUpgradeable, ERC1967UpgradeUpgradeable {
         factorMap[_basset] = 0;
 
         uint256 index;
-        for (uint i = 0; i < bassetsArray.length - 1; i++) {
+        for (uint256 i = 0; i < bassetsArray.length - 1; i++) {
             if (bassetsArray[i] == _basset) {
                 index = i;
                 break;
