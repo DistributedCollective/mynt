@@ -7,14 +7,14 @@ const func: DeployFunction = async ({
   getNamedAccounts,
 }) => {
   const networkName = deployments.getNetworkName();
-  const { log, get, getOrNull } = deployments;
+  const { log, get } = deployments;
   const { deployer } = await getNamedAccounts();
   let bAssets;
-  const factors = [1, 1];
-  const bridges = [constants.AddressZero, constants.AddressZero];
-  const mins = [0, 0];
-  const maxs = [1000, 1000]; // need to set to what MAX_VALUE defined in BasketManager contract
-  const pausedFlags = [false, false];
+  let factors = [1, 1];
+  let bridges = [constants.AddressZero, constants.AddressZero];
+  let mins = [0, 0];
+  let maxs = [1000, 1000]; // need to set to what MAX_VALUE defined in BasketManager contract
+  let pausedFlags = [false, false];
 
   if (["rskTestnet", "rskForkedTestnet"].includes(networkName)) {
     // @todo add forked nets to hh config
@@ -53,26 +53,41 @@ const func: DeployFunction = async ({
     el.toLowerCase()
   );
 
-  const bassetsToAdd = bAssets
+  const bassetsToExclude = bAssets
     .map((el) => el.toLowerCase())
-    .filter(
-      (basset) =>
-        existingBAssets.find((basset2) => basset === basset2) === undefined
+    .map((basset, index) =>
+      existingBAssets.includes(basset) ? index : undefined
+    )
+    .filter((el) => el !== undefined);
+
+  if (bassetsToExclude.length !== 0) {
+    [bAssets, factors, bridges, mins, maxs, pausedFlags] = [
+      bAssets,
+      factors,
+      bridges,
+      mins,
+      maxs,
+      pausedFlags,
+    ].map((arg) =>
+      arg.filter((el, index) => !bassetsToExclude.includes(index))
     );
+  }
 
-  if (bassetsToAdd.length > 0) log("Adding bAssets:", bassetsToAdd);
-  await deployments.execute(
-    "BasketManagerV3",
-    { from: deployer },
-    "addBassets",
-    bassetsToAdd,
-    factors,
-    bridges,
-    mins,
-    maxs,
-    pausedFlags
-  );
-
+  if (bAssets.length !== 0) {
+    await deployments.execute(
+      "BasketManagerV3",
+      { from: deployer },
+      "addBassets",
+      bAssets,
+      factors,
+      bridges,
+      mins,
+      maxs,
+      pausedFlags
+    );
+  } else {
+    log("SKIPPING bAssets registration: all bAssets already registered");
+  }
   log(`Done`);
 };
 
