@@ -232,12 +232,12 @@ const config: HardhatUserConfig = {
       rskTestnet: ["external/deployments/rskTestnet"],
       rskForkedTestnet: [
         "external/deployments/rskTestnet",
-        "deployment/deployments/rskTestnet",
+        "deployments/rskTestnet",
       ],
       rskMainnet: ["external/deployments/rskMainnet"],
       rskForkedMainnet: [
         "external/deployments/rskMainnet",
-        "deployment/deployments/rskMainnet",
+        "deployments/rskMainnet",
       ],
     },
   },
