@@ -1,12 +1,20 @@
 import { DeployFunction } from "hardhat-deploy/types";
+import { MassetManager } from "types/generated";
 
-const func: DeployFunction = async ({ deployments, getNamedAccounts }) => {
-  const { deploy, log } = deployments;
+const func: DeployFunction = async ({
+  ethers,
+  deployments,
+  getNamedAccounts,
+}) => {
+  const { deploy, getOrNull, log } = deployments;
   const { deployer } = await getNamedAccounts();
   const deployedMassetManager = await deployments.get("MassetManager");
   const deployedToken = await deployments.get("DLLR");
   const deployedFeesVault = await deployments.get("FeesVault");
   const deployedFeesManager = await deployments.get("FeesManager");
+
+  const bmDeployment = await getOrNull("BasketManagerV3");
+  const bmInitialized = bmDeployment != null;
 
   await deploy("BasketManagerV3", {
     // @todo - replace BasketManagerV3 -> BasketManager (requires removing or renaming legacy BasketManager contract)
@@ -32,25 +40,40 @@ const func: DeployFunction = async ({ deployments, getNamedAccounts }) => {
   // Initialize  MassetManager
   const deployedBasketManager = await deployments.get("BasketManagerV3");
 
-  await deployments.execute(
-    "MassetManager",
-    { from: deployer },
-    "initialize",
-    deployedBasketManager.address,
-    deployedToken.address,
-    false
-  );
+  const massetManager = (await ethers.getContract(
+    "MassetManager"
+  )) as MassetManager;
 
-  // Upgrade  MassetManager To V3
-  await deployments.execute(
-    "MassetManager",
-    { from: deployer },
-    "upgradeToV3",
-    deployedBasketManager.address,
-    deployedToken.address,
-    deployedFeesVault.address,
-    deployedFeesManager.address
-  );
+  const mmInitialized =
+    (await massetManager.getBasketManager()) !== ethers.constants.AddressZero &&
+    (await massetManager.getToken()) !== ethers.constants.AddressZero;
+
+  if (!mmInitialized) {
+    await deployments.execute(
+      "MassetManager",
+      { from: deployer },
+      "initialize",
+      deployedBasketManager.address,
+      deployedToken.address,
+      false
+    );
+  }
+
+  const mmUpgraded =
+    (await massetManager.getFeesVault()) === deployedFeesVault.address &&
+    (await massetManager.getFeesManager()) === deployedFeesManager.address;
+  if (!mmUpgraded) {
+    // Upgrade  MassetManager To V3
+    await deployments.execute(
+      "MassetManager",
+      { from: deployer },
+      "upgradeToV3",
+      deployedBasketManager.address,
+      deployedToken.address,
+      deployedFeesVault.address,
+      deployedFeesManager.address
+    );
+  }
 
   const massetManagerVersion = await deployments.read(
     "MassetManager",

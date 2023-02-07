@@ -1,7 +1,11 @@
 import { constants } from "ethers";
 import { DeployFunction } from "hardhat-deploy/types";
 
-const func: DeployFunction = async ({ deployments, getNamedAccounts }) => {
+const func: DeployFunction = async ({
+  ethers,
+  deployments,
+  getNamedAccounts,
+}) => {
   const networkName = deployments.getNetworkName();
   const { log, get, getOrNull } = deployments;
   const { deployer } = await getNamedAccounts();
@@ -32,7 +36,7 @@ const func: DeployFunction = async ({ deployments, getNamedAccounts }) => {
 
   const bAssetsNames = ["ZUSD", "DoC"];
   log(
-    "adding bAssets to the BasketManager: ",
+    "bAssets for the BasketManager: ",
     JSON.stringify({
       bAssetsNames,
       bAssets,
@@ -44,11 +48,24 @@ const func: DeployFunction = async ({ deployments, getNamedAccounts }) => {
     })
   );
 
+  const basketManager = await ethers.getContract("BasketManagerV3");
+  const existingBAssets = (await basketManager.getBassets()).map((el) =>
+    el.toLowerCase()
+  );
+
+  const bassetsToAdd = bAssets
+    .map((el) => el.toLowerCase())
+    .filter(
+      (basset) =>
+        existingBAssets.find((basset2) => basset === basset2) === undefined
+    );
+
+  if (bassetsToAdd.length > 0) log("Adding bAssets:", bassetsToAdd);
   await deployments.execute(
     "BasketManagerV3",
     { from: deployer },
     "addBassets",
-    bAssets,
+    bassetsToAdd,
     factors,
     bridges,
     mins,
