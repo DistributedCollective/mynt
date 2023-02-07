@@ -1,5 +1,6 @@
 import { DeployFunction } from "hardhat-deploy/types";
-import { MassetManager } from "types/generated";
+import { DLLR, MassetManager } from "types/generated";
+import { masset } from "types/generated/artifacts/contracts";
 
 const func: DeployFunction = async ({
   ethers,
@@ -82,19 +83,24 @@ const func: DeployFunction = async ({
   log("Masset Version :", massetManagerVersion);
 
   // Set  MassetManager & Basket Manager in DLLR contract
-  await deployments.execute(
-    "DLLR",
-    { from: deployer },
-    "setMassetManagerProxy",
-    deployedMassetManager.address
-  );
+  const dllr = (await ethers.getContract("DLLR")) as DLLR;
+  if ((await dllr.massetManagerProxy()) !== deployedMassetManager.address) {
+    await deployments.execute(
+      "DLLR",
+      { from: deployer },
+      "setMassetManagerProxy",
+      deployedMassetManager.address
+    );
+  }
 
-  await deployments.execute(
-    "DLLR",
-    { from: deployer },
-    "setBasketManagerProxy",
-    deployedBasketManager.address
-  );
+  if ((await dllr.basketManagerProxy()) !== deployedBasketManager.address) {
+    await deployments.execute(
+      "DLLR",
+      { from: deployer },
+      "setBasketManagerProxy",
+      deployedBasketManager.address
+    );
+  }
 };
 
 func.tags = ["BasketManager"];
