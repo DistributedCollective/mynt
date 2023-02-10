@@ -13,7 +13,7 @@ const func: DeployFunction = async ({ deployments, getNamedAccounts }) => {
     [
       "rskMainnet",
       "rskTestnet",
-      "rskForkedkMainnet",
+      "rskForkedMainnet",
       "rskForkedTestnet",
     ].includes(networkName)
   ) {
@@ -57,7 +57,7 @@ func.tags = ["MocIntegration"];
 func.dependencies = [
   "DLLR",
   "MassetManager",
-  "MyAdminProxy",
+  "MyntAdminProxy",
   "DeployMockBAssets",
 ];
 

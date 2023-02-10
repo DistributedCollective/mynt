@@ -44,7 +44,7 @@ describe("MoC Integration", async () => {
 
     beforeEach("before all", async () => {
         await deployments.fixture([
-            "MyAdminProxy",
+            "MyntAdminProxy",
             "DLLR",
             "MassetManager",
             "BasketManager",
