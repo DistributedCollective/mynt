@@ -36,7 +36,7 @@ Here is the list of available scripts:
 -    "flatten" - run flattener on source files
 -    "prepublishOnly" - compile
 -    "docgen" - generate documentation from solidity Natspecs
--    "fork:rsk-mainnet": "hardhat node --fork https://mainnet.sovryn.app/rpc"
+-    "fork:rsk-mainnet": "hardhat node --fork https://mainnet4.sovryn.app/rpc"
 -    "fork:rsk-testnet": "hardhat node --fork https://testnet.sovryn.app/rpc"
 
 ## 3. Governance migration
