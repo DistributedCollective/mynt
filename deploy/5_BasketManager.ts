@@ -1,14 +1,25 @@
 import { DeployFunction } from "hardhat-deploy/types";
+import { DLLR, MassetManager } from "types/generated";
+import { masset } from "types/generated/artifacts/contracts";
 
-const func: DeployFunction = async ({ deployments, getNamedAccounts }) => {
-  const { deploy } = deployments;
+const func: DeployFunction = async ({
+  ethers,
+  deployments,
+  getNamedAccounts,
+}) => {
+  const { deploy, getOrNull, log } = deployments;
   const { deployer } = await getNamedAccounts();
-  const deployedMasset = await deployments.get("MassetV3");
+  const deployedMassetManager = await deployments.get("MassetManager");
   const deployedToken = await deployments.get("DLLR");
   const deployedFeesVault = await deployments.get("FeesVault");
   const deployedFeesManager = await deployments.get("FeesManager");
 
+  const bmDeployment = await getOrNull("BasketManagerV3");
+  const bmInitialized = bmDeployment != null;
+
   await deploy("BasketManagerV3", {
+    // @todo - replace BasketManagerV3 -> BasketManager (requires removing or renaming legacy BasketManager contract)
+    contract: "BasketManagerV3",
     proxy: {
       owner: deployer,
       proxyContract: "OpenZeppelinTransparentProxy",
@@ -19,7 +30,7 @@ const func: DeployFunction = async ({ deployments, getNamedAccounts }) => {
       execute: {
         init: {
           methodName: "initialize",
-          args: [deployedMasset.address],
+          args: [deployedMassetManager.address],
         },
       },
     },
@@ -27,49 +38,78 @@ const func: DeployFunction = async ({ deployments, getNamedAccounts }) => {
     log: true,
   });
 
-  // Initialize Masset
+  // Initialize  MassetManager
   const deployedBasketManager = await deployments.get("BasketManagerV3");
-  console.log(deployedBasketManager.address);
-  console.log(deployedToken.address);
-  await deployments.execute(
-    "MassetV3",
-    { from: deployer },
-    "initialize",
-    deployedBasketManager.address,
-    deployedToken.address,
-    false
-  );
 
-  // Upgrade Masset To V3
-  await deployments.execute(
-    "MassetV3",
-    { from: deployer },
-    "upgradeToV3",
-    deployedBasketManager.address,
-    deployedToken.address,
-    deployedFeesVault.address,
-    deployedFeesManager.address
-  );
+  const massetManager = (await ethers.getContract(
+    "MassetManager"
+  )) as MassetManager;
 
-  const mAssetVersion = await deployments.read("MassetV3", "getVersion");
-  console.log("Masset Version :", mAssetVersion);
+  const mmInitialized =
+    (await massetManager.getBasketManager()) !== ethers.constants.AddressZero &&
+    (await massetManager.getToken()) !== ethers.constants.AddressZero;
 
-  // Set Masset & Basket Manager in DLLR contract
-  await deployments.execute(
-    "DLLR",
-    { from: deployer },
-    "setMassetProxy",
-    deployedMasset.address
-  );
+  if (!mmInitialized) {
+    await deployments.execute(
+      "MassetManager",
+      { from: deployer },
+      "initialize",
+      deployedBasketManager.address,
+      deployedToken.address,
+      false
+    );
+  }
 
-  await deployments.execute(
-    "DLLR",
-    { from: deployer },
-    "setBasketManagerProxy",
-    deployedBasketManager.address
+  const mmUpgraded =
+    (await massetManager.getFeesVault()) === deployedFeesVault.address &&
+    (await massetManager.getFeesManager()) === deployedFeesManager.address;
+  if (!mmUpgraded) {
+    // Upgrade  MassetManager To V3
+    await deployments.execute(
+      "MassetManager",
+      { from: deployer },
+      "upgradeToV3",
+      deployedBasketManager.address,
+      deployedToken.address,
+      deployedFeesVault.address,
+      deployedFeesManager.address
+    );
+  }
+
+  const massetManagerVersion = await deployments.read(
+    "MassetManager",
+    "getVersion"
   );
+  log("Masset Version :", massetManagerVersion);
+
+  // Set  MassetManager & Basket Manager in DLLR contract
+  const dllr = (await ethers.getContract("DLLR")) as DLLR;
+  if ((await dllr.massetManagerProxy()) !== deployedMassetManager.address) {
+    await deployments.execute(
+      "DLLR",
+      { from: deployer },
+      "setMassetManagerProxy",
+      deployedMassetManager.address
+    );
+  }
+
+  if ((await dllr.basketManagerProxy()) !== deployedBasketManager.address) {
+    await deployments.execute(
+      "DLLR",
+      { from: deployer },
+      "setBasketManagerProxy",
+      deployedBasketManager.address
+    );
+  }
 };
 
 func.tags = ["BasketManager"];
+func.dependencies = [
+  "MyntAdminProxy",
+  "MassetManager",
+  "DLLR",
+  "FeesVault",
+  "FeesManager",
+];
 
 export default func;

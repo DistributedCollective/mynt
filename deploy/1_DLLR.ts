@@ -4,9 +4,8 @@ const func: DeployFunction = async ({
   deployments: { deploy },
   getNamedAccounts,
 }) => {
-  const {deployer} = await getNamedAccounts();
-
-  await deploy('DLLR', {
+  const { deployer } = await getNamedAccounts();
+  await deploy("DLLR", {
     from: deployer,
     contract: "DLLR",
     log: true,

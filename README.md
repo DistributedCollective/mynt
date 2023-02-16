@@ -21,8 +21,6 @@ Here is the list of available scripts:
      "deploy-governance:ropsten" - run migrations of governance contracts, ropsten network
      "deploy-governance:kovan" - run migrations of governance contracts, kovan network
      "deploy-governance:rskTestnet" - run migrations of governance contracts, rskTestnet network
-     "deploy-mynt-token" - deploy MyntToken, development network
-     "deploy-fish-token" - deploy FishToken, development network
 -    "lint" - run linter
 -    "lint-ts" - run typescript linter
 -    "lint-sol" - run solidity linter
@@ -34,10 +32,12 @@ Here is the list of available scripts:
 -    "test-file" - run just one test file
 -    "test:fork" run tests on fork network
 -    "compile" - install project dependencies and compile
--    "prettify" - run prettifier on source files
+-    "prettify" - run prettier on source files
 -    "flatten" - run flattener on source files
 -    "prepublishOnly" - compile
 -    "docgen" - generate documentation from solidity Natspecs
+-    "fork:rsk-mainnet": "hardhat node --fork https://mainnet4.sovryn.app/rpc"
+-    "fork:rsk-testnet": "hardhat node --fork https://testnet.sovryn.app/rpc"
 
 ## 3. Governance migration
 

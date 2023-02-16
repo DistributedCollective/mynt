@@ -7,8 +7,8 @@ import "../interfaces/IApproveAndCall.sol";
 import "../interfaces/IProxy.sol";
 
 /**
- * @title Token
- * @dev Implementation of staking Token.
+ * @title MetaAssetToken
+ * @dev mAsset - Meta Asset Token implementation.
  * Inherits from ERC20.
  * mint and burn functions.
  */
@@ -17,10 +17,10 @@ contract MetaAssetToken is ERC20Permit, Ownable {
     // events
 
     /**
-     * @dev Emitted when mAsset config is changed.
-     * @param _newAssetProxy                    Address of new mAsset proxy.
+     * @dev Emitted when MassetManager config is changed.
+     * @param _newMassetManagerProxy                    Address of new MassetManager proxy.
      */
-    event MassetProxyChanged(address indexed _newAssetProxy);
+    event MassetManagerProxyChanged(address indexed _newMassetManagerProxy);
 
     /**
      * @dev Emitted when Basket Manager config is changed.
@@ -28,48 +28,45 @@ contract MetaAssetToken is ERC20Permit, Ownable {
      */
     event BasketManagerProxyChanged(address indexed _newBasketManagerProxy);
 
+    /**
+     * @dev Emitted when transfer  Manager config is changed.
+     */
+    event TransferWithPermit(address _from, address _to, uint256 _amount);
+
     // state
 
-    address public mAssetProxy;
+    address public massetManagerProxy;
     address public basketManagerProxy;
 
     // modifiers
-    modifier onlyAssetProxy() {
-        require(msg.sender == mAssetProxy, "DLLR:unauthorized mAsset proxy");
+    modifier onlyMassetManagerProxy() {
+        require(msg.sender == massetManagerProxy, "DLLR:unauthorized MassetManager proxy");
         _;
     }
 
     modifier requireValidRecipient(address _recipient) {
         require(
             _recipient != address(0) && _recipient != address(this),
-            "DLLR: Invalid address. Cannot transfer DLLR directly to the DLLR contract or the null address"
+            "DLLR: Invalid address. Cannot transfer DLLR to the null address."
         );
-
-        address _assetImplementation = assetImplementation();
-        address _basketManagerImplementation = basketManagerImplementation();
-        require(
-            _recipient != mAssetProxy &&
-                _recipient != _assetImplementation &&
-                _recipient != basketManagerProxy &&
-                _recipient != _basketManagerImplementation,
-            "DLLR: Invalid address. Cannot transfer DLLR directly to a Mynt protocol address"
-        );
-
         _;
     }
 
     /**
      * @notice Constructor called on deployment, initiates the contract.
      */
-    constructor(string memory _tokenName, string memory _symbol) ERC20(_tokenName, _symbol) ERC20Permit("MetaAsset") {}
+    constructor(
+        string memory _tokenName,
+        string memory _symbol
+    ) ERC20(_tokenName, _symbol) ERC20Permit(_tokenName) {}
 
     /**
-     * @dev getter function of asset implementation address
+     * @dev getter function of MassetManager implementation address
      *
-     * @return asset implementation address
+     * @return MassetManager implementation address
      */
-    function assetImplementation() public view virtual returns (address) {
-        return IProxy(mAssetProxy).getProxyImplementation();
+    function massetManagerImplementation() public view virtual returns (address) {
+        return IProxy(massetManagerProxy).getProxyImplementation();
     }
 
     /**
@@ -82,14 +79,14 @@ contract MetaAssetToken is ERC20Permit, Ownable {
     }
 
     /**
-     * @notice setAssetConfig sets the mAsset proxy address
-     * @param _mAssetProxy The address of the mAsset proxy contract
+     * @notice setMassetManagerProxy sets the MassetManager proxy address
+     * @param _massetManagerProxy The address of the MassetManager proxy contract
      */
-    function setMassetProxy(address _mAssetProxy) external onlyOwner {
-        require(_mAssetProxy != address(0), "invalid mAsset proxy address");
-        mAssetProxy = _mAssetProxy;
+    function setMassetManagerProxy(address _massetManagerProxy) external onlyOwner {
+        require(_massetManagerProxy != address(0), "invalid MassetManager proxy address");
+        massetManagerProxy = _massetManagerProxy;
 
-        emit MassetProxyChanged(mAssetProxy);
+        emit MassetManagerProxyChanged(massetManagerProxy);
     }
 
     /**
@@ -104,33 +101,30 @@ contract MetaAssetToken is ERC20Permit, Ownable {
 
     /**
      * @notice Creates new tokens and sends them to the recipient.
-     * @notice Can be minted only by the mAsset proxy contract.
+     * @notice Can be minted only by the MassetManager proxy contract.
      *
      * @param _account The recipient address to get the minted tokens.
      * @param _amount The amount of tokens to be minted.
      */
-    function mint(address _account, uint256 _amount) external onlyAssetProxy {
+    function mint(address _account, uint256 _amount) external onlyMassetManagerProxy {
         _mint(_account, _amount);
     }
 
     /**
      * @notice Burns tokens for the given account.
-     * @notice Can be burned only by the mAsset proxy contract.
+     * @notice Can be burned only by the MassetManager proxy contract.
      *
      * @param _account The recipient address to get the minted tokens.
      * @param _amount The amount of tokens to be minted.
      */
-    function burn(address _account, uint256 _amount) external onlyAssetProxy {
+    function burn(address _account, uint256 _amount) external onlyMassetManagerProxy {
         _burn(_account, _amount);
     }
 
     /**
      * @notice Only owner who can transfer the token.
      * @notice destination cannot be:
-     * - Zero address.
-     * - DLLR contract address.
-     * - Sovryn mAsset proxy & implementation address.
-     * - Sovryn Basket Manager proxy & implementation address.
+     * - zero (0x0) address.
      *
      * @param _recipient Recipient of the token.
      * @param _amount The amount of token that will be transferred.
@@ -148,10 +142,7 @@ contract MetaAssetToken is ERC20Permit, Ownable {
     /**
      * @notice Only owner who can transfer the token.
      * @notice destination cannot be:
-     * - Zero address.
-     * - DLLR contract address.
-     * - Sovryn mAsset proxy & implementation address.
-     * - Sovryn Basket Manager proxy & implementation address.
+     * - zero (0x0) address.
      *
      * @param _from Sender of the token.
      * @param _to Recipient of the token.
@@ -173,10 +164,7 @@ contract MetaAssetToken is ERC20Permit, Ownable {
      * @notice transfer utilizing EIP-2612, to reduce the additional sending transaction for doing the approval to the spender.
      *
      * @notice destination cannot be:
-     * - Zero address.
-     * - DLLR contract address.
-     * - Sovryn mAsset proxy & implementation address.
-     * - Sovryn Basket Manager proxy & implementation address.
+     * - zero (0x0) address.
      *
      * @dev By calling this function, the allowance will be overwritten by the total amount.
      *
@@ -198,7 +186,12 @@ contract MetaAssetToken is ERC20Permit, Ownable {
         bytes32 _s
     ) external requireValidRecipient(_to) {
         permit(_from, msg.sender, _amount, _deadline, _v, _r, _s);
-        transferFrom(_from, _to, _amount);
+        require(
+            transferFrom(_from, _to, _amount),
+            "MetaAssetToken::transferWithPermit: transfer failed"
+        );
+
+        emit TransferWithPermit(_from, _to, _amount);
     }
 
     /**

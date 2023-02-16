@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 /**
  * @title Token
- * @dev Implementation of masset Token.
+ * @dev Implementation of mAsset Token.
  * Inherits from ERC20 and ERC20Detailed with implemented
  * mint and burn functions.
  */

@@ -6,7 +6,7 @@ const func: DeployFunction = async ({
 }) => {
   const { deployer } = await getNamedAccounts();
 
-  await deploy("MassetV3", {
+  await deploy("MassetManager", {
     proxy: {
       owner: deployer,
       proxyContract: "OpenZeppelinTransparentProxy",
@@ -20,6 +20,7 @@ const func: DeployFunction = async ({
   });
 };
 
-func.tags = ["Masset"];
+func.tags = ["MassetManager"];
+func.dependencies = ["MyntAdminProxy"];
 
 export default func;
