@@ -1,6 +1,6 @@
 import { deployments, ethers } from "hardhat";
 import { DeployFunction } from "hardhat-deploy/types";
-import { addresses } from "../configs/addresses";
+import { addresses, IListAddresses } from "../configs/addresses";
 
 const func: DeployFunction = async ({
   deployments: { deploy },
@@ -8,7 +8,7 @@ const func: DeployFunction = async ({
 }) => {
   const networkName = deployments.getNetworkName();
   const { log } = deployments;
-  let configAddresses;
+  let configAddresses: IListAddresses = {} as IListAddresses;
   // const { owner } = 
   if (["rskTestnet", "rskForkedTestnet"].includes(networkName)) {
     configAddresses = addresses.testnet
@@ -16,9 +16,11 @@ const func: DeployFunction = async ({
     configAddresses = addresses.mainnet
   } else if (["development", "hardhat"].includes(networkName)) {
     // Not necessary to transfer the ownership to other account
-    configAddresses = {
-      owner: "0x95a1CA72Df913f14Dc554a5D14E826B64Bd049FD" // dummy address -- need to be change
-    }
+
+    /** Activate this for testing only purposes */
+    // configAddresses = {
+    //   owner: "0x95a1CA72Df913f14Dc554a5D14E826B64Bd049FD" // dummy address -- need to be changed
+    // } as IListAddresses
   }
 
   if(!configAddresses.owner) return;
