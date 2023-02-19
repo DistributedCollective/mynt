@@ -27,3 +27,14 @@ export const addresses: IAddresses = {
     governorAdmin: "0xfF25f66b7D7F385503D70574AE0170b6B1622dAd",
   }
 }
+
+export const getAddresses = (networkName: string): IListAddresses => {
+  let configAddresses: IListAddresses = {} as IListAddresses;
+  if (["rskTestnet", "rskForkedTestnet"].includes(networkName)) {
+    configAddresses = addresses.testnet
+  } else if (["rskMainnet", "rskForkedMainnet"].includes(networkName)) {
+    configAddresses = addresses.mainnet
+  }
+
+  return configAddresses;
+}

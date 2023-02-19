@@ -1,39 +1,30 @@
 /* eslint-disable no-console */
-import hre from "hardhat";
 import { task } from "hardhat/config";
 import Logs from "node-logs";
-import { addresses, IListAddresses } from "../../configs/addresses";
-import SIPArgs from "./args/SIPArgs";
+import { getAddresses, IListAddresses } from "../../configs/addresses";
+import SIPArgs, { ISipArgument } from "./args/SIPArgs";
 
 const logger = new Logs().showInConsole(true);
      
 task("createSIP", "Create SIP to Sovryn Governance")
 .addParam("argsModuleName", "module name that is located in tasks/sips//args folder which and returning the sip arguments")
 .setAction(async (taskArgs, hre) => {
-  let argsModuleName = taskArgs.argsModuleName;
+  const { network, ethers } = hre;
+  const argsModuleName = taskArgs.argsModuleName;
+  const sipArgs: ISipArgument = await SIPArgs[argsModuleName](hre);
+  const configAddresses: IListAddresses = getAddresses(network.name)
+  const governor = await ethers.getContractAt("IGovernorAlpha", configAddresses.governorOwner);
 
-  let sipArgs = await SIPArgs[argsModuleName](hre);
-  
-  let configAddresses: IListAddresses = {} as IListAddresses;
-    const { network } = hre;
-    const networkName = network.name;
+  logger.info("=== Creating SIP ===")
+  logger.info(`Governor Address:    ${governor.address}`)
+  logger.info(`Target:              ${sipArgs.target}`)
+  logger.info(`Values:              ${sipArgs.value}`)
+  logger.info(`Signature:           ${sipArgs.signature}`)
+  logger.info(`Data:                ${sipArgs.data}`)
+  logger.info(`Description:         ${sipArgs.description}`)
+  logger.info(`============================================================='`)
 
-    if (["rskTestnet", "rskForkedTestnet"].includes(networkName)) {
-      configAddresses = addresses.testnet
-    } else if (["rskMainnet", "rskForkedMainnet"].includes(networkName)) {
-      configAddresses = addresses.mainnet
-    }
+  await governor.propose(sipArgs.target, sipArgs.value, sipArgs.signature, sipArgs.data, sipArgs.description)
 
-    const governor = await hre.ethers.getContractAt("IGovernorAlpha", configAddresses.governorOwner);
-
-    logger.info("=== Creating SIP ===")
-    logger.info(`Governor Address:    ${governor.address}`)
-    logger.info(`Target:              ${sipArgs.target}`)
-    logger.info(`Values:              ${sipArgs.value}`)
-    logger.info(`Signature:           ${sipArgs.signature}`)
-    logger.info(`Data:                ${sipArgs.data}`)
-    logger.info(`Description:         ${sipArgs.description}`)
-    logger.info(`============================================================='`)
-
-    logger.success("SIP has been created");
+  logger.success("SIP has been created");
 })

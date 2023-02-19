@@ -1,4 +1,4 @@
-interface ISipArgument {
+export interface ISipArgument {
   target: string[];
   value: number[];
   signature: string[];
