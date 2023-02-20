@@ -276,7 +276,7 @@ task("interaction:get-contracts-owner", "Log contracts owners")
     );
   });
 
-
+/** MetaAssetToken contract interaction */
 task("interaction:get-massetManagerConfig", "Fetch massetManagerProxy address")
 .addParam("contractAddress", "Meta asset token contract address (DLLR, etc)", undefined, types.string, false)
 .setAction(async ({ contractAddress }, hre) => {
@@ -342,3 +342,108 @@ task("multisig:set-basketManagerProxy", "Set basketManagerProxy")
     deployer
   );
 });
+
+/** BasketManager contract interaction */
+task("basketManager:isValidBasset", "Checks if bAasset is valid by checking its presence in the bAssets factors list")
+.addParam("basset", "Basset address to be checked", undefined, types.string, false)
+.setAction(async ({ basset }, hre) => {
+  const { ethers } = hre;
+  const basketManager = await ethers.getContract("BasketManagerV3"); // as BasketManagerV3;
+  console.log("is valid: ", await basketManager.isValidBasset(basset));
+})
+
+task("basketManager:checkBasketBalanceForDeposit", "Checks if ratio of bAssets in basket is within limits to make a deposit of specific asset")
+.addParam("basset", "Basset address to deposit", undefined, types.string, false)
+.addParam("bassetQuantity", "Amount of bAssets to deposit", undefined, types.string, false)
+.setAction(async ({ basset, bassetQuantity }, hre) => {
+  const { ethers } = hre;
+  const basketManager = await ethers.getContract("BasketManagerV3"); // as BasketManagerV3;
+  console.log("result: ", await basketManager.checkBasketBalanceForDeposit(basset, bassetQuantity));
+})
+
+task("basketManager:checkBasketBalanceForWithdrawal", "Checks if ratio of bAssets in basket is within limits to make a withdrawal of specific asset")
+.addParam("basset", "Basset address to redeem", undefined, types.string, false)
+.addParam("bassetQuantity", "Amount of bAssets to redeem", undefined, types.string, false)
+.setAction(async ({ basset, bassetQuantity }, hre) => {
+  const { ethers } = hre;
+  const basketManager = await ethers.getContract("BasketManagerV3"); // as BasketManagerV3;
+  console.log("result: ", await basketManager.checkBasketBalanceForWithdrawal(basset, bassetQuantity));
+})
+
+task("basketManager:convertBassetToMassetQuantity", "Converts bAsset to mAsset quantity")
+.addParam("basset", "Basset address", undefined, types.string, false)
+.addParam("bassetQuantity", "Amount of bAssets to check", undefined, types.string, false)
+.setAction(async ({ basset, bassetQuantity }, hre) => {
+  const { ethers } = hre;
+  const basketManager = await ethers.getContract("BasketManagerV3"); // as BasketManagerV3;
+  console.log("result: ",await basketManager.convertBassetToMassetQuantity(basset, bassetQuantity));
+})
+
+task("basketManager:convertMassetToBassetQuantity", "Converts mAsset to bAsset quantity")
+.addParam("basset", "Basset address", undefined, types.string, false)
+.addParam("massetQuantity", "Amount of mAssets to check", undefined, types.string, false)
+.setAction(async ({ basset, massetQuantity }, hre) => {
+  const { ethers } = hre;
+  const basketManager = await ethers.getContract("BasketManagerV3"); // as BasketManagerV3;
+  console.log("result: ",await basketManager.convertMassetToBassetQuantity(basset, massetQuantity));
+})
+
+task("basketManager:getTotalMassetBalance", "Calculates total mAsset balance")
+.setAction(async ({}, hre) => {
+  const { ethers } = hre;
+  const basketManager = await ethers.getContract("BasketManagerV3"); // as BasketManagerV3;
+  console.log("result: ",(await basketManager.getTotalMassetBalance()).toString());
+})
+
+task("basketManager:getBassetBalance", "Calculates total bAsset balance")
+.addParam("basset", "Basset address", undefined, types.string, false)
+.setAction(async ({ basset }, hre) => {
+  const { ethers } = hre;
+  const basketManager = await ethers.getContract("BasketManagerV3"); // as BasketManagerV3;
+  console.log("result: ",(await basketManager.getBassetBalance(basset)).toString());
+})
+
+task("basketManager:getVersion", "Get version of basket manager")
+.setAction(async ({}, hre) => {
+  const { ethers } = hre;
+  const basketManager = await ethers.getContract("BasketManagerV3"); // as BasketManagerV3;
+  console.log("result: ",await basketManager.getVersion());
+})
+
+task("basketManager:getBassets", "Get list of bAssets")
+.setAction(async ({}, hre) => {
+  const { ethers } = hre;
+  const basketManager = await ethers.getContract("BasketManagerV3"); // as BasketManagerV3;
+  console.log(await basketManager.getBassets());
+})
+
+task("basketManager:getFactor", "Get factor")
+.addParam("basset", "Basset address", undefined, types.string, false)
+.setAction(async ({ basset }, hre) => {
+  const { ethers } = hre;
+  const basketManager = await ethers.getContract("BasketManagerV3"); // as BasketManagerV3;
+  console.log("result: ", (await basketManager.getFactor(basset)).toString());
+})
+
+task("basketManager:getRange", "Get range(min,max)")
+.addParam("basset", "Basset address", undefined, types.string, false)
+.setAction(async ({ basset }, hre) => {
+  const { ethers } = hre;
+  const basketManager = await ethers.getContract("BasketManagerV3"); // as BasketManagerV3;
+  console.log("result: ", await basketManager.getRange(basset));
+})
+
+task("basketManager:getPaused", "Get paused status of basset")
+.addParam("basset", "Basset address", undefined, types.string, false)
+.setAction(async ({ basset }, hre) => {
+  const { ethers } = hre;
+  const basketManager = await ethers.getContract("BasketManagerV3"); // as BasketManagerV3;
+  console.log("result: ", await basketManager.getPaused(basset));
+})
+
+task("basketManager:getProxyImplementation", "Get proxy implementation of basket manager")
+.setAction(async ({}, hre) => {
+  const { ethers } = hre;
+  const basketManager = await ethers.getContract("BasketManagerV3"); // as BasketManagerV3;
+  console.log("result: ", await basketManager.getProxyImplementation());
+})
