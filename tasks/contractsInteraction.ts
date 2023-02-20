@@ -306,41 +306,87 @@ task("interaction:get-chainid", "Fetch chain id")
 task("multisig:set-massetManagerProxy", "Set massetManagerProxy")
 .addParam("contractAddress", "Meta asset token contract address (DLLR, etc)", undefined, types.string, false)
 .addParam("newMassetManagerProxy", "new masset manager proxy address", undefined, types.string, false)
-.setAction(async ({ contractAddress, newMassetManagerProxy }, hre) => {
+.addOptionalParam("isMultisig", "flag if transaction needs to be intiated from the multisig contract")
+.addOptionalParam("isSIP", "flag if transaction needs to be initiated from the SIP")
+.setAction(async ({ contractAddress, newMassetManagerProxy, isMultisig, isSIP }, hre) => {
+  // if isMultisig & isSIP are false, transaction will be initiated as per normal
+
   helpers.injectHre(hre);
   const {ethers, network, getNamedAccounts} = hre;
   const configAddresses = getAddresses(network.name);
   const MetaAssetToken = await ethers.getContractAt("MetaAssetToken", contractAddress);
   const { deployer } = await getNamedAccounts();
-  const data = MetaAssetToken.interface.encodeFunctionData("setMassetManagerProxy", [
-    newMassetManagerProxy,
-  ]);
-  await helpers.sendWithMultisig(
-    configAddresses.multisig,
-    MetaAssetToken.address,
-    data,
-    deployer
-  );
+
+  if(isMultisig) {
+    const data = MetaAssetToken.interface.encodeFunctionData("setMassetManagerProxy", [
+      newMassetManagerProxy,
+    ]);
+    await helpers.sendWithMultisig(
+      configAddresses.multisig,
+      MetaAssetToken.address,
+      data,
+      deployer
+    );
+  } else if(isSIP) {
+    const signature = "setMassetManagerProxy(address)";
+    const data = MetaAssetToken.interface.encodeFunctionData("setMassetManagerProxy", [
+      newMassetManagerProxy,
+    ]);
+
+    const sipArgs: ISipArgument = {
+      target: [contractAddress],
+      value: [0],
+      signature: [signature],
+      data: [data],
+      description: "Set massetManagerProxy address"
+    };
+
+    _createSIP(hre, sipArgs);
+  } else {
+    await MetaAssetToken.setMassetManagerProxy(newMassetManagerProxy);
+  }
 });
 
 task("multisig:set-basketManagerProxy", "Set basketManagerProxy")
 .addParam("contractAddress", "Meta asset token contract address (DLLR, etc)", undefined, types.string, false)
 .addParam("newBasketManagerProxy", "new basket manager proxy address", undefined, types.string, false)
-.setAction(async ({ contractAddress, newBasketManagerProxy }, hre) => {
+.addOptionalParam("isMultisig", "flag if transaction needs to be intiated from the multisig contract")
+.addOptionalParam("isSIP", "flag if transaction needs to be initiated from the SIP")
+.setAction(async ({ contractAddress, newBasketManagerProxy, isMultisig, isSIP }, hre) => {
+  // if isMultisig & isSIP are false, transaction will be initiated as per normal
   helpers.injectHre(hre);
   const {ethers, network, getNamedAccounts} = hre;
   const configAddresses = getAddresses(network.name)
   const MetaAssetToken = await ethers.getContractAt("MetaAssetToken", contractAddress);
   const { deployer } = await getNamedAccounts();
-  const data = MetaAssetToken.interface.encodeFunctionData("setBasketManagerProxy", [
-    newBasketManagerProxy,
-  ]);
-  await helpers.sendWithMultisig(
-    configAddresses.multisig,
-    MetaAssetToken.address,
-    data,
-    deployer
-  );
+  if(isMultisig) {
+    const data = MetaAssetToken.interface.encodeFunctionData("setBasketManagerProxy", [
+      newBasketManagerProxy,
+    ]);
+    await helpers.sendWithMultisig(
+      configAddresses.multisig,
+      MetaAssetToken.address,
+      data,
+      deployer
+    );
+  } else if(isSIP) {
+    const signature = "setBasketManagerProxy(address)";
+    const data = MetaAssetToken.interface.encodeFunctionData("setBasketManagerProxy", [
+      newBasketManagerProxy,
+    ]);
+
+    const sipArgs: ISipArgument = {
+      target: [contractAddress],
+      value: [0],
+      signature: [signature],
+      data: [data],
+      description: "Set basketManagerProxy address"
+    }
+
+    _createSIP(hre, sipArgs);
+  } else {
+    await MetaAssetToken.setBasketManagerProxy(newBasketManagerProxy);
+  }
 });
 
 /** BasketManager contract interaction */
