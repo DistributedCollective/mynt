@@ -12,6 +12,8 @@ import {
 } from "@nomicfoundation/hardhat-network-helpers";
 import * as helpers from "../scripts/utils/helpers";
 import { getAddresses, IListAddresses } from "../configs/addresses";
+import { _createSIP } from "./sips/createSIP";
+import { ISipArgument } from "./sips/args/SIPArgs";
 
 /// ------ REPLACE bAsset ----- ///
 task("interaction:replace-basset", "Replace bAsset")
@@ -266,61 +268,66 @@ task("interaction:get-contracts-owner", "Log contracts owners")
 
 
 task("interaction:get-massetManagerConfig", "Fetch massetManagerProxy address")
-.setAction(async (taskArgs, hre) => {
+.addParam("contractAddress", "Meta asset token contract address (DLLR, etc)", undefined, types.string, false)
+.setAction(async ({ contractAddress }, hre) => {
   const {ethers} = hre;
-  const DLLR = await ethers.getContract("DLLR");
-  console.log(`massetManagerProxy address: ${await DLLR.massetManagerProxy()}`);
-  console.log(`massetManagerImplementation address: ${await DLLR.massetManagerImplementation()}`);
+  const MetaAssetToken = await ethers.getContractAt("MetaAssetToken", contractAddress);
+  console.log(`massetManagerProxy address: ${await MetaAssetToken.massetManagerProxy()}`);
+  console.log(`massetManagerImplementation address: ${await MetaAssetToken.massetManagerImplementation()}`);
 });
 
 task("interaction:get-basketManagerConfig", "Fetch basketManagerProxy address")
-.setAction(async (taskArgs, hre) => {
+.addParam("contractAddress", "Meta asset token contract address (DLLR, etc)", undefined, types.string, false)
+.setAction(async ({ contractAddress }, hre) => {
   const {ethers} = hre;
-  const DLLR = await ethers.getContract("DLLR");
-  console.log(`basketManagerProxy address: ${await DLLR.basketManagerProxy()}`);
-  console.log(`basketManagerImplementation address: ${await DLLR.basketManagerImplementation()}`);
+  const MetaAssetToken = await ethers.getContractAt("MetaAssetToken", contractAddress);
+  console.log(`basketManagerProxy address: ${await MetaAssetToken.basketManagerProxy()}`);
+  console.log(`basketManagerImplementation address: ${await MetaAssetToken.basketManagerImplementation()}`);
 });
 
 task("interaction:get-chainid", "Fetch chain id")
-.setAction(async (taskArgs, hre) => {
+.addParam("contractAddress", "Meta asset token contract address (DLLR, etc)", undefined, types.string, false)
+.setAction(async ({ contractAddress }, hre) => {
   const {ethers} = hre;
-  const DLLR = await ethers.getContract("DLLR");
-  console.log(`chain id: ${await DLLR.getChainId()}`);
+  const MetaAssetToken = await ethers.getContractAt("MetaAssetToken", contractAddress);
+  console.log(`chain id: ${await MetaAssetToken.getChainId()}`);
 });
 
 task("multisig:set-massetManagerProxy", "Set massetManagerProxy")
+.addParam("contractAddress", "Meta asset token contract address (DLLR, etc)", undefined, types.string, false)
 .addParam("newMassetManagerProxy", "new masset manager proxy address", undefined, types.string, false)
-.setAction(async ({newMassetManagerProxy}, hre) => {
+.setAction(async ({ contractAddress, newMassetManagerProxy }, hre) => {
   helpers.injectHre(hre);
   const {ethers, network, getNamedAccounts} = hre;
   const configAddresses = getAddresses(network.name);
-  const DLLR = await ethers.getContract("DLLR");
+  const MetaAssetToken = await ethers.getContractAt("MetaAssetToken", contractAddress);
   const { deployer } = await getNamedAccounts();
-  const data = DLLR.interface.encodeFunctionData("setMassetManagerProxy", [
+  const data = MetaAssetToken.interface.encodeFunctionData("setMassetManagerProxy", [
     newMassetManagerProxy,
   ]);
   await helpers.sendWithMultisig(
     configAddresses.multisig,
-    DLLR.address,
+    MetaAssetToken.address,
     data,
     deployer
   );
 });
 
 task("multisig:set-basketManagerProxy", "Set basketManagerProxy")
+.addParam("contractAddress", "Meta asset token contract address (DLLR, etc)", undefined, types.string, false)
 .addParam("newBasketManagerProxy", "new basket manager proxy address", undefined, types.string, false)
-.setAction(async ({newBasketManagerProxy}, hre) => {
+.setAction(async ({ contractAddress, newBasketManagerProxy }, hre) => {
   helpers.injectHre(hre);
   const {ethers, network, getNamedAccounts} = hre;
   const configAddresses = getAddresses(network.name)
-  const DLLR = await ethers.getContract("DLLR");
+  const MetaAssetToken = await ethers.getContractAt("MetaAssetToken", contractAddress);
   const { deployer } = await getNamedAccounts();
-  const data = DLLR.interface.encodeFunctionData("setBasketManagerProxy", [
+  const data = MetaAssetToken.interface.encodeFunctionData("setBasketManagerProxy", [
     newBasketManagerProxy,
   ]);
   await helpers.sendWithMultisig(
     configAddresses.multisig,
-    DLLR.address,
+    MetaAssetToken.address,
     data,
     deployer
   );

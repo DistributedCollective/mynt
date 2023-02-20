@@ -8,10 +8,13 @@ const logger = new Logs().showInConsole(true);
      
 task("createSIP", "Create SIP to Sovryn Governance")
 .addParam("argsModuleName", "module name that is located in tasks/sips//args folder which and returning the sip arguments")
-.setAction(async (taskArgs, hre) => {
-  const { network, ethers } = hre;
-  const argsModuleName = taskArgs.argsModuleName;
+.setAction(async ({argsModuleName}, hre) => {
   const sipArgs: ISipArgument = await SIPArgs[argsModuleName](hre);
+  await _createSIP(hre, sipArgs)
+})
+
+export const _createSIP = async (hre, sipArgs: ISipArgument) => {
+  const { network, ethers } = hre;
   const configAddresses: IListAddresses = getAddresses(network.name)
   const governor = await ethers.getContractAt("IGovernorAlpha", configAddresses.governorOwner);
 
@@ -27,4 +30,4 @@ task("createSIP", "Create SIP to Sovryn Governance")
   await governor.propose(sipArgs.target, sipArgs.value, sipArgs.signature, sipArgs.data, sipArgs.description)
 
   logger.success("SIP has been created");
-})
+}
