@@ -33,22 +33,12 @@ task("interaction:replace-basset", "Replace bAsset")
       deployments: { get, getNetworkName },
     } = hre;
     const basketManager = await ethers.getContract("BasketManagerV3"); // as BasketManagerV3;
+    const contractAddress = basketManager.address;
+    const BasketManagerV3Interface = new ethers.utils.Interface(
+      (await get("BasketManagerV3")).abi
+    );
 
-    helpers.injectHre(hre);
-    const { deployer } = await getNamedAccounts();
-
-    const networkName = getNetworkName();
-    if (["rskTestnet", "rskForkedTestnet"].includes(networkName)) {
-      // multisig tx
-      const multisigAddress = (await get("MultiSigWallet")).address;
-      const contractAddress = basketManager.address;
-      const sender = deployer;
-
-      const BasketManagerV3Interface = new ethers.utils.Interface(
-        (await get("BasketManagerV3")).abi
-      );
-
-      const dataRemove = pausePrevBasset
+    const dataRemove = pausePrevBasset
         ? BasketManagerV3Interface.encodeFunctionData("pauseBasset", [
             prevBasset,
             true,
@@ -57,14 +47,23 @@ task("interaction:replace-basset", "Replace bAsset")
             prevBasset,
           ]);
 
-      const dataAdd = BasketManagerV3Interface.encodeFunctionData("addBasset", [
-        newBasset,
-        1,
-        ethers.constants.AddressZero,
-        0,
-        1000,
-        false,
-      ]);
+    const dataAdd = BasketManagerV3Interface.encodeFunctionData("addBasset", [
+      newBasset,
+      1,
+      ethers.constants.AddressZero,
+      0,
+      1000,
+      false,
+    ]);
+
+    helpers.injectHre(hre);
+    const { deployer } = await getNamedAccounts();
+
+    const networkName = getNetworkName();
+    if (["rskTestnet", "rskForkedTestnet"].includes(networkName)) {
+      // multisig tx
+      const multisigAddress = (await get("MultiSigWallet")).address;
+      const sender = deployer;
 
       console.log(`removing basset multisig tx:`);
       await helpers.sendWithMultisig(
@@ -82,7 +81,18 @@ task("interaction:replace-basset", "Replace bAsset")
       );
     } else if (["rskMainnet", "rskForkedMainnet"].includes(networkName)) {
       if (networkName === "rskMainnet") {
-        // @todo create a proposal - meanwhile use the core protocol py script
+        // @todo create a proposal
+        const signatureRemove = pausePrevBasset ? "pauseBasset(address)" : "removeBasset(address)";
+        const signatureAdd = "addBasset(address,int256,address,uint256,uint256,bool)";
+        const sipArgs: ISipArgument = {
+          target: [contractAddress, contractAddress],
+          value: [0, 0],
+          signature: [signatureRemove, signatureAdd],
+          data: [dataRemove, dataAdd],
+          description: "Replace Basset"
+        }
+
+        _createSIP(hre, sipArgs);
       } else {
         // @todo forked mainnet to replace bAsset - impersonate accounts: TimelockOwner, GvernorOwner, whale accounts
         //   - create proposal (impersonate a whale account)
