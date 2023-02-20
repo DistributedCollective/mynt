@@ -20,6 +20,7 @@ import "@nomiclabs/hardhat-solhint";
 
 import "tasks/contractsInteraction";
 import "tasks/metaAssetTokenInteraction";
+import "tasks/upgradeContract";
 import "tasks/sips/createSIP";
 
 /*
