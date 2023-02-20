@@ -19,6 +19,7 @@ import "@openzeppelin/hardhat-upgrades";
 import "@nomiclabs/hardhat-solhint";
 
 import "tasks/contractsInteraction";
+import "tasks/metaAssetTokenInteraction";
 import "tasks/sips/createSIP";
 
 /*
