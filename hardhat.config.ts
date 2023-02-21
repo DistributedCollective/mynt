@@ -120,7 +120,7 @@ const config: HardhatUserConfig = {
     rskMainnet: {
       chainId: 30,
       accounts: mainnetAccounts,
-      url: "wss://mainnet.sovryn.app/ws",
+      url: "https://mainnet.sovryn.app/rpc",
       gasPrice: 66000010, // ~66GWei,
       timeout: 1e9,
       live: true,

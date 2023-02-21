@@ -11,7 +11,6 @@ import {
   stopImpersonatingAccount,
 } from "@nomicfoundation/hardhat-network-helpers";
 import * as helpers from "../scripts/utils/helpers";
-import { getAddresses, IListAddresses } from "../configs/addresses";
 import { _createSIP } from "./sips/createSIP";
 import { ISipArgument } from "./sips/args/SIPArgs";
 

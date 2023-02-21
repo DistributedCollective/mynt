@@ -1,6 +1,5 @@
 import { task, types } from "hardhat/config";
 import * as helpers from "../scripts/utils/helpers";
-import { getAddresses } from "../configs/addresses";
 import { _createSIP } from "./sips/createSIP";
 import { ISipArgument } from "./sips/args/SIPArgs";
 
@@ -39,17 +38,17 @@ task("multisig:set-massetManagerProxy", "Set massetManagerProxy")
   // if isMultisig & isSIP are false, transaction will be initiated as per normal
 
   helpers.injectHre(hre);
-  const {ethers, network, getNamedAccounts} = hre;
-  const configAddresses = getAddresses(network.name);
+  const {ethers, deployments: { get }, getNamedAccounts} = hre;
   const MetaAssetToken = await ethers.getContractAt("MetaAssetToken", contractAddress);
   const { deployer } = await getNamedAccounts();
 
   if(isMultisig) {
+    const multisigAddress = (await get("MultisigWallet")).address;
     const data = MetaAssetToken.interface.encodeFunctionData("setMassetManagerProxy", [
       newMassetManagerProxy,
     ]);
     await helpers.sendWithMultisig(
-      configAddresses.multisig,
+      multisigAddress,
       MetaAssetToken.address,
       data,
       deployer
@@ -82,16 +81,16 @@ task("multisig:set-basketManagerProxy", "Set basketManagerProxy")
 .setAction(async ({ contractAddress, newBasketManagerProxy, isMultisig, isSIP }, hre) => {
   // if isMultisig & isSIP are false, transaction will be initiated as per normal
   helpers.injectHre(hre);
-  const {ethers, network, getNamedAccounts} = hre;
-  const configAddresses = getAddresses(network.name)
+  const {ethers, deployments: { get }, getNamedAccounts} = hre;
   const MetaAssetToken = await ethers.getContractAt("MetaAssetToken", contractAddress);
   const { deployer } = await getNamedAccounts();
   if(isMultisig) {
+    const multisigAddress = (await get("MultisigWallet")).address;
     const data = MetaAssetToken.interface.encodeFunctionData("setBasketManagerProxy", [
       newBasketManagerProxy,
     ]);
     await helpers.sendWithMultisig(
-      configAddresses.multisig,
+      multisigAddress,
       MetaAssetToken.address,
       data,
       deployer

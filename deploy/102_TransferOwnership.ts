@@ -1,6 +1,6 @@
-import { deployments, ethers } from "hardhat";
+import { deployments, ethers, network } from "hardhat";
 import { DeployFunction } from "hardhat-deploy/types";
-import { addresses, IListAddresses } from "../configs/addresses";
+import { addresses, getAddresses, IListAddresses } from "../configs/addresses";
 
 const func: DeployFunction = async ({
   deployments: { deploy },
@@ -8,20 +8,15 @@ const func: DeployFunction = async ({
 }) => {
   const networkName = deployments.getNetworkName();
   const { log } = deployments;
-  let configAddresses: IListAddresses = {} as IListAddresses;
-  // const { owner } = 
-  if (["rskTestnet", "rskForkedTestnet"].includes(networkName)) {
-    configAddresses = addresses.testnet
-  } else if (["rskMainnet", "rskForkedMainnet"].includes(networkName)) {
-    configAddresses = addresses.mainnet
-  } else if (["development", "hardhat"].includes(networkName)) {
-    // Not necessary to transfer the ownership to other account
+  let configAddresses = getAddresses(network.tags);
 
-    /** Activate this for testing only purposes */
-    // configAddresses = {
-    //   owner: "0x95a1CA72Df913f14Dc554a5D14E826B64Bd049FD" // dummy address -- need to be changed
-    // } as IListAddresses
-  }
+  // For local network, not necessary to transfer the ownership to other account
+  /** Activate this for testing only purposes */
+  // if(!configAddresses.owner) {
+  //   configAddresses = {
+  //     owner: "0x95a1CA72Df913f14Dc554a5D14E826B64Bd049FD" // dummy address -- need to be changed
+  //   } as IListAddresses
+  // }
 
   if(!configAddresses.owner) return;
 

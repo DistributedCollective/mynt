@@ -1,6 +1,5 @@
 import { task } from "hardhat/config";
 import * as helpers from "../scripts/utils/helpers";
-import { getAddresses } from "../configs/addresses";
 import { _createSIP } from "./sips/createSIP";
 import { ISipArgument } from "./sips/args/SIPArgs";
 
@@ -9,9 +8,8 @@ task("upgrade:massetManager", "Upgrade implementation of massetManager contract"
 .addOptionalParam("isSIP", "flag if transaction needs to be initiated from the SIP")
 .setAction(async ({ isMultisig, isSIP }, hre) => {
   helpers.injectHre(hre);
-  const { ethers, network, getNamedAccounts } = hre;
+  const { ethers, deployments: { get }, getNamedAccounts } = hre;
   const { deployer } = await getNamedAccounts();
-  const configAddresses = getAddresses(network.name)
   const myntAdminProxy = await ethers.getContract("MyntAdminProxy");
   const massetManagerProxy = await ethers.getContract("MassetManager");
 
@@ -20,12 +18,13 @@ task("upgrade:massetManager", "Upgrade implementation of massetManager contract"
   console.log(`Upgrading massetManager implementation to ${newMassetManagerImpl.address}`)
 
   if(isMultisig) {
+    const multisigAddress = (await get("MultisigWallet")).address;
     const dataUpgrade = myntAdminProxy.interface.encodeFunctionData("upgrade", [
       massetManagerProxy.address, newMassetManagerImpl.address
     ]);
 
     await helpers.sendWithMultisig(
-      configAddresses.multisig,
+      multisigAddress,
       myntAdminProxy.address,
       dataUpgrade,
       deployer
@@ -45,8 +44,6 @@ task("upgrade:massetManager", "Upgrade implementation of massetManager contract"
     }
 
     _createSIP(hre, sipArgs);
-  } else {
-    await myntAdminProxy.upgrade(massetManagerProxy.address, newMassetManagerImpl.address) 
   }
 });
 
@@ -55,9 +52,8 @@ task("upgrade:feesVault", "Upgrade implementation of feesVault contract")
 .addOptionalParam("isSIP", "flag if transaction needs to be initiated from the SIP")
 .setAction(async ({ isMultisig, isSIP }, hre) => {
   helpers.injectHre(hre);
-  const { ethers, network, getNamedAccounts } = hre;
+  const { ethers, deployments: { get }, getNamedAccounts } = hre;
   const { deployer } = await getNamedAccounts();
-  const configAddresses = getAddresses(network.name)
   const myntAdminProxy = await ethers.getContract("MyntAdminProxy");
   const feesVaultProxy = await ethers.getContract("FeesVault");
 
@@ -66,12 +62,13 @@ task("upgrade:feesVault", "Upgrade implementation of feesVault contract")
   console.log(`Upgrading feesVault implementation to ${newFeesVaultImpl.address}`)
 
   if(isMultisig) {
+    const multisigAddress = (await get("MultisigWallet")).address;
     const dataUpgrade = myntAdminProxy.interface.encodeFunctionData("upgrade", [
       feesVaultProxy.address, newFeesVaultImpl.address
     ]);
 
     await helpers.sendWithMultisig(
-      configAddresses.multisig,
+      multisigAddress,
       myntAdminProxy.address,
       dataUpgrade,
       deployer
@@ -91,8 +88,6 @@ task("upgrade:feesVault", "Upgrade implementation of feesVault contract")
     }
 
     _createSIP(hre, sipArgs);
-  } else {
-    await myntAdminProxy.upgrade(feesVaultProxy.address, newFeesVaultImpl.address) 
   }
 });
 
@@ -101,9 +96,8 @@ task("upgrade:feesManager", "Upgrade implementation of feesManager contract")
 .addOptionalParam("isSIP", "flag if transaction needs to be initiated from the SIP")
 .setAction(async ({ isMultisig, isSIP }, hre) => {
   helpers.injectHre(hre);
-  const { ethers, network, getNamedAccounts } = hre;
+  const { ethers, deployments: { get }, getNamedAccounts } = hre;
   const { deployer } = await getNamedAccounts();
-  const configAddresses = getAddresses(network.name)
   const myntAdminProxy = await ethers.getContract("MyntAdminProxy");
   const feesManagerProxy = await ethers.getContract("FeesManager");
 
@@ -112,12 +106,13 @@ task("upgrade:feesManager", "Upgrade implementation of feesManager contract")
   console.log(`Upgrading feesManager implementation to ${newFeesManagerImpl.address}`)
 
   if(isMultisig) {
+    const multisigAddress = (await get("MultisigWallet")).address;
     const dataUpgrade = myntAdminProxy.interface.encodeFunctionData("upgrade", [
       feesManagerProxy.address, newFeesManagerImpl.address
     ]);
 
     await helpers.sendWithMultisig(
-      configAddresses.multisig,
+      multisigAddress,
       myntAdminProxy.address,
       dataUpgrade,
       deployer
@@ -137,8 +132,6 @@ task("upgrade:feesManager", "Upgrade implementation of feesManager contract")
     }
 
     _createSIP(hre, sipArgs);
-  } else {
-    await myntAdminProxy.upgrade(feesManagerProxy.address, newFeesManagerImpl.address) 
   }
 });
 
@@ -147,9 +140,8 @@ task("upgrade:basketManager", "Upgrade implementation of basketManager contract"
 .addOptionalParam("isSIP", "flag if transaction needs to be initiated from the SIP")
 .setAction(async ({ isMultisig, isSIP }, hre) => {
   helpers.injectHre(hre);
-  const { ethers, network, getNamedAccounts } = hre;
+  const { ethers, deployments: { get }, getNamedAccounts } = hre;
   const { deployer } = await getNamedAccounts();
-  const configAddresses = getAddresses(network.name)
   const myntAdminProxy = await ethers.getContract("MyntAdminProxy");
   const basketManagerProxy = await ethers.getContract("BasketManagerV3"); // basketManagerV3
 
@@ -158,12 +150,13 @@ task("upgrade:basketManager", "Upgrade implementation of basketManager contract"
   console.log(`Upgrading basket manager implementation to ${newBasketManagerImpl.address}`)
 
   if(isMultisig) {
+    const multisigAddress = (await get("MultisigWallet")).address;
     const dataUpgrade = myntAdminProxy.interface.encodeFunctionData("upgrade", [
       basketManagerProxy.address, newBasketManagerImpl.address
     ]);
 
     await helpers.sendWithMultisig(
-      configAddresses.multisig,
+      multisigAddress,
       myntAdminProxy.address,
       dataUpgrade,
       deployer
@@ -183,7 +176,5 @@ task("upgrade:basketManager", "Upgrade implementation of basketManager contract"
     }
 
     _createSIP(hre, sipArgs);
-  } else {
-    await myntAdminProxy.upgrade(basketManagerProxy.address, newBasketManagerImpl.address) 
   }
 });
