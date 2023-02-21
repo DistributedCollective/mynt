@@ -41,13 +41,9 @@ task("multisig:set-massetManagerProxy", "Set massetManagerProxy")
   // if isMultisig & isSIP are false, assign based on network tags.
   const { network } = hre;
   if(!isMultisig && !isSIP) {
-    if(network.tags["testnet"]) {
-      isMultisig = true;
-    } else if(network.tags["mainnet"]) {
-      isSIP = true;
-    } else {
-      return logger.error(`Non-supported ${JSON.stringify(network.tags)} network tags`);
-    }
+    let {isMultisigFlag, isSIPFlag} = helpers.defaultValueMultisigOrSipFlag(network.tags);
+    isMultisig = isMultisigFlag;
+    isSIP = isSIPFlag;
   }
 
   helpers.injectHre(hre);
@@ -94,13 +90,9 @@ task("multisig:set-basketManagerProxy", "Set basketManagerProxy")
 .setAction(async ({ contractAddress, newBasketManagerProxy, isMultisig, isSIP }, hre) => {
   const { network } = hre;
   if(!isMultisig && !isSIP) {
-    if(network.tags["testnet"]) {
-      isMultisig = true;
-    } else if(network.tags["mainnet"]) {
-      isSIP = true;
-    } else {
-      return logger.error(`Non-supported ${JSON.stringify(network.tags)} network tags`);
-    }
+    let {isMultisigFlag, isSIPFlag} = helpers.defaultValueMultisigOrSipFlag(network.tags);
+    isMultisig = isMultisigFlag;
+    isSIP = isSIPFlag;
   }
 
   // if isMultisig & isSIP are false, transaction will be initiated as per normal
