@@ -9,7 +9,7 @@ import "@nomiclabs/hardhat-web3";
 import "@nomicfoundation/hardhat-chai-matchers";
 import "@nomiclabs/hardhat-ethers";
 import "@nomiclabs/hardhat-truffle5";
-// import "@tenderly/hardhat-tenderly";
+
 import "hardhat-deploy";
 import "tsconfig-paths/register";
 import "@typechain/hardhat";
