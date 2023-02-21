@@ -21,6 +21,7 @@ import "@nomiclabs/hardhat-solhint";
 import "tasks/contractsInteraction";
 import "tasks/metaAssetTokenInteraction";
 import "tasks/upgradeContract";
+import "tasks/transferOwnership";
 import "tasks/sips/createSIP";
 
 /*
@@ -107,14 +108,12 @@ const config: HardhatUserConfig = {
       url: "https://testnet.sovryn.app/rpc",
       gasPrice: 66000010, // 66GWei,
       timeout: 1e9,
-      live: true,
       tags: ["testnet"],
     },
     rskForkedTestnet: {
       accounts: testnetAccounts,
       url: "http://127.0.0.1:8545/",
       gas: 6800000,
-      live: true,
       tags: ["testnet"],
     },
     rskMainnet: {
@@ -123,7 +122,6 @@ const config: HardhatUserConfig = {
       url: "https://mainnet.sovryn.app/rpc",
       gasPrice: 66000010, // ~66GWei,
       timeout: 1e9,
-      live: true,
       tags: ["mainnet"],
     },
     rskForkedMainnet: {
@@ -131,7 +129,6 @@ const config: HardhatUserConfig = {
       accounts: mainnetAccounts,
       url: "http://127.0.0.1:8545",
       gas: 6800000,
-      live: true,
       tags: ["mainnet"],
     },
     coverage: {

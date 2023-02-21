@@ -1,7 +1,7 @@
 export interface ISipArgument {
-  target: string[];
-  value: number[];
-  signature: string[];
+  targets: string[];
+  values: number[];
+  signatures: string[];
   data: string[];
   description: string;
 }
@@ -10,11 +10,11 @@ const SampleSIP01 = async (hre): Promise<ISipArgument> => {
   const { ethers } = hre;
   const SampleToken = await ethers.getContractFactory("ERC20");
   const args: ISipArgument = {
-    target: ["0x95a1CA72Df913f14Dc554a5D14E826B64Bd049FD"],
-    value: [0],
-    signature: ["transfer(address,uint256)"],
+    targets: ["0x95a1CA72Df913f14Dc554a5D14E826B64Bd049FD"],
+    values: [0],
+    signatures: ["transfer(address,uint256)"],
     data: [SampleToken.interface.encodeFunctionData("transfer",["0x95222290dd7278aa3ddd389cc1e1d165cc4bafe5", ethers.utils.parseEther("1")])],
-    description: "Transfer Sample Token"
+    description: "SIP-0001: Transfer token. SHA256: "
   }
 
   return args;
@@ -25,11 +25,11 @@ const SIPSetMassetManagerProxy = async (hre): Promise<ISipArgument> => {
   const newMassetManagerProxy = "";
   const DLLR = await ethers.getContract("DLLR");
   const args: ISipArgument = {
-    target: [DLLR.address],
-    value: [0],
-    signature: ["setMassetManagerProxy(address)"],
+    targets: [DLLR.address],
+    values: [0],
+    signatures: ["setMassetManagerProxy(address)"],
     data: [DLLR.interface.encodeFunctionData("setMassetManagerProxy",[newMassetManagerProxy])],
-    description: "Set Masset Manager Proxy"
+    description: "SIP-0002: Set Masset Manager Proxy. SHA256: "
   }
 
   return args;
@@ -40,11 +40,11 @@ const SIPSetBasketManagerProxy = async (hre): Promise<ISipArgument> => {
   const newBasketManagerProxy = "";
   const DLLR = await ethers.getContract("DLLR");
   const args: ISipArgument = {
-    target: [DLLR.address],
-    value: [0],
-    signature: ["setBasketManagerProxy(address)"],
+    targets: [DLLR.address],
+    values: [0],
+    signatures: ["setBasketManagerProxy(address)"],
     data: [DLLR.interface.encodeFunctionData("setBasketManagerProxy",[newBasketManagerProxy])],
-    description: "Set Basket Manager Proxy"
+    description: "SIP-0003: Set Basket Manager Proxy. SHA256: "
   }
 
   return args;

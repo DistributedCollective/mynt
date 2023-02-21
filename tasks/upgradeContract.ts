@@ -36,9 +36,9 @@ task("upgrade:massetManager", "Upgrade implementation of massetManager contract"
     ]);
 
     const sipArgs: ISipArgument = {
-      target: [massetManagerProxy.address],
-      value: [0],
-      signature: [signatureUpgrade],
+      targets: [massetManagerProxy.address],
+      values: [0],
+      signatures: [signatureUpgrade],
       data: [dataUpgrade],
       description: "Upgrade masset manager contract"
     }
@@ -80,9 +80,9 @@ task("upgrade:feesVault", "Upgrade implementation of feesVault contract")
     ]);
 
     const sipArgs: ISipArgument = {
-      target: [feesVaultProxy.address],
-      value: [0],
-      signature: [signatureUpgrade],
+      targets: [feesVaultProxy.address],
+      values: [0],
+      signatures: [signatureUpgrade],
       data: [dataUpgrade],
       description: "Upgrade fees vault contract"
     }
@@ -124,9 +124,9 @@ task("upgrade:feesManager", "Upgrade implementation of feesManager contract")
     ]);
 
     const sipArgs: ISipArgument = {
-      target: [feesManagerProxy.address],
-      value: [0],
-      signature: [signatureUpgrade],
+      targets: [feesManagerProxy.address],
+      values: [0],
+      signatures: [signatureUpgrade],
       data: [dataUpgrade],
       description: "Upgrade fees manager contract"
     }
@@ -168,9 +168,9 @@ task("upgrade:basketManager", "Upgrade implementation of basketManager contract"
     ]);
 
     const sipArgs: ISipArgument = {
-      target: [basketManagerProxy.address],
-      value: [0],
-      signature: [signatureUpgrade],
+      targets: [basketManagerProxy.address],
+      values: [0],
+      signatures: [signatureUpgrade],
       data: [dataUpgrade],
       description: "Upgrade fees vault contract"
     }

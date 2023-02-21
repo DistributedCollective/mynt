@@ -30,6 +30,7 @@ task("interaction:replace-basset", "Replace bAsset")
       ethers,
       getNamedAccounts,
       deployments: { get, getNetworkName },
+      network
     } = hre;
     const basketManager = await ethers.getContract("BasketManagerV3"); // as BasketManagerV3;
     const contractAddress = basketManager.address;
@@ -59,7 +60,7 @@ task("interaction:replace-basset", "Replace bAsset")
     const { deployer } = await getNamedAccounts();
 
     const networkName = getNetworkName();
-    if (["rskTestnet", "rskForkedTestnet"].includes(networkName)) {
+    if (network.tags["testnet"]) {
       // multisig tx
       const multisigAddress = (await get("MultiSigWallet")).address;
       const sender = deployer;
@@ -78,15 +79,15 @@ task("interaction:replace-basset", "Replace bAsset")
         dataAdd,
         sender
       );
-    } else if (["rskMainnet", "rskForkedMainnet"].includes(networkName)) {
+    } else if (network.tags["mainnet"]) {
       if (networkName === "rskMainnet") {
         // @todo create a proposal
         const signatureRemove = pausePrevBasset ? "pauseBasset(address)" : "removeBasset(address)";
         const signatureAdd = "addBasset(address,int256,address,uint256,uint256,bool)";
         const sipArgs: ISipArgument = {
-          target: [contractAddress, contractAddress],
-          value: [0, 0],
-          signature: [signatureRemove, signatureAdd],
+          targets: [contractAddress, contractAddress],
+          values: [0, 0],
+          signatures: [signatureRemove, signatureAdd],
           data: [dataRemove, dataAdd],
           description: "Replace Basset"
         }
@@ -139,6 +140,7 @@ task("interaction:transfer-ownership", "Transfer contracts ownership")
   .setAction(async ({ contracts, newOwner }, hre) => {
     const {
       ethers,
+      network,
       getNamedAccounts,
       deployments: { get, getNetworkName },
     } = hre;
@@ -175,7 +177,7 @@ task("interaction:transfer-ownership", "Transfer contracts ownership")
 
     console.log("Transferring contracts ownership...");
 
-    if (["rskTestnet", "rskForkedTestnet"].includes(networkName)) {
+    if (network.tags["testnet"]) {
       // multisig tx
       const multisigAddress = (await get("MultiSigWallet")).address;
       const sender = deployer;
@@ -193,10 +195,10 @@ task("interaction:transfer-ownership", "Transfer contracts ownership")
           );
         })
       );
-    } else if (["rskMainnet", "rskForkedMainnet"].includes(networkName)) {
+    } if (network.tags["mainnet"]) {
       // governance or multisig
       // @todo add governance or ms?
-    } else if (["localhost", "development", "hardhat"].includes(networkName)) {
+    } else {
       // local ganache deployer
       await Promise.all(
         contractsAddresses.map(async (contractAddress, index) => {

@@ -2,6 +2,9 @@ import { task, types } from "hardhat/config";
 import * as helpers from "../scripts/utils/helpers";
 import { _createSIP } from "./sips/createSIP";
 import { ISipArgument } from "./sips/args/SIPArgs";
+import Logs from "node-logs";
+
+const logger = new Logs().showInConsole(true);
 
 task("interaction:get-massetManagerConfig", "Fetch massetManagerProxy address")
 .addParam("contractAddress", "Meta asset token contract address (DLLR, etc)", undefined, types.string, false)
@@ -35,7 +38,17 @@ task("multisig:set-massetManagerProxy", "Set massetManagerProxy")
 .addOptionalParam("isMultisig", "flag if transaction needs to be intiated from the multisig contract")
 .addOptionalParam("isSIP", "flag if transaction needs to be initiated from the SIP")
 .setAction(async ({ contractAddress, newMassetManagerProxy, isMultisig, isSIP }, hre) => {
-  // if isMultisig & isSIP are false, transaction will be initiated as per normal
+  // if isMultisig & isSIP are false, assign based on network tags.
+  const { network } = hre;
+  if(!isMultisig && !isSIP) {
+    if(network.tags["testnet"]) {
+      isMultisig = true;
+    } else if(network.tags["mainnet"]) {
+      isSIP = true;
+    } else {
+      return logger.error(`Non-supported ${JSON.stringify(network.tags)} network tags`);
+    }
+  }
 
   helpers.injectHre(hre);
   const {ethers, deployments: { get }, getNamedAccounts} = hre;
@@ -60,9 +73,9 @@ task("multisig:set-massetManagerProxy", "Set massetManagerProxy")
     ]);
 
     const sipArgs: ISipArgument = {
-      target: [contractAddress],
-      value: [0],
-      signature: [signature],
+      targets: [contractAddress],
+      values: [0],
+      signatures: [signature],
       data: [data],
       description: "Set massetManagerProxy address"
     };
@@ -79,6 +92,17 @@ task("multisig:set-basketManagerProxy", "Set basketManagerProxy")
 .addOptionalParam("isMultisig", "flag if transaction needs to be intiated from the multisig contract")
 .addOptionalParam("isSIP", "flag if transaction needs to be initiated from the SIP")
 .setAction(async ({ contractAddress, newBasketManagerProxy, isMultisig, isSIP }, hre) => {
+  const { network } = hre;
+  if(!isMultisig && !isSIP) {
+    if(network.tags["testnet"]) {
+      isMultisig = true;
+    } else if(network.tags["mainnet"]) {
+      isSIP = true;
+    } else {
+      return logger.error(`Non-supported ${JSON.stringify(network.tags)} network tags`);
+    }
+  }
+
   // if isMultisig & isSIP are false, transaction will be initiated as per normal
   helpers.injectHre(hre);
   const {ethers, deployments: { get }, getNamedAccounts} = hre;
@@ -102,9 +126,9 @@ task("multisig:set-basketManagerProxy", "Set basketManagerProxy")
     ]);
 
     const sipArgs: ISipArgument = {
-      target: [contractAddress],
-      value: [0],
-      signature: [signature],
+      targets: [contractAddress],
+      values: [0],
+      signatures: [signature],
       data: [data],
       description: "Set basketManagerProxy address"
     }
