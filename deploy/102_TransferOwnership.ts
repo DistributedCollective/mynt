@@ -14,7 +14,7 @@ const func: DeployFunction = async (hre) => {
   if (network.tags.testnet) {
     targetOwner = (await get("MultisigWallet")).address;
   } else if (network.tags.mainnet) {
-    // targetOwner = (await get("TimelockOwner")).address;
+    targetOwner = (await get("TimelockOwner")).address;
   } else {
     // For local network, not necessary to transfer the ownership to other account
     // targetOwner =  "0x95a1CA72Df913f14Dc554a5D14E826B64Bd049FD"; // dummy address -- need to be changed
