@@ -9,7 +9,7 @@ import "@nomiclabs/hardhat-web3";
 import "@nomicfoundation/hardhat-chai-matchers";
 import "@nomiclabs/hardhat-ethers";
 import "@nomiclabs/hardhat-truffle5";
-// import "@tenderly/hardhat-tenderly";
+
 import "hardhat-deploy";
 import "tsconfig-paths/register";
 import "@typechain/hardhat";
@@ -19,6 +19,10 @@ import "@openzeppelin/hardhat-upgrades";
 import "@nomiclabs/hardhat-solhint";
 
 import "tasks/contractsInteraction";
+import "tasks/metaAssetTokenInteraction";
+import "tasks/upgradeContract";
+import "tasks/transferOwnership";
+import "tasks/sips/createSIP";
 
 /*
  * Test hardhat forking with patched hardhat
@@ -104,23 +108,22 @@ const config: HardhatUserConfig = {
       url: "https://testnet.sovryn.app/rpc",
       gasPrice: 66000010, // 66GWei,
       timeout: 1e9,
-      live: true,
       tags: ["testnet"],
     },
     rskForkedTestnet: {
       accounts: testnetAccounts,
       url: "http://127.0.0.1:8545/",
       gas: 6800000,
-      live: true,
       tags: ["testnet"],
     },
     rskMainnet: {
       chainId: 30,
       accounts: mainnetAccounts,
-      url: "wss://mainnet.sovryn.app/ws",
+      url: "https://mainnet4.sovryn.app/rpc",
       gasPrice: 66000010, // ~66GWei,
+      blockGasLimit: 6800000,
+
       timeout: 1e9,
-      live: true,
       tags: ["mainnet"],
     },
     rskForkedMainnet: {
@@ -128,7 +131,6 @@ const config: HardhatUserConfig = {
       accounts: mainnetAccounts,
       url: "http://127.0.0.1:8545",
       gas: 6800000,
-      live: true,
       tags: ["mainnet"],
     },
     coverage: {

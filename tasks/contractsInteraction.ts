@@ -11,6 +11,8 @@ import {
   stopImpersonatingAccount,
 } from "@nomicfoundation/hardhat-network-helpers";
 import * as helpers from "../scripts/utils/helpers";
+import { _createSIP } from "./sips/createSIP";
+import { ISipArgument } from "./sips/args/SIPArgs";
 
 /// ------ REPLACE bAsset ----- ///
 task("interaction:replace-basset", "Replace bAsset")
@@ -28,24 +30,15 @@ task("interaction:replace-basset", "Replace bAsset")
       ethers,
       getNamedAccounts,
       deployments: { get, getNetworkName },
+      network
     } = hre;
     const basketManager = await ethers.getContract("BasketManagerV3"); // as BasketManagerV3;
+    const contractAddress = basketManager.address;
+    const BasketManagerV3Interface = new ethers.utils.Interface(
+      (await get("BasketManagerV3")).abi
+    );
 
-    helpers.injectHre(hre);
-    const { deployer } = await getNamedAccounts();
-
-    const networkName = getNetworkName();
-    if (["rskTestnet", "rskForkedTestnet"].includes(networkName)) {
-      // multisig tx
-      const multisigAddress = (await get("MultiSigWallet")).address;
-      const contractAddress = basketManager.address;
-      const sender = deployer;
-
-      const BasketManagerV3Interface = new ethers.utils.Interface(
-        (await get("BasketManagerV3")).abi
-      );
-
-      const dataRemove = pausePrevBasset
+    const dataRemove = pausePrevBasset
         ? BasketManagerV3Interface.encodeFunctionData("pauseBasset", [
             prevBasset,
             true,
@@ -54,14 +47,23 @@ task("interaction:replace-basset", "Replace bAsset")
             prevBasset,
           ]);
 
-      const dataAdd = BasketManagerV3Interface.encodeFunctionData("addBasset", [
-        newBasset,
-        1,
-        ethers.constants.AddressZero,
-        0,
-        1000,
-        false,
-      ]);
+    const dataAdd = BasketManagerV3Interface.encodeFunctionData("addBasset", [
+      newBasset,
+      1,
+      ethers.constants.AddressZero,
+      0,
+      1000,
+      false,
+    ]);
+
+    helpers.injectHre(hre);
+    const { deployer } = await getNamedAccounts();
+
+    const networkName = getNetworkName();
+    if (network.tags["testnet"]) {
+      // multisig tx
+      const multisigAddress = (await get("MultiSigWallet")).address;
+      const sender = deployer;
 
       console.log(`removing basset multisig tx:`);
       await helpers.sendWithMultisig(
@@ -77,9 +79,20 @@ task("interaction:replace-basset", "Replace bAsset")
         dataAdd,
         sender
       );
-    } else if (["rskMainnet", "rskForkedMainnet"].includes(networkName)) {
+    } else if (network.tags["mainnet"]) {
       if (networkName === "rskMainnet") {
-        // @todo create a proposal - meanwhile use the core protocol py script
+        // @todo create a proposal
+        const signatureRemove = pausePrevBasset ? "pauseBasset(address)" : "removeBasset(address)";
+        const signatureAdd = "addBasset(address,int256,address,uint256,uint256,bool)";
+        const sipArgs: ISipArgument = {
+          targets: [contractAddress, contractAddress],
+          values: [0, 0],
+          signatures: [signatureRemove, signatureAdd],
+          data: [dataRemove, dataAdd],
+          description: "Replace Basset"
+        }
+
+        _createSIP(hre, sipArgs);
       } else {
         // @todo forked mainnet to replace bAsset - impersonate accounts: TimelockOwner, GvernorOwner, whale accounts
         //   - create proposal (impersonate a whale account)
@@ -127,6 +140,7 @@ task("interaction:transfer-ownership", "Transfer contracts ownership")
   .setAction(async ({ contracts, newOwner }, hre) => {
     const {
       ethers,
+      network,
       getNamedAccounts,
       deployments: { get, getNetworkName },
     } = hre;
@@ -163,7 +177,7 @@ task("interaction:transfer-ownership", "Transfer contracts ownership")
 
     console.log("Transferring contracts ownership...");
 
-    if (["rskTestnet", "rskForkedTestnet"].includes(networkName)) {
+    if (network.tags["testnet"]) {
       // multisig tx
       const multisigAddress = (await get("MultiSigWallet")).address;
       const sender = deployer;
@@ -181,10 +195,10 @@ task("interaction:transfer-ownership", "Transfer contracts ownership")
           );
         })
       );
-    } else if (["rskMainnet", "rskForkedMainnet"].includes(networkName)) {
+    } if (network.tags["mainnet"]) {
       // governance or multisig
       // @todo add governance or ms?
-    } else if (["localhost", "development", "hardhat"].includes(networkName)) {
+    } else {
       // local ganache deployer
       await Promise.all(
         contractsAddresses.map(async (contractAddress, index) => {

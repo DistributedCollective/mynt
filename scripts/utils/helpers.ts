@@ -161,6 +161,19 @@ const createProposal = async (
   console.log(tx);
 };
 
+const defaultValueMultisigOrSipFlag = (networkTags: Record<string, boolean>): {isMultisigFlag: boolean, isSIPFlag: boolean} => {
+  let isMultisigFlag, isSIPFlag;
+  if(networkTags["testnet"]) {
+    isMultisigFlag = true;
+  } else if(networkTags["mainnet"]) {
+    isSIPFlag = true;
+  } else {
+    throw new Error(`Non-supported ${JSON.stringify(networkTags)} network tags`);
+  }
+
+  return {isMultisigFlag, isSIPFlag}
+}
+
 export {
   parseEthersLog,
   getEthersLog,
@@ -170,4 +183,5 @@ export {
   multisigCheckTx,
   createProposal,
   injectHre,
+  defaultValueMultisigOrSipFlag,
 };
