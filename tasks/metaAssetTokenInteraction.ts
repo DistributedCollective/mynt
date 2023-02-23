@@ -3,8 +3,45 @@ import * as helpers from "../scripts/utils/helpers";
 import { _createSIP } from "./sips/createSIP";
 import { ISipArgument } from "./sips/args/SIPArgs";
 import Logs from "node-logs";
+import { BigNumber } from "ethers";
+import * as hhHelpers from "@nomicfoundation/hardhat-network-helpers";
+import { MAX_UINT256, ZERO_ADDRESS } from "@utils/constants";
+import { signERC2612Permit } from 'eth-permit';
+import { signTypedMessage } from "eth-sig-util";
+import {
+  EIP712Domain,
+  Permit,
+  PERMIT_TYPEHASH,
+  domainSeparator,
+} from "../test/helpers/EIP712";
+import { fromRpcSig, toBuffer } from "ethereumjs-util";
+import Wallet from "ethereumjs-wallet";
+import { BN } from "bn.js";
 
 const logger = new Logs().showInConsole(true);
+
+const tokenName = "Sovryn Dollar";
+const tokenSymbol = "DLLR";
+const decimals = 18;
+const maxDeadline = MAX_UINT256;
+const name = tokenName;
+const version = "1";
+
+const buildData = (
+  chainId,
+  verifyingContract,
+  from,
+  spender,
+  amount,
+  nonce,
+  deadline = maxDeadline
+) => ({
+  primaryType: "Permit",
+  types: { EIP712Domain, Permit },
+  domain: { name, version, chainId, verifyingContract },
+  message: { owner: from, spender, value: amount, nonce, deadline },
+});
+
 
 task("interaction:get-massetManagerConfig", "Fetch massetManagerProxy address")
 .addParam("contractAddress", "Meta asset token contract address (DLLR, etc)", undefined, types.string, false)
@@ -234,4 +271,148 @@ task("basketManager:getProxyImplementation", "Get proxy implementation of basket
   const { ethers } = hre;
   const basketManager = await ethers.getContract("BasketManagerV3"); // as BasketManagerV3;
   console.log("result: ", await basketManager.getProxyImplementation());
+})
+
+
+task("test:mint-burn", "")
+.setAction(async ({}, hre) => {
+  const { ethers, network, deployments: {get} } = hre;
+  const impersonateAcc = "0x5F777270259E32F79589fe82269DB6209F7b7582";
+
+  const provider = new ethers.providers.JsonRpcProvider(
+    "http://localhost:8545"
+  );
+  await provider.send("hardhat_impersonateAccount", [impersonateAcc]);
+  const signer = provider.getSigner(impersonateAcc);
+
+  hhHelpers.setBalance(impersonateAcc, 10n**18n)
+  const DLLR = await get("DLLR");
+  const MetaAssetToken = await ethers.getContractAt(DLLR.abi, DLLR.address, signer);
+
+  await signer.sendTransaction({
+    to: ethers.constants.AddressZero,
+    value: ethers.utils.parseEther("0.1"),
+  });
+  const dummyAddress = "0xDCcA4285420e3965D5Ce831fC2a57fD08f9701Ee";
+  const dummyMintAmount = BigNumber.from(ethers.utils.parseUnits("1000", 18));
+  const dummyBurnAmount = BigNumber.from(ethers.utils.parseUnits("1000", 18));
+  console.log(signer)
+  console.log(DLLR.address);
+  console.log(await MetaAssetToken.name());
+  console.log(await MetaAssetToken.decimals());
+  console.log(await MetaAssetToken.totalSupply());
+
+  /** MINT */
+  let previousBalance = await MetaAssetToken.balanceOf(dummyAddress);
+  await MetaAssetToken.mint(dummyAddress, dummyMintAmount);
+  let latestBalance = await MetaAssetToken.balanceOf(dummyAddress);
+
+  console.log("previous balance: ", previousBalance.toString())
+  console.log("latest balance: ", latestBalance.toString())
+  expect(previousBalance.add(dummyMintAmount)).to.equal(latestBalance);
+
+
+  /** BURN */
+  previousBalance = await MetaAssetToken.balanceOf(dummyAddress);
+  await MetaAssetToken.burn(dummyAddress, dummyBurnAmount);
+  latestBalance = await MetaAssetToken.balanceOf(dummyAddress);
+  expect(previousBalance.sub(dummyMintAmount)).to.equal(latestBalance);
+})
+
+task("test:transfer", "")
+.setAction(async ({}, hre) => {
+  const { ethers, network, deployments: {get} } = hre;
+  const impersonateAcc = "0x5F777270259E32F79589fe82269DB6209F7b7582";
+
+  const provider = new ethers.providers.JsonRpcProvider(
+    "http://localhost:8545"
+  );
+  await provider.send("hardhat_impersonateAccount", [impersonateAcc]);
+  const signer = provider.getSigner(impersonateAcc);
+
+  hhHelpers.setBalance(impersonateAcc, 10n**18n)
+  const DLLR = await get("DLLR");
+  const MetaAssetToken = await ethers.getContractAt(DLLR.abi, DLLR.address, signer);
+
+  await signer.sendTransaction({
+    to: ethers.constants.AddressZero,
+    value: ethers.utils.parseEther("0.1"),
+  });
+  const dummyAddress = "0xDCcA4285420e3965D5Ce831fC2a57fD08f9701Ee";
+  const dummyMintAmount = BigNumber.from(ethers.utils.parseUnits("1000", 18));
+
+  /** MINT & Transfer */
+  let previousImpersonateBalance = await MetaAssetToken.balanceOf(impersonateAcc);
+  let previousDummyBalance = await MetaAssetToken.balanceOf(dummyAddress);
+  await MetaAssetToken.mint(impersonateAcc, dummyMintAmount);
+  await MetaAssetToken.transfer(dummyAddress, dummyMintAmount);
+  let latestImpersonateBalance = await MetaAssetToken.balanceOf(impersonateAcc);
+  let latestDummyBalance = await MetaAssetToken.balanceOf(dummyAddress);
+
+  expect(latestImpersonateBalance.toString()).to.equal("0");
+  expect(previousDummyBalance.add(dummyMintAmount)).to.equal(latestDummyBalance)
+})
+
+task("test:transferWithPermit", "")
+.setAction(async ({}, hre) => {
+  const { ethers, config, deployments: {get} } = hre;
+  const impersonateAcc = "0x5F777270259E32F79589fe82269DB6209F7b7582";
+  const [dummyOwner] = await ethers.getSigners();
+
+  const accounts = config.networks.hardhat.accounts as any;
+  const index = 0; // first wallet, increment for next wallets
+  const dummyOwnerObj = ethers.Wallet.fromMnemonic(accounts.mnemonic, accounts.path + `/${index}`);
+  const privateKeyBuffer = toBuffer(dummyOwnerObj.privateKey);
+  const dummyOwnerWallet = Wallet.fromPrivateKey(privateKeyBuffer);
+
+  const provider = new ethers.providers.JsonRpcProvider(
+    "http://localhost:8545"
+  );
+  await provider.send("hardhat_impersonateAccount", [impersonateAcc]);
+  let signer = provider.getSigner(impersonateAcc);
+
+  hhHelpers.setBalance(impersonateAcc, 10n**18n)
+  const DLLR = await get("DLLR");
+  let MetaAssetToken = await ethers.getContractAt(DLLR.abi, DLLR.address, signer);
+
+  await signer.sendTransaction({
+    to: ethers.constants.AddressZero,
+    value: ethers.utils.parseEther("0.1"),
+  });
+  const dummySpenderAddress = "0x70997970C51812dc3A010C7d01b50e0d17dc79C8";
+  const dummyMintAmount = BigNumber.from(ethers.utils.parseUnits("1000", 18));
+
+  /** MINT */
+  await MetaAssetToken.mint(dummyOwner.address, dummyMintAmount);
+
+  const deadline = new BN(MAX_UINT256);
+  const nonce = await MetaAssetToken.nonces(dummyOwner.address);
+  const chainId = await MetaAssetToken.getChainId();
+  const data = buildData(
+    chainId.toString(),
+    MetaAssetToken.address,
+    dummyOwner.address,
+    dummySpenderAddress,
+    dummyMintAmount.toString(),
+    new BN(nonce.toString()),
+    deadline
+  ) as any;
+  
+  const signature = signTypedMessage(dummyOwnerWallet.getPrivateKey(), {
+    data,
+  });
+  const { v } = fromRpcSig(signature);
+  const { r, s }: any = fromRpcSig(signature);
+  
+  let previousSpenderBalance = await MetaAssetToken.balanceOf(dummySpenderAddress);
+  let previousInitiatorBalance = await MetaAssetToken.balanceOf(dummyOwner.address);
+  await provider.send("hardhat_stopImpersonatingAccount", [impersonateAcc]);
+  await provider.send("hardhat_impersonateAccount", [dummySpenderAddress]);
+  signer = provider.getSigner(dummySpenderAddress);
+  MetaAssetToken = await ethers.getContractAt(DLLR.abi, DLLR.address, signer);
+  await MetaAssetToken.transferWithPermit(dummyOwner.address, dummySpenderAddress, dummyMintAmount, deadline.toString(), v, r, s);
+  let latestSpenderBalance = await MetaAssetToken.balanceOf(dummySpenderAddress);
+  let latestInitiatorBalance = await MetaAssetToken.balanceOf(dummyOwner.address);
+  expect(previousSpenderBalance.add(dummyMintAmount)).to.equal(latestSpenderBalance);
+  expect(previousInitiatorBalance.sub(dummyMintAmount)).to.equal(latestInitiatorBalance);
 })
