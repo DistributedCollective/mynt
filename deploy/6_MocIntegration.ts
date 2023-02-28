@@ -1,4 +1,4 @@
-import { ethers } from "hardhat";
+import { ethers, network } from "hardhat";
 import { DeployFunction } from "hardhat-deploy/types";
 
 const func: DeployFunction = async ({ deployments, getNamedAccounts }) => {
@@ -9,14 +9,7 @@ const func: DeployFunction = async ({ deployments, getNamedAccounts }) => {
   let mocAddress;
   const docAddress = (await get("DoC")).address;
 
-  if (
-    [
-      "rskMainnet",
-      "rskTestnet",
-      "rskForkedMainnet",
-      "rskForkedTestnet",
-    ].includes(networkName)
-  ) {
+  if (network.tags.mainnet || network.tags.testnet) {
     mocAddress = (await get("MocMintRedeemDoc")).address;
   } else if (["development", "hardhat", "localhost"].includes(networkName)) {
     // @todo add handling forked networks

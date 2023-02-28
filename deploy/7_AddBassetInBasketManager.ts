@@ -5,6 +5,7 @@ const func: DeployFunction = async ({
   ethers,
   deployments,
   getNamedAccounts,
+  network,
 }) => {
   const networkName = deployments.getNetworkName();
   const { log, get } = deployments;
@@ -22,7 +23,7 @@ const func: DeployFunction = async ({
       "0x6b41566353d6c7b8c2a7931d498f11489dacac29", // ZUSD Testnet
       "0xcb46c0ddc60d18efeb0e586c17af6ea36452dae0", // DOC Tesnet
     ];
-  } else if (["rskMainnet", "rskForkedMainnet"].includes(networkName)) {
+  } else if (network.tags.mainnet) {
     bAssets = [
       "0xdb107fa69e33f05180a4c2ce9c2e7cb481645c2d", // ZUSD Mainnet
       "0xe700691da7b9851f2f35f8b8182c69c53ccad9db", // DOC Mainnet
