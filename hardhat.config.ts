@@ -102,10 +102,18 @@ const config: HardhatUserConfig = {
       timeout: 1e9,
       gas: 6800000,
     },
-    rskTestnet: {
+    rskSovrynTestnet: {
       chainId: 31,
       accounts: testnetAccounts,
       url: "https://testnet.sovryn.app/rpc",
+      gasPrice: 66000010, // 66GWei,
+      timeout: 1e9,
+      tags: ["testnet"],
+    },
+    rskTestnet: {
+      chainId: 31,
+      accounts: testnetAccounts,
+      url: "https://public-node.testnet.rsk.co/",
       gasPrice: 66000010, // 66GWei,
       timeout: 1e9,
       tags: ["testnet"],
@@ -114,12 +122,22 @@ const config: HardhatUserConfig = {
       accounts: testnetAccounts,
       url: "http://127.0.0.1:8545/",
       gas: 6800000,
-      tags: ["testnet"],
+      tags: ["testnet", "forked"],
+    },
+    rskSovrynMainnet: {
+      chainId: 30,
+      accounts: mainnetAccounts,
+      url: "https://mainnet4.sovryn.app/rpc",
+      gasPrice: 66000010, // ~66GWei,
+      blockGasLimit: 6800000,
+
+      timeout: 1e9,
+      tags: ["mainnet"],
     },
     rskMainnet: {
       chainId: 30,
       accounts: mainnetAccounts,
-      url: "https://mainnet4.sovryn.app/rpc",
+      url: "https://public-node.rsk.co/",
       gasPrice: 66000010, // ~66GWei,
       blockGasLimit: 6800000,
 
@@ -131,7 +149,7 @@ const config: HardhatUserConfig = {
       accounts: mainnetAccounts,
       url: "http://127.0.0.1:8545",
       gas: 6800000,
-      tags: ["mainnet"],
+      tags: ["mainnet", "forked"],
     },
     coverage: {
       url: "http://127.0.0.1:7546",
@@ -231,15 +249,23 @@ const config: HardhatUserConfig = {
       }, */
     ],
     deployments: {
-      rskTestnet: ["external/deployments/rskTestnet"],
+      rskSovrynTestnet: ["external/deployments/rskTestnet"],
+      rskTestnet: [
+        "external/deployments/rskTestnet",
+        "deployments/rskSovrynTestnet",
+      ],
       rskForkedTestnet: [
         "external/deployments/rskTestnet",
-        "deployments/rskTestnet",
+        "deployments/rskSovrynTestnet",
       ],
-      rskMainnet: ["external/deployments/rskMainnet"],
+      rskSovrynMainnet: ["external/deployments/rskMainnet"],
+      rskMainnet: [
+        "external/deployments/rskMainnet",
+        "deployments/rskSovrynMainnet",
+      ],
       rskForkedMainnet: [
         "external/deployments/rskMainnet",
-        "deployments/rskMainnet",
+        "deployments/rskSovrynMainnet",
       ],
     },
   },

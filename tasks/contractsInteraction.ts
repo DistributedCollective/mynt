@@ -30,7 +30,7 @@ task("interaction:replace-basset", "Replace bAsset")
       ethers,
       getNamedAccounts,
       deployments: { get, getNetworkName },
-      network
+      network,
     } = hre;
     const basketManager = await ethers.getContract("BasketManagerV3"); // as BasketManagerV3;
     const contractAddress = basketManager.address;
@@ -39,13 +39,13 @@ task("interaction:replace-basset", "Replace bAsset")
     );
 
     const dataRemove = pausePrevBasset
-        ? BasketManagerV3Interface.encodeFunctionData("pauseBasset", [
-            prevBasset,
-            true,
-          ])
-        : BasketManagerV3Interface.encodeFunctionData("removeBasset", [
-            prevBasset,
-          ]);
+      ? BasketManagerV3Interface.encodeFunctionData("pauseBasset", [
+          prevBasset,
+          true,
+        ])
+      : BasketManagerV3Interface.encodeFunctionData("removeBasset", [
+          prevBasset,
+        ]);
 
     const dataAdd = BasketManagerV3Interface.encodeFunctionData("addBasset", [
       newBasset,
@@ -60,7 +60,7 @@ task("interaction:replace-basset", "Replace bAsset")
     const { deployer } = await getNamedAccounts();
 
     const networkName = getNetworkName();
-    if (network.tags["testnet"]) {
+    if (network.tags.testnet) {
       // multisig tx
       const multisigAddress = (await get("MultiSigWallet")).address;
       const sender = deployer;
@@ -79,18 +79,21 @@ task("interaction:replace-basset", "Replace bAsset")
         dataAdd,
         sender
       );
-    } else if (network.tags["mainnet"]) {
-      if (networkName === "rskMainnet") {
+    } else if (network.tags.mainnet) {
+      if (!network.tags.forked) {
         // @todo create a proposal
-        const signatureRemove = pausePrevBasset ? "pauseBasset(address)" : "removeBasset(address)";
-        const signatureAdd = "addBasset(address,int256,address,uint256,uint256,bool)";
+        const signatureRemove = pausePrevBasset
+          ? "pauseBasset(address)"
+          : "removeBasset(address)";
+        const signatureAdd =
+          "addBasset(address,int256,address,uint256,uint256,bool)";
         const sipArgs: ISipArgument = {
           targets: [contractAddress, contractAddress],
           values: [0, 0],
           signatures: [signatureRemove, signatureAdd],
           data: [dataRemove, dataAdd],
-          description: "Replace Basset"
-        }
+          description: "Replace Basset",
+        };
 
         _createSIP(hre, sipArgs);
       } else {
@@ -177,7 +180,7 @@ task("interaction:transfer-ownership", "Transfer contracts ownership")
 
     console.log("Transferring contracts ownership...");
 
-    if (network.tags["testnet"]) {
+    if (network.tags.testnet) {
       // multisig tx
       const multisigAddress = (await get("MultiSigWallet")).address;
       const sender = deployer;
@@ -195,7 +198,8 @@ task("interaction:transfer-ownership", "Transfer contracts ownership")
           );
         })
       );
-    } if (network.tags["mainnet"]) {
+    }
+    if (network.tags.mainnet) {
       // governance or multisig
       // @todo add governance or ms?
     } else {
