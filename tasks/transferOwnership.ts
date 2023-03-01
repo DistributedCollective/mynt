@@ -1,32 +1,54 @@
 import { task, types } from "hardhat/config";
-import * as helpers from "../scripts/utils/helpers";
-import { _createSIP } from "./sips/createSIP";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import Logs from "node-logs";
+import * as helpers from "../scripts/utils/helpers";
+import { _createSIP } from "./sips/createSIP";
 
 const logger = new Logs().showInConsole(true);
 
 task("ownership:transfer", "Upgrade implementation of feesManager contract")
-.addParam("newOwner", "New address of the owner", undefined, types.string, false)
-.addVariadicPositionalParam("contractAddresses", "Array of contract address which ownership will be transferred")
-.addOptionalParam("isMultisig", "flag if transaction needs to be intiated from the multisig contract")
-.setAction(async ({ contractAddresses, newOwner, isMultisig }, hre) => {
-  await Promise.all(
-    contractAddresses.map(async contractAddress => {
-      await _transferOwnership(hre, contractAddress, newOwner, isMultisig)
-    })
+  .addParam(
+    "newOwner",
+    "New address of the owner",
+    undefined,
+    types.string,
+    false
   )
-})
+  .addVariadicPositionalParam(
+    "contractAddresses",
+    "Array of contract address which ownership will be transferred"
+  )
+  .addOptionalParam(
+    "isMultisig",
+    "flag if transaction needs to be intiated from the multisig contract"
+  )
+  .setAction(async ({ contractAddresses, newOwner, isMultisig }, hre) => {
+    await Promise.all(
+      contractAddresses.map(async (contractAddress) => {
+        await transferOwnership(hre, contractAddress, newOwner, isMultisig);
+      })
+    );
+  });
 
-export const _transferOwnership = async (hre: HardhatRuntimeEnvironment, contractAddress: string, newOwner: string, isMultisig: boolean = false) => {
-  const { ethers, getNamedAccounts, deployments: { get } } = hre;
+// eslint-disable-next-line no-underscore-dangle
+export const transferOwnership = async (
+  hre: HardhatRuntimeEnvironment,
+  contractAddress: string,
+  newOwner: string,
+  isMultisig = false
+) => {
+  const {
+    ethers,
+    getNamedAccounts,
+    deployments: { get },
+  } = hre;
   const ownableABI = [
     "function transferOwnership(address newOwner)",
     "function owner() view returns(address)",
   ];
   const ownable = await ethers.getContractAt(ownableABI, contractAddress);
 
-  if(isMultisig) {
+  if (isMultisig) {
     const { deployer } = await getNamedAccounts();
     const multisigAddress = (await get("MultiSigWallet")).address;
     const data = ownable.interface.encodeFunctionData("transferOwnership", [
@@ -40,7 +62,15 @@ export const _transferOwnership = async (hre: HardhatRuntimeEnvironment, contrac
       deployer
     );
   } else {
-    await ownable.transferOwnership(newOwner);
-    logger.success(`Contract ${contractAddress} ownership has been transferred to: ${await ownable.owner()}`);
+    await (await ownable.transferOwnership(newOwner)).wait();
+    if ((await ownable.owner()) === newOwner) {
+      logger.success(
+        `Contract ${contractAddress} ownership has been transferred to: ${await ownable.owner()}`
+      );
+    } else {
+      logger.error(
+        `Contract ${contractAddress} ownership has NOT been transferred to: ${await ownable.owner()}`
+      );
+    }
   }
-}
+};

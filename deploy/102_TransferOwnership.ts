@@ -1,6 +1,6 @@
 import { deployments, ethers, network } from "hardhat";
 import { DeployFunction } from "hardhat-deploy/types";
-import { _transferOwnership } from "../tasks/transferOwnership";
+import { transferOwnership } from "../tasks/transferOwnership";
 
 // import hardhat from "hardhat";
 
@@ -12,7 +12,7 @@ const func: DeployFunction = async (hre) => {
   let targetOwner = "";
 
   if (network.tags.testnet) {
-    targetOwner = (await get("MultisigWallet")).address;
+    targetOwner = (await get("MultiSigWallet")).address;
   } else if (network.tags.mainnet) {
     targetOwner = (await get("TimelockOwner")).address;
   } else {
@@ -26,14 +26,14 @@ const func: DeployFunction = async (hre) => {
   // DLLR
   log(`=== Transferring DLLR ownership to: ${targetOwner} ===`);
   const DLLR = await ethers.getContract("DLLR");
-  _transferOwnership(hre, DLLR.address, targetOwner);
+  await transferOwnership(hre, DLLR.address, targetOwner);
   log(`DLLR ownership is transferred to: ${await DLLR.owner()}`);
 
   /** Transferring proxy contract ownership */
   // Masset Manager
   log(`=== Transferring MassetManager ownership to: ${targetOwner} ===`);
   const MassetManager = await ethers.getContract("MassetManager");
-  _transferOwnership(hre, MassetManager.address, targetOwner);
+  await transferOwnership(hre, MassetManager.address, targetOwner);
   log(
     `MassetManager ownership is transferred to: ${await MassetManager.owner()}`
   );
@@ -41,19 +41,19 @@ const func: DeployFunction = async (hre) => {
   // Fees Vault
   log(`=== Transferring FeesVault ownership to: ${targetOwner} ===`);
   const FeesVault = await ethers.getContract("FeesVault");
-  _transferOwnership(hre, FeesVault.address, targetOwner);
+  await transferOwnership(hre, FeesVault.address, targetOwner);
   log(`FeesVault ownership is transferred to: ${await FeesVault.owner()}`);
 
   // Fees Manager
   log(`=== Transferring FeesManager ownership to: ${targetOwner} ===`);
   const FeesManager = await ethers.getContract("FeesManager");
-  _transferOwnership(hre, FeesManager.address, targetOwner);
+  await transferOwnership(hre, FeesManager.address, targetOwner);
   log(`FeesManager ownership is transferred to: ${await FeesManager.owner()}`);
 
   // Fees Manager
   log(`=== Transferring BasketManagerV3 ownership to: ${targetOwner} ===`);
   const BasketManagerV3 = await ethers.getContract("BasketManagerV3");
-  _transferOwnership(hre, BasketManagerV3.address, targetOwner);
+  await transferOwnership(hre, BasketManagerV3.address, targetOwner);
   log(
     `BasketManagerV3 ownership is transferred to: ${await BasketManagerV3.owner()}`
   );
@@ -61,7 +61,7 @@ const func: DeployFunction = async (hre) => {
   // Moc Integration
   log(`=== Transferring MocIntegration ownership to: ${targetOwner} ===`);
   const MocIntegration = await ethers.getContract("MocIntegration");
-  _transferOwnership(hre, MocIntegration.address, targetOwner);
+  await transferOwnership(hre, MocIntegration.address, targetOwner);
   log(
     `MocIntegration ownership is transferred to: ${await MocIntegration.owner()}`
   );
@@ -69,7 +69,7 @@ const func: DeployFunction = async (hre) => {
   /** Transferring MyntAdminProxy ownership */
   log(`=== Transferring MyntAdminProxy ownership to: ${targetOwner} ===`);
   const MyntAdminProxy = await ethers.getContract("MyntAdminProxy");
-  _transferOwnership(hre, MyntAdminProxy.address, targetOwner);
+  await transferOwnership(hre, MyntAdminProxy.address, targetOwner);
   log(
     `MyntAdminProxy ownership is transferred to: ${await MyntAdminProxy.owner()}`
   );
