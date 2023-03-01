@@ -43,7 +43,7 @@ task("check-fork-patch", "Check Hardhat Fork Patch by Rainer").setAction(
       params: [
         {
           forking: {
-            jsonRpcUrl: "https://mainnet4.sovryn.app/rpc",
+            jsonRpcUrl: "https://mainnet-dev.sovryn.app/rpc",
             blockNumber: 4272658,
           },
         },
@@ -93,6 +93,8 @@ const config: HardhatUserConfig = {
       blockGasLimit: 6800000,
       allowUnlimitedContractSize: true,
       initialBaseFeePerGas: 0,
+      gas: 6800000,
+      gasPrice: 660000010, // ~66GWei,
     },
     rskDev: {
       from: "0xcd2a3d9f938e13cd947ec05abc7fe734df8dd826",
@@ -119,6 +121,7 @@ const config: HardhatUserConfig = {
       tags: ["testnet"],
     },
     rskForkedTestnet: {
+      // npx hardhat node --fork https://testnet.sovryn.app/rpc --no-deploy --fork-block-number 3495000
       accounts: testnetAccounts,
       url: "http://127.0.0.1:8545/",
       gas: 6800000,
@@ -127,7 +130,7 @@ const config: HardhatUserConfig = {
     rskSovrynMainnet: {
       chainId: 30,
       accounts: mainnetAccounts,
-      url: "https://mainnet4.sovryn.app/rpc",
+      url: "https://mainnet-dev.sovryn.app/rpc ",
       gasPrice: 66000010, // ~66GWei,
       blockGasLimit: 6800000,
 
@@ -145,10 +148,12 @@ const config: HardhatUserConfig = {
       tags: ["mainnet"],
     },
     rskForkedMainnet: {
+      // npx hardhat node --fork https://mainnet-dev.sovryn.app/rpc --no-deploy --fork-block-number 4929553
       chainId: 31337,
       accounts: mainnetAccounts,
       url: "http://127.0.0.1:8545",
       gas: 6800000,
+      gasPrice: 660000010, // ~66GWei,
       tags: ["mainnet", "forked"],
     },
     coverage: {
