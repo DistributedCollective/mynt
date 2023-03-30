@@ -34,7 +34,7 @@ const hardhat_network_helpers_1 = require("@nomicfoundation/hardhat-network-help
 const helpers = __importStar(require("../scripts/utils/helpers"));
 const createSIP_1 = require("./sips/createSIP");
 /// ------ REPLACE bAsset ----- ///
-(0, config_1.task)("interaction:replace-basset", "Replace bAsset")
+(0, config_1.task)("mynt:replace-basset", "Replace bAsset")
     .addParam("prevBasset", "bAsset to replace", undefined, config_1.types.string, false)
     .addParam("newBasset", "New bAsset", undefined, config_1.types.string, false)
     .addParam("pausePrevBasset", "Pause old basset - used if can't be removed (Mynt balance > 0)", false, config_1.types.boolean, true)
@@ -115,7 +115,7 @@ const createSIP_1 = require("./sips/createSIP");
     console.log("Basset updated");
 });
 /// ------ TRANSFER OWNERSHIP ----- ///
-(0, config_1.task)("interaction:transfer-ownership", "Transfer contracts ownership")
+(0, config_1.task)("mynt:transfer-ownership", "Transfer contracts ownership")
     .addParam("newOwner", "New owner address", undefined, config_1.types.string, false)
     .addParam("contracts", "contracts to transfer ownership: e.g. [DLLR, FeesManager, MassetManager]", undefined, config_1.types.string, true)
     .setAction(async ({ contracts, newOwner }, hre) => {
@@ -185,7 +185,7 @@ const createSIP_1 = require("./sips/createSIP");
         }));
     }
 });
-(0, config_1.task)("interaction:get-contracts-owner", "Log contracts owners")
+(0, config_1.task)("mynt:get-contracts-owner", "Log contracts owners")
     .addParam("contracts", "contracts to transfer ownership: e.g. [DLLR, FeesManager, MassetManager]", undefined, config_1.types.string, true)
     .setAction(async ({ contracts }, hre) => {
     const { ethers, deployments: { get }, } = hre;

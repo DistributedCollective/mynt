@@ -15,7 +15,7 @@ import { _createSIP } from "./sips/createSIP";
 import { ISipArgument } from "./sips/args/SIPArgs";
 
 /// ------ REPLACE bAsset ----- ///
-task("interaction:replace-basset", "Replace bAsset")
+task("mynt:replace-basset", "Replace bAsset")
   .addParam("prevBasset", "bAsset to replace", undefined, types.string, false)
   .addParam("newBasset", "New bAsset", undefined, types.string, false)
   .addParam(
@@ -131,7 +131,7 @@ task("interaction:replace-basset", "Replace bAsset")
   });
 
 /// ------ TRANSFER OWNERSHIP ----- ///
-task("interaction:transfer-ownership", "Transfer contracts ownership")
+task("mynt:transfer-ownership", "Transfer contracts ownership")
   .addParam("newOwner", "New owner address", undefined, types.string, false)
   .addParam(
     "contracts",
@@ -235,7 +235,7 @@ task("interaction:transfer-ownership", "Transfer contracts ownership")
     }
   });
 
-task("interaction:get-contracts-owner", "Log contracts owners")
+task("mynt:get-contracts-owner", "Log contracts owners")
   .addParam(
     "contracts",
     "contracts to transfer ownership: e.g. [DLLR, FeesManager, MassetManager]",

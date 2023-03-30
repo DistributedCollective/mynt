@@ -31,7 +31,7 @@ const helpers = __importStar(require("../scripts/utils/helpers"));
 const createSIP_1 = require("./sips/createSIP");
 const node_logs_1 = __importDefault(require("node-logs"));
 const logger = new node_logs_1.default().showInConsole(true);
-(0, config_1.task)("interaction:get-massetManagerConfig", "Fetch massetManagerProxy address")
+(0, config_1.task)("mynt:get-massetManagerConfig", "Fetch massetManagerProxy address")
     .addParam("contractAddress", "Meta asset token contract address (DLLR, etc)", undefined, config_1.types.string, false)
     .setAction(async ({ contractAddress }, hre) => {
     const { ethers } = hre;
@@ -39,7 +39,7 @@ const logger = new node_logs_1.default().showInConsole(true);
     console.log(`massetManagerProxy address: ${await MetaAssetToken.massetManagerProxy()}`);
     console.log(`massetManagerImplementation address: ${await MetaAssetToken.massetManagerImplementation()}`);
 });
-(0, config_1.task)("interaction:get-basketManagerConfig", "Fetch basketManagerProxy address")
+(0, config_1.task)("mynt:get-basketManagerConfig", "Fetch basketManagerProxy address")
     .addParam("contractAddress", "Meta asset token contract address (DLLR, etc)", undefined, config_1.types.string, false)
     .setAction(async ({ contractAddress }, hre) => {
     const { ethers } = hre;
@@ -47,7 +47,7 @@ const logger = new node_logs_1.default().showInConsole(true);
     console.log(`basketManagerProxy address: ${await MetaAssetToken.basketManagerProxy()}`);
     console.log(`basketManagerImplementation address: ${await MetaAssetToken.basketManagerImplementation()}`);
 });
-(0, config_1.task)("interaction:get-chainid", "Fetch chain id")
+(0, config_1.task)("mynt:get-chainid", "Fetch chain id")
     .addParam("contractAddress", "Meta asset token contract address (DLLR, etc)", undefined, config_1.types.string, false)
     .setAction(async ({ contractAddress }, hre) => {
     const { ethers } = hre;
@@ -68,27 +68,23 @@ const logger = new node_logs_1.default().showInConsole(true);
         isSIP = isSIPFlag;
     }
     helpers.injectHre(hre);
-    const { ethers, deployments: { get }, getNamedAccounts } = hre;
+    const { ethers, deployments: { get }, getNamedAccounts, } = hre;
     const MetaAssetToken = await ethers.getContractAt("MetaAssetToken", contractAddress);
     const { deployer } = await getNamedAccounts();
     if (isMultisig) {
         const multisigAddress = (await get("MultisigWallet")).address;
-        const data = MetaAssetToken.interface.encodeFunctionData("setMassetManagerProxy", [
-            newMassetManagerProxy,
-        ]);
+        const data = MetaAssetToken.interface.encodeFunctionData("setMassetManagerProxy", [newMassetManagerProxy]);
         await helpers.sendWithMultisig(multisigAddress, MetaAssetToken.address, data, deployer);
     }
     else if (isSIP) {
         const signature = "setMassetManagerProxy(address)";
-        const data = MetaAssetToken.interface.encodeFunctionData("setMassetManagerProxy", [
-            newMassetManagerProxy,
-        ]);
+        const data = MetaAssetToken.interface.encodeFunctionData("setMassetManagerProxy", [newMassetManagerProxy]);
         const sipArgs = {
             targets: [contractAddress],
             values: [0],
             signatures: [signature],
             data: [data],
-            description: "Set massetManagerProxy address"
+            description: "Set massetManagerProxy address",
         };
         (0, createSIP_1._createSIP)(hre, sipArgs);
     }
@@ -110,27 +106,23 @@ const logger = new node_logs_1.default().showInConsole(true);
     }
     // if isMultisig & isSIP are false, transaction will be initiated as per normal
     helpers.injectHre(hre);
-    const { ethers, deployments: { get }, getNamedAccounts } = hre;
+    const { ethers, deployments: { get }, getNamedAccounts, } = hre;
     const MetaAssetToken = await ethers.getContractAt("MetaAssetToken", contractAddress);
     const { deployer } = await getNamedAccounts();
     if (isMultisig) {
         const multisigAddress = (await get("MultisigWallet")).address;
-        const data = MetaAssetToken.interface.encodeFunctionData("setBasketManagerProxy", [
-            newBasketManagerProxy,
-        ]);
+        const data = MetaAssetToken.interface.encodeFunctionData("setBasketManagerProxy", [newBasketManagerProxy]);
         await helpers.sendWithMultisig(multisigAddress, MetaAssetToken.address, data, deployer);
     }
     else if (isSIP) {
         const signature = "setBasketManagerProxy(address)";
-        const data = MetaAssetToken.interface.encodeFunctionData("setBasketManagerProxy", [
-            newBasketManagerProxy,
-        ]);
+        const data = MetaAssetToken.interface.encodeFunctionData("setBasketManagerProxy", [newBasketManagerProxy]);
         const sipArgs = {
             targets: [contractAddress],
             values: [0],
             signatures: [signature],
             data: [data],
-            description: "Set basketManagerProxy address"
+            description: "Set basketManagerProxy address",
         };
         (0, createSIP_1._createSIP)(hre, sipArgs);
     }
@@ -178,8 +170,7 @@ const logger = new node_logs_1.default().showInConsole(true);
     const basketManager = await ethers.getContract("BasketManagerV3"); // as BasketManagerV3;
     console.log("result: ", await basketManager.convertMassetToBassetQuantity(basset, massetQuantity));
 });
-(0, config_1.task)("basketManager:getTotalMassetBalance", "Calculates total mAsset balance")
-    .setAction(async ({}, hre) => {
+(0, config_1.task)("basketManager:getTotalMassetBalance", "Calculates total mAsset balance").setAction(async ({}, hre) => {
     const { ethers } = hre;
     const basketManager = await ethers.getContract("BasketManagerV3"); // as BasketManagerV3;
     console.log("result: ", (await basketManager.getTotalMassetBalance()).toString());
@@ -191,14 +182,12 @@ const logger = new node_logs_1.default().showInConsole(true);
     const basketManager = await ethers.getContract("BasketManagerV3"); // as BasketManagerV3;
     console.log("result: ", (await basketManager.getBassetBalance(basset)).toString());
 });
-(0, config_1.task)("basketManager:getVersion", "Get version of basket manager")
-    .setAction(async ({}, hre) => {
+(0, config_1.task)("basketManager:getVersion", "Get version of basket manager").setAction(async ({}, hre) => {
     const { ethers } = hre;
     const basketManager = await ethers.getContract("BasketManagerV3"); // as BasketManagerV3;
     console.log("result: ", await basketManager.getVersion());
 });
-(0, config_1.task)("basketManager:getBassets", "Get list of bAssets")
-    .setAction(async ({}, hre) => {
+(0, config_1.task)("basketManager:getBassets", "Get list of bAssets").setAction(async ({}, hre) => {
     const { ethers } = hre;
     const basketManager = await ethers.getContract("BasketManagerV3"); // as BasketManagerV3;
     console.log(await basketManager.getBassets());
@@ -224,8 +213,7 @@ const logger = new node_logs_1.default().showInConsole(true);
     const basketManager = await ethers.getContract("BasketManagerV3"); // as BasketManagerV3;
     console.log("result: ", await basketManager.getPaused(basset));
 });
-(0, config_1.task)("basketManager:getProxyImplementation", "Get proxy implementation of basket manager")
-    .setAction(async ({}, hre) => {
+(0, config_1.task)("basketManager:getProxyImplementation", "Get proxy implementation of basket manager").setAction(async ({}, hre) => {
     const { ethers } = hre;
     const basketManager = await ethers.getContract("BasketManagerV3"); // as BasketManagerV3;
     console.log("result: ", await basketManager.getProxyImplementation());
