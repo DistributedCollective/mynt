@@ -18,11 +18,7 @@ import "hardhat-contract-sizer";
 import "@openzeppelin/hardhat-upgrades";
 import "@nomiclabs/hardhat-solhint";
 
-import "tasks/contractsInteraction";
-import "tasks/metaAssetTokenInteraction";
-import "tasks/upgradeContract";
-import "tasks/transferOwnership";
-import "tasks/sips/createSIP";
+import "tasks";
 
 /*
  * Test hardhat forking with patched hardhat
