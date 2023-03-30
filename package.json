@@ -14,8 +14,8 @@
         "postinstall": "yarn run patch-package",
         "deploy": "yarn hardhat deploy --network development --reset --tags migration",
         "deploy:rinkeby": "yarn hardhat deploy --network rinkeby --reset --tags migration",
-        "deploy:ropsten": "yarn hardhat deploy --network ropsten --reset -tags migration",
-        "deploy:kovan": "yarn hardhat deploy --network kovan --reset -tags migration",
+        "deploy:ropsten": "yarn hardhat deploy --network ropsten --reset --tags migration",
+        "deploy:kovan": "yarn hardhat deploy --network kovan --reset --tags migration",
         "deploy:rskDev": "yarn hardhat deploy --network rskDev --reset --tags migration",
         "deploy:rskSovrynTestnet": "yarn hardhat deploy --network rskSovrynTestnet --reset --tags migration",
         "deploy:rskTestnet": "yarn hardhat deploy --network rskTestnet --reset --tags migration",
@@ -111,6 +111,7 @@
         "web3": "^1.8.1"
     },
     "dependencies": {
+        "cryptoenv": "^0.2.0",
         "dotenv": "^16.0.3",
         "hardhat-gas-reporter": "^1.0.9",
         "node-logs": "^1.1.0",
