@@ -11,7 +11,7 @@
         "/types/**/*.ts"
     ],
     "scripts": {
-        "postinstall": "npx run patch-package",
+        "postinstall": "npx patch-package",
         "deploy": "yarn hardhat deploy --network development --reset --tags migration",
         "deploy:rinkeby": "yarn hardhat deploy --network rinkeby --reset --tags migration",
         "deploy:ropsten": "yarn hardhat deploy --network ropsten --reset --tags migration",
