@@ -250,7 +250,8 @@ task("mynt:get-contracts-owner", "Log contracts owners")
     } = hre;
     let contractsList: string[];
     if (contracts) {
-      contractsList = JSON.parse(contracts) as Array<string>;
+      console.log(contracts);
+      contractsList = contracts.split(",");
     } else {
       contractsList = [
         "DLLR",
