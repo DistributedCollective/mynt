@@ -186,7 +186,7 @@ const createSIP_1 = require("./sips/createSIP");
     }
 });
 (0, config_1.task)("mynt:get-contracts-owner", "Log contracts owners")
-    .addParam("contracts", "contracts to transfer ownership: e.g. [DLLR, FeesManager, MassetManager]", undefined, config_1.types.string, true)
+    .addOptionalParam("contracts", "contracts to transfer ownership: e.g. [DLLR, FeesManager, MassetManager]", undefined, config_1.types.string)
     .setAction(async ({ contracts }, hre) => {
     const { ethers, deployments: { get }, } = hre;
     let contractsList;
@@ -204,14 +204,25 @@ const createSIP_1 = require("./sips/createSIP");
             "MyntAdminProxy",
         ];
     }
-    const ownableABI = ["function owner() view returns(address)"];
+    const ownableABI = [
+        "function owner() view returns(address)",
+        "function getOwner() view returns(address)",
+    ];
     console.log();
     console.log("Contracts owners: ...");
     console.log();
     await Promise.all(contractsList.map(async (contractName, index) => {
-        const contractAddress = (await get(contractName)).address;
+        const contractDeployment = await get(contractName);
+        const contractAddress = contractDeployment.address;
         const ownable = await ethers.getContractAt(ownableABI, contractAddress);
-        console.log(`${contractsList[index]} @ ${contractAddress}: owner ${await ownable.owner()}`);
+        let owner;
+        try {
+            owner = await ownable.getOwner();
+        }
+        catch (e) {
+            owner = await ownable.owner();
+        }
+        console.log(`${contractsList[index]} @ ${contractAddress}: owner ${owner}`);
     }));
 });
 //# sourceMappingURL=contractsInteraction.js.map

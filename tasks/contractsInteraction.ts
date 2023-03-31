@@ -236,12 +236,11 @@ task("mynt:transfer-ownership", "Transfer contracts ownership")
   });
 
 task("mynt:get-contracts-owner", "Log contracts owners")
-  .addParam(
+  .addOptionalParam(
     "contracts",
     "contracts to transfer ownership: e.g. [DLLR, FeesManager, MassetManager]",
     undefined,
-    types.string,
-    true
+    types.string
   )
   .setAction(async ({ contracts }, hre) => {
     const {
@@ -263,7 +262,10 @@ task("mynt:get-contracts-owner", "Log contracts owners")
       ];
     }
 
-    const ownableABI = ["function owner() view returns(address)"];
+    const ownableABI = [
+      "function owner() view returns(address)",
+      "function getOwner() view returns(address)",
+    ];
 
     console.log();
     console.log("Contracts owners: ...");
@@ -271,12 +273,17 @@ task("mynt:get-contracts-owner", "Log contracts owners")
 
     await Promise.all(
       contractsList.map(async (contractName, index) => {
-        const contractAddress = (await get(contractName)).address;
+        const contractDeployment = await get(contractName);
+        const contractAddress = contractDeployment.address;
         const ownable = await ethers.getContractAt(ownableABI, contractAddress);
+        let owner;
+        try {
+          owner = await ownable.getOwner();
+        } catch (e) {
+          owner = await ownable.owner();
+        }
         console.log(
-          `${
-            contractsList[index]
-          } @ ${contractAddress}: owner ${await ownable.owner()}`
+          `${contractsList[index]} @ ${contractAddress}: owner ${owner}`
         );
       })
     );
