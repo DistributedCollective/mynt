@@ -1,5 +1,5 @@
-import "tasks/contractsInteraction";
-import "tasks/metaAssetTokenInteraction";
-import "tasks/upgradeContract";
-import "tasks/transferOwnership";
-import "tasks/sips/createSIP";
+import "./contractsInteraction";
+import "./metaAssetTokenInteraction";
+import "./upgradeContract";
+import "./transferOwnership";
+import "./sips/createSIP";

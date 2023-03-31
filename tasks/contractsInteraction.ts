@@ -15,7 +15,7 @@ import { _createSIP } from "./sips/createSIP";
 import { ISipArgument } from "./sips/args/SIPArgs";
 
 /// ------ REPLACE bAsset ----- ///
-task("interaction:replace-basset", "Replace bAsset")
+task("mynt:replace-basset", "Replace bAsset")
   .addParam("prevBasset", "bAsset to replace", undefined, types.string, false)
   .addParam("newBasset", "New bAsset", undefined, types.string, false)
   .addParam(
@@ -131,7 +131,7 @@ task("interaction:replace-basset", "Replace bAsset")
   });
 
 /// ------ TRANSFER OWNERSHIP ----- ///
-task("interaction:transfer-ownership", "Transfer contracts ownership")
+task("mynt:transfer-ownership", "Transfer contracts ownership")
   .addParam("newOwner", "New owner address", undefined, types.string, false)
   .addParam(
     "contracts",
@@ -235,13 +235,12 @@ task("interaction:transfer-ownership", "Transfer contracts ownership")
     }
   });
 
-task("interaction:get-contracts-owner", "Log contracts owners")
-  .addParam(
+task("mynt:get-contracts-owner", "Log contracts owners")
+  .addOptionalParam(
     "contracts",
     "contracts to transfer ownership: e.g. [DLLR, FeesManager, MassetManager]",
     undefined,
-    types.string,
-    true
+    types.string
   )
   .setAction(async ({ contracts }, hre) => {
     const {
@@ -250,7 +249,8 @@ task("interaction:get-contracts-owner", "Log contracts owners")
     } = hre;
     let contractsList: string[];
     if (contracts) {
-      contractsList = JSON.parse(contracts) as Array<string>;
+      console.log(contracts);
+      contractsList = contracts.split(",");
     } else {
       contractsList = [
         "DLLR",
@@ -262,7 +262,10 @@ task("interaction:get-contracts-owner", "Log contracts owners")
       ];
     }
 
-    const ownableABI = ["function owner() view returns(address)"];
+    const ownableABI = [
+      "function owner() view returns(address)",
+      "function getOwner() view returns(address)",
+    ];
 
     console.log();
     console.log("Contracts owners: ...");
@@ -270,12 +273,17 @@ task("interaction:get-contracts-owner", "Log contracts owners")
 
     await Promise.all(
       contractsList.map(async (contractName, index) => {
-        const contractAddress = (await get(contractName)).address;
+        const contractDeployment = await get(contractName);
+        const contractAddress = contractDeployment.address;
         const ownable = await ethers.getContractAt(ownableABI, contractAddress);
+        let owner;
+        try {
+          owner = await ownable.getOwner();
+        } catch (e) {
+          owner = await ownable.owner();
+        }
         console.log(
-          `${
-            contractsList[index]
-          } @ ${contractAddress}: owner ${await ownable.owner()}`
+          `${contractsList[index]} @ ${contractAddress}: owner ${owner}`
         );
       })
     );
