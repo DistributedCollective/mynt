@@ -36,7 +36,7 @@
         "test:fork": "yarn run compile; yarn hardhat test --network fork;",
         "compile": "yarn hardhat compile --force",
         "init": "yarn install && TS_NODE_TRANSPILE_ONLY=1 yarn hardhat compile --force",
-        "prepare": "tsc",
+        "prepare": "TS_NODE_TRANSPILE_ONLY=1 && tsc",
         "contract-sizes": "yarn hardhat size-contracts",
         "prettify": "prettier --write test/**/*.ts types/generated/*.ts types/**/*.ts contracts/**/*.sol",
         "prettier-check": "prettier --check .",
