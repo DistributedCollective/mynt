@@ -27,9 +27,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const config_1 = require("hardhat/config");
+const node_logs_1 = __importDefault(require("node-logs"));
 const helpers = __importStar(require("../scripts/utils/helpers"));
 const createSIP_1 = require("./sips/createSIP");
-const node_logs_1 = __importDefault(require("node-logs"));
 const logger = new node_logs_1.default().showInConsole(true);
 (0, config_1.task)("mynt:get-massetManagerConfig", "Fetch massetManagerProxy address")
     .addParam("contractAddress", "Meta asset token contract address (DLLR, etc)", undefined, config_1.types.string, false)
@@ -63,7 +63,7 @@ const logger = new node_logs_1.default().showInConsole(true);
     // if isMultisig & isSIP are false, assign based on network tags.
     const { network } = hre;
     if (!isMultisig && !isSIP) {
-        let { isMultisigFlag, isSIPFlag } = helpers.defaultValueMultisigOrSipFlag(network.tags);
+        const { isMultisigFlag, isSIPFlag } = helpers.defaultValueMultisigOrSipFlag(network.tags);
         isMultisig = isMultisigFlag;
         isSIP = isSIPFlag;
     }
@@ -100,7 +100,7 @@ const logger = new node_logs_1.default().showInConsole(true);
     .setAction(async ({ contractAddress, newBasketManagerProxy, isMultisig, isSIP }, hre) => {
     const { network } = hre;
     if (!isMultisig && !isSIP) {
-        let { isMultisigFlag, isSIPFlag } = helpers.defaultValueMultisigOrSipFlag(network.tags);
+        const { isMultisigFlag, isSIPFlag } = helpers.defaultValueMultisigOrSipFlag(network.tags);
         isMultisig = isMultisigFlag;
         isSIP = isSIPFlag;
     }
@@ -175,38 +175,38 @@ const logger = new node_logs_1.default().showInConsole(true);
     const basketManager = await ethers.getContract("BasketManagerV3"); // as BasketManagerV3;
     console.log("result: ", (await basketManager.getTotalMassetBalance()).toString());
 });
-(0, config_1.task)("basketManager:getBassetBalance", "Calculates total bAsset balance")
+(0, config_1.task)("mynt:getBassetBalance", "Calculates total bAsset balance")
     .addParam("basset", "Basset address", undefined, config_1.types.string, false)
     .setAction(async ({ basset }, hre) => {
     const { ethers } = hre;
     const basketManager = await ethers.getContract("BasketManagerV3"); // as BasketManagerV3;
     console.log("result: ", (await basketManager.getBassetBalance(basset)).toString());
 });
-(0, config_1.task)("basketManager:getVersion", "Get version of basket manager").setAction(async ({}, hre) => {
+(0, config_1.task)("mynt:getBMVersion", "Get version of basket manager").setAction(async ({}, hre) => {
     const { ethers } = hre;
     const basketManager = await ethers.getContract("BasketManagerV3"); // as BasketManagerV3;
     console.log("result: ", await basketManager.getVersion());
 });
-(0, config_1.task)("basketManager:getBassets", "Get list of bAssets").setAction(async ({}, hre) => {
+(0, config_1.task)("mynt:getBassets", "Get list of bAssets").setAction(async ({}, hre) => {
     const { ethers } = hre;
     const basketManager = await ethers.getContract("BasketManagerV3"); // as BasketManagerV3;
     console.log(await basketManager.getBassets());
 });
-(0, config_1.task)("basketManager:getFactor", "Get factor")
+(0, config_1.task)("mynt:getFactor", "Get factor")
     .addParam("basset", "Basset address", undefined, config_1.types.string, false)
     .setAction(async ({ basset }, hre) => {
     const { ethers } = hre;
     const basketManager = await ethers.getContract("BasketManagerV3"); // as BasketManagerV3;
     console.log("result: ", (await basketManager.getFactor(basset)).toString());
 });
-(0, config_1.task)("basketManager:getRange", "Get range(min,max)")
+(0, config_1.task)("mynt:getRange", "Get range(min,max)")
     .addParam("basset", "Basset address", undefined, config_1.types.string, false)
     .setAction(async ({ basset }, hre) => {
     const { ethers } = hre;
     const basketManager = await ethers.getContract("BasketManagerV3"); // as BasketManagerV3;
     console.log("result: ", await basketManager.getRange(basset));
 });
-(0, config_1.task)("basketManager:getPaused", "Get paused status of basset")
+(0, config_1.task)("mynt:getPaused", "Get paused status of basset")
     .addParam("basset", "Basset address", undefined, config_1.types.string, false)
     .setAction(async ({ basset }, hre) => {
     const { ethers } = hre;

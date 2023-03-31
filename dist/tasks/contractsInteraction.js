@@ -191,7 +191,8 @@ const createSIP_1 = require("./sips/createSIP");
     const { ethers, deployments: { get }, } = hre;
     let contractsList;
     if (contracts) {
-        contractsList = JSON.parse(contracts);
+        console.log(contracts);
+        contractsList = contracts.split(",");
     }
     else {
         contractsList = [
