@@ -1,31 +1,31 @@
 "use strict";
 module.exports = {
-    "extends": [
+    extends: [
         "airbnb-typescript",
         "plugin:@typescript-eslint/recommended",
         "prettier",
-        "prettier/@typescript-eslint"
+        "prettier/@typescript-eslint",
     ],
-    "env": {
-        "node": true,
-        "browser": true,
-        "jest": true
+    env: {
+        node: true,
+        browser: true,
+        jest: true,
     },
-    "parserOptions": {
-        "project": "./tsconfig.json"
+    parserOptions: {
+        project: "./tsconfig.json",
     },
-    "settings": {
-        'import/resolver': {
-            "alias": {
+    settings: {
+        "import/resolver": {
+            alias: {
                 map: [
-                    ['@utils', './test-utils'],
-                    ['types/generated', './types/generated/index', 'types/contracts']
+                    ["@utils", "./test-utils"],
+                    ["types/generated", "./types/generated/index"],
                 ],
-                extensions: ['.ts', '.d.ts', '.js', '.jsx', '.json']
-            }
-        }
+                extensions: [".ts", ".d.ts", ".js", ".jsx", ".json"],
+            },
+        },
     },
-    "rules": {
+    rules: {
         "@typescript-eslint/no-use-before-define": 1,
         "import/no-extraneous-dependencies": 0,
         "@typescript-eslint/semi": 1,
@@ -38,9 +38,9 @@ module.exports = {
         "@typescript-eslint/camelcase": "off",
         "no-console": "off",
     },
-    "overrides": [
+    overrides: [
         {
-            "files": [
+            files: [
                 "./types/*.ts",
                 "./types/contracts.ts",
                 "./types/chai.d.ts",
@@ -49,11 +49,14 @@ module.exports = {
                 "./test/*.ts",
                 "./scripts/**/*.ts",
                 "./test/**/*.ts",
+                "./tasks/**/*.ts",
+                "./tasks",
                 "./test-utils/*.ts",
                 "./test-utils/**/*.ts",
-                "./migrations/*.js"
+                "./migrations/*.js",
+                "./deployment/deploy/*.ts",
             ],
-        }
-    ]
+        },
+    ],
 };
 //# sourceMappingURL=.eslintrc.js.map

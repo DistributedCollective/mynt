@@ -80,3 +80,4 @@ deployments/rskForkedMainnet
 .openzeppelin
 
 tmp/
+deployment/deployments/localhost

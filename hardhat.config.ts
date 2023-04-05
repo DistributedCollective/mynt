@@ -1,5 +1,4 @@
-import { HardhatUserConfig } from "hardhat/types";
-import { task } from "hardhat/config";
+import { HardhatUserConfig, task } from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox";
 
 import * as dotenv from "dotenv";
@@ -18,7 +17,7 @@ import "hardhat-contract-sizer";
 import "@openzeppelin/hardhat-upgrades";
 import "@nomiclabs/hardhat-solhint";
 
-import "tasks";
+import "./tasks";
 
 /*
  * Test hardhat forking with patched hardhat
@@ -226,8 +225,10 @@ const config: HardhatUserConfig = {
     ],
   },
   paths: {
-    deployments: "./deployments",
     sources: "./contracts",
+    tests: "./tests",
+    deploy: "./deployment/deploy",
+    deployments: "./deployment/deployments",
   },
   gasReporter: {
     currency: "USD",

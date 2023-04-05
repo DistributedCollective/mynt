@@ -39,7 +39,7 @@ require("hardhat-docgen");
 require("hardhat-contract-sizer");
 require("@openzeppelin/hardhat-upgrades");
 require("@nomiclabs/hardhat-solhint");
-require("tasks");
+require("./tasks");
 /*
  * Test hardhat forking with patched hardhat
  *
@@ -234,8 +234,10 @@ const config = {
         ],
     },
     paths: {
-        deployments: "./deployments",
         sources: "./contracts",
+        tests: "./tests",
+        deploy: "./deployment/deploy",
+        deployments: "./deployment/deployments",
     },
     gasReporter: {
         currency: "USD",
