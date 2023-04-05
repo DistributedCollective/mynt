@@ -35,19 +35,21 @@ const func: DeployFunction = async ({
     bAssets = [(await get("ZUSD")).address, (await get("DoC")).address];
   }
 
-  const bAssetsNames = ["ZUSD", "DoC"];
-  log(
-    "bAssets for the BasketManager: ",
-    JSON.stringify({
-      bAssetsNames,
-      bAssets,
-      factors,
-      bridges,
-      mins,
-      maxs,
-      pausedFlags,
-    })
-  );
+  /*
+    const bAssetsNames = ["ZUSD", "DoC"];
+    log(
+      "bAssets for the BasketManager: ",
+      JSON.stringify({
+        bAssetsNames,
+        bAssets,
+        factors,
+        bridges,
+        mins,
+        maxs,
+        pausedFlags,
+      })
+    ); 
+  */
 
   const basketManager = await ethers.getContract("BasketManagerV3");
   const existingBAssets = (await basketManager.getBassets()).map((el) =>

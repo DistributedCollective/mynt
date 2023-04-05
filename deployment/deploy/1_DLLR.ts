@@ -9,6 +9,7 @@ const func: DeployFunction = async ({
     from: deployer,
     contract: "DLLR",
     log: true,
+    skipIfAlreadyDeployed: true,
   });
 };
 

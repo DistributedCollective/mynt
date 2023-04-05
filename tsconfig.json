@@ -19,12 +19,15 @@
         "typeRoots": ["node_modules/@0x/typescript-typings/types", "node_modules/@types"]
     },
     "include": [
-        "./scripts",
+        "./scripts/**/*.js",
+        "./scripts/**/*.ts",
         "./tests",
         "./tasks",
         "./types/generated",
         "./deployment/deploy",
-        "./.eslintrc.js"
+        "./.eslintrc.js",
+        "./deployment/helpers",
+        "./hardhat/**/*.[ts|js]"
     ],
     "files": ["./hardhat.config.ts"]
 }

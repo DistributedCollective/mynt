@@ -6,6 +6,7 @@ const func = async ({ deployments: { deploy }, getNamedAccounts, }) => {
         from: deployer,
         contract: "DLLR",
         log: true,
+        skipIfAlreadyDeployed: true,
     });
 };
 func.tags = ["DLLR"];

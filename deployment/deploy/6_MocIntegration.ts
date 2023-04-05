@@ -1,8 +1,9 @@
 import { ethers, network } from "hardhat";
 import { DeployFunction } from "hardhat-deploy/types";
+import { upgradeWithTransparentUpgradableProxy } from "../helpers/deployment";
 
 const func: DeployFunction = async ({ deployments, getNamedAccounts }) => {
-  const { deploy, get, log } = deployments;
+  const { deploy, get, getOrNull, log } = deployments;
   const { deployer } = await getNamedAccounts();
 
   const networkName = deployments.getNetworkName();
@@ -23,27 +24,38 @@ const func: DeployFunction = async ({ deployments, getNamedAccounts }) => {
 
   const dllrAddress = (await get("DLLR")).address;
 
-  const massetManagerAddress = (await get("MassetManager")).address;
-
-  await deploy("MocIntegration", {
-    args: [mocAddress, docAddress, dllrAddress, massetManagerAddress],
-    proxy: {
-      owner: deployer,
-      proxyContract: "OpenZeppelinTransparentProxy",
-      viaAdminContract: {
-        name: "MyntAdminProxy",
-        artifact: "MyntAdminProxy",
-      },
-      execute: {
-        init: {
-          methodName: "initialize",
-          args: [ethers.constants.AddressZero],
+  const deploymentName = "MocIntegration";
+  const deployment = await getOrNull(deploymentName);
+  if (deployment) {
+    await upgradeWithTransparentUpgradableProxy(
+      deployer,
+      deploymentName,
+      "TransparentUpgradeableProxy",
+      undefined,
+      `${deploymentName}_Proxy`
+    );
+  } else {
+    const massetManagerAddress = (await get("MassetManager")).address;
+    await deploy(deploymentName, {
+      args: [mocAddress, docAddress, dllrAddress, massetManagerAddress],
+      proxy: {
+        owner: deployer,
+        proxyContract: "OpenZeppelinTransparentProxy",
+        viaAdminContract: {
+          name: "MyntAdminProxy",
+          artifact: "MyntAdminProxy",
+        },
+        execute: {
+          init: {
+            methodName: "initialize",
+            args: [ethers.constants.AddressZero],
+          },
         },
       },
-    },
-    from: deployer,
-    log: true,
-  });
+      from: deployer,
+      log: true,
+    });
+  }
 };
 
 func.tags = ["MocIntegration"];

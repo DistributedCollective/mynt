@@ -1,7 +1,8 @@
 import { DeployFunction } from "hardhat-deploy/types";
+import { upgradeWithTransparentUpgradableProxy } from "../helpers/deployment";
 
 const func: DeployFunction = async ({
-  deployments: { deploy },
+  deployments: { deploy, getOrNull },
   getNamedAccounts,
 }) => {
   const { deployer } = await getNamedAccounts();
@@ -11,29 +12,41 @@ const func: DeployFunction = async ({
   const withdrawalFee = 0;
   const withdrawalBridgeFee = 0;
 
-  await deploy("FeesManager", {
-    proxy: {
-      owner: deployer,
-      proxyContract: "OpenZeppelinTransparentProxy",
-      viaAdminContract: {
-        name: "MyntAdminProxy",
-        artifact: "MyntAdminProxy",
-      },
-      execute: {
-        init: {
-          methodName: "initialize",
-          args: [
-            depositFee,
-            depositBridgeFee,
-            withdrawalFee,
-            withdrawalBridgeFee,
-          ],
+  const deploymentName = "FeesManager";
+  const deployment = await getOrNull(deploymentName);
+  if (deployment) {
+    await upgradeWithTransparentUpgradableProxy(
+      deployer,
+      deploymentName,
+      "TransparentUpgradeableProxy",
+      undefined,
+      `${deploymentName}_Proxy`
+    );
+  } else {
+    await deploy(deploymentName, {
+      proxy: {
+        owner: deployer,
+        proxyContract: "OpenZeppelinTransparentProxy",
+        viaAdminContract: {
+          name: "MyntAdminProxy",
+          artifact: "MyntAdminProxy",
+        },
+        execute: {
+          init: {
+            methodName: "initialize",
+            args: [
+              depositFee,
+              depositBridgeFee,
+              withdrawalFee,
+              withdrawalBridgeFee,
+            ],
+          },
         },
       },
-    },
-    from: deployer,
-    log: true,
-  });
+      from: deployer,
+      log: true,
+    });
+  }
 };
 
 func.tags = ["FeesManager"];
