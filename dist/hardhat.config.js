@@ -40,7 +40,7 @@ require("hardhat-contract-sizer");
 require("@openzeppelin/hardhat-upgrades");
 require("@nomiclabs/hardhat-solhint");
 require("./tasks");
-//import "node_modules/sovrynsmartcontracts/hardhat/tasks/multisig";
+require("node_modules/sovrynsmartcontracts/hardhat/tasks/multisig");
 /*
  * Test hardhat forking with patched hardhat
  *
