@@ -9,3 +9,11 @@ types/generated
 scripts/helpers/**/*.js
 hardhat/tasks/**/*.js
 test-utils/env_setup.ts
+
+artifacts
+build
+cache
+types
+reports
+tmp
+deployment/deployments

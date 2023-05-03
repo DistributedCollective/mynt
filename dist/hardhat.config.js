@@ -40,6 +40,7 @@ require("hardhat-contract-sizer");
 require("@openzeppelin/hardhat-upgrades");
 require("@nomiclabs/hardhat-solhint");
 require("./tasks");
+//import "node_modules/sovrynsmartcontracts/hardhat/tasks/multisig";
 /*
  * Test hardhat forking with patched hardhat
  *
@@ -255,6 +256,10 @@ const config = {
         contracts: [
             {
                 artifacts: "external/artifacts/*.sol/!(*.dbg.json)",
+                // deploy: "node_modules/@cartesi/arbitration/export/deploy",
+            },
+            {
+                artifacts: "external/artifacts",
                 // deploy: "node_modules/@cartesi/arbitration/export/deploy",
             },
             /* {

@@ -18,6 +18,7 @@ import "@openzeppelin/hardhat-upgrades";
 import "@nomiclabs/hardhat-solhint";
 
 import "./tasks";
+import "node_modules/sovrynsmartcontracts/hardhat/tasks/multisig";
 
 /*
  * Test hardhat forking with patched hardhat
@@ -246,6 +247,10 @@ const config: HardhatUserConfig = {
     contracts: [
       {
         artifacts: "external/artifacts/*.sol/!(*.dbg.json)",
+        // deploy: "node_modules/@cartesi/arbitration/export/deploy",
+      },
+      {
+        artifacts: "external/artifacts",
         // deploy: "node_modules/@cartesi/arbitration/export/deploy",
       },
       /* {

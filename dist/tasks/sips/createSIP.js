@@ -16,8 +16,8 @@ const logger = new node_logs_1.default().showInConsole(true);
     await (0, exports._createSIP)(hre, sipArgs);
 });
 const _createSIP = async (hre, sipArgs) => {
-    const { ethers, deployments: { get } } = hre;
-    const Governor = (await get("GovernorOwner"));
+    const { ethers, deployments: { get }, } = hre;
+    const Governor = await get("GovernorOwner");
     const governor = await ethers.getContractAt(Governor.abi, Governor.address);
     logger.info("=== Creating SIP ===");
     logger.info(`Governor Address:    ${governor.address}`);
@@ -29,7 +29,7 @@ const _createSIP = async (hre, sipArgs) => {
     logger.info(`============================================================='`);
     const tx = await governor.propose(sipArgs.targets, sipArgs.values, sipArgs.signatures, sipArgs.data, sipArgs.description);
     const receipt = await tx.wait();
-    const eventData = governor.interface.parseLog(receipt.logs[0])['args'];
+    const eventData = governor.interface.parseLog(receipt.logs[0])["args"];
     logger.success("=== SIP has been created ===");
     logger.success(`Governor Address:     ${governor.address}`);
     logger.success(`Proposal ID:          ${eventData.id.toString()}`);
