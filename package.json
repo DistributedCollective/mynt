@@ -11,7 +11,6 @@
         "/types/**/*.ts"
     ],
     "scripts": {
-        "postinstall": "yarn patch-package",
         "deploy": "yarn hardhat deploy --network development --reset --tags migration",
         "deploy:rinkeby": "yarn hardhat deploy --network rinkeby --reset --tags migration",
         "deploy:ropsten": "yarn hardhat deploy --network ropsten --reset --tags migration",
@@ -36,7 +35,7 @@
         "test:fork": "yarn run compile; yarn hardhat test --network fork;",
         "compile": "yarn hardhat compile --force",
         "init": "yarn install && set TS_NODE_TRANSPILE_ONLY=1 && yarn hardhat compile --force",
-        "prepare": "set TS_NODE_TRANSPILE_ONLY=1 && yarn hardhat compile --force && tsc",
+        "prepare": "set TS_NODE_TRANSPILE_ONLY=1 && yarn hardhat compile --force && tsc && yarn patch-package",
         "contract-sizes": "yarn hardhat size-contracts",
         "prettify": "prettier --write test/**/*.ts types/generated/*.ts types/**/*.ts contracts/**/*.sol",
         "prettier-check": "prettier --check .",
