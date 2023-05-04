@@ -3,7 +3,6 @@ name: Lint Solidity
 jobs:
   build:
     runs-on: ubuntu-latest
-    environment: production
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v1
@@ -20,5 +19,9 @@ jobs:
           key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
             ${{ runner.os }}-yarn-
-      - run: yarn run init
+      - name: Yarn run init with NODE_ENV=production
+        env:
+          NODE_ENV: production
+        run: yarn run init
+
       - run: yarn lint-sol
