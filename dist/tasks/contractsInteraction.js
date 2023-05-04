@@ -85,7 +85,7 @@ const createSIP_1 = require("./sips/createSIP");
                 data: [dataRemove, dataAdd],
                 description: "Replace Basset",
             };
-            (0, createSIP_1._createSIP)(hre, sipArgs);
+            (0, createSIP_1.createSIP)(hre, sipArgs);
         }
         else {
             // @todo forked mainnet to replace bAsset - impersonate accounts: TimelockOwner, GvernorOwner, whale accounts

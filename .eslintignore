@@ -17,3 +17,10 @@ types
 reports
 tmp
 deployment/deployments
+.eslintrc.js
+docs
+
+#@todo remove when adapted to ethers typechain tyings 
+test-utils
+scripts/utils
+tests

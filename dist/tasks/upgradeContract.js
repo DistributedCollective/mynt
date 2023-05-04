@@ -31,7 +31,7 @@ const createSIP_1 = require("./sips/createSIP");
     .addOptionalParam("isSIP", "flag if transaction needs to be initiated from the SIP")
     .setAction(async ({ isMultisig, isSIP }, hre) => {
     helpers.injectHre(hre);
-    const { ethers, deployments: { get }, getNamedAccounts } = hre;
+    const { ethers, deployments: { get }, getNamedAccounts, } = hre;
     const { deployer } = await getNamedAccounts();
     const myntAdminProxy = await ethers.getContract("MyntAdminProxy");
     const massetManagerProxy = await ethers.getContract("MassetManager");
@@ -40,24 +40,20 @@ const createSIP_1 = require("./sips/createSIP");
     console.log(`Upgrading massetManager implementation to ${newMassetManagerImpl.address}`);
     if (isMultisig) {
         const multisigAddress = (await get("MultisigWallet")).address;
-        const dataUpgrade = myntAdminProxy.interface.encodeFunctionData("upgrade", [
-            massetManagerProxy.address, newMassetManagerImpl.address
-        ]);
+        const dataUpgrade = myntAdminProxy.interface.encodeFunctionData("upgrade", [massetManagerProxy.address, newMassetManagerImpl.address]);
         await helpers.sendWithMultisig(multisigAddress, myntAdminProxy.address, dataUpgrade, deployer);
     }
     else if (isSIP) {
         const signatureUpgrade = "upgrade(address,address)";
-        const dataUpgrade = myntAdminProxy.interface.encodeFunctionData("upgrade", [
-            massetManagerProxy.address, newMassetManagerImpl.address
-        ]);
+        const dataUpgrade = myntAdminProxy.interface.encodeFunctionData("upgrade", [massetManagerProxy.address, newMassetManagerImpl.address]);
         const sipArgs = {
             targets: [massetManagerProxy.address],
             values: [0],
             signatures: [signatureUpgrade],
             data: [dataUpgrade],
-            description: "Upgrade masset manager contract"
+            description: "Upgrade masset manager contract",
         };
-        (0, createSIP_1._createSIP)(hre, sipArgs);
+        (0, createSIP_1.createSIP)(hre, sipArgs);
     }
 });
 (0, config_1.task)("upgrade:feesVault", "Upgrade implementation of feesVault contract")
@@ -65,7 +61,7 @@ const createSIP_1 = require("./sips/createSIP");
     .addOptionalParam("isSIP", "flag if transaction needs to be initiated from the SIP")
     .setAction(async ({ isMultisig, isSIP }, hre) => {
     helpers.injectHre(hre);
-    const { ethers, deployments: { get }, getNamedAccounts } = hre;
+    const { ethers, deployments: { get }, getNamedAccounts, } = hre;
     const { deployer } = await getNamedAccounts();
     const myntAdminProxy = await ethers.getContract("MyntAdminProxy");
     const feesVaultProxy = await ethers.getContract("FeesVault");
@@ -74,24 +70,20 @@ const createSIP_1 = require("./sips/createSIP");
     console.log(`Upgrading feesVault implementation to ${newFeesVaultImpl.address}`);
     if (isMultisig) {
         const multisigAddress = (await get("MultisigWallet")).address;
-        const dataUpgrade = myntAdminProxy.interface.encodeFunctionData("upgrade", [
-            feesVaultProxy.address, newFeesVaultImpl.address
-        ]);
+        const dataUpgrade = myntAdminProxy.interface.encodeFunctionData("upgrade", [feesVaultProxy.address, newFeesVaultImpl.address]);
         await helpers.sendWithMultisig(multisigAddress, myntAdminProxy.address, dataUpgrade, deployer);
     }
     else if (isSIP) {
         const signatureUpgrade = "upgrade(address,address)";
-        const dataUpgrade = myntAdminProxy.interface.encodeFunctionData("upgrade", [
-            feesVaultProxy.address, newFeesVaultImpl.address
-        ]);
+        const dataUpgrade = myntAdminProxy.interface.encodeFunctionData("upgrade", [feesVaultProxy.address, newFeesVaultImpl.address]);
         const sipArgs = {
             targets: [feesVaultProxy.address],
             values: [0],
             signatures: [signatureUpgrade],
             data: [dataUpgrade],
-            description: "Upgrade fees vault contract"
+            description: "Upgrade fees vault contract",
         };
-        (0, createSIP_1._createSIP)(hre, sipArgs);
+        (0, createSIP_1.createSIP)(hre, sipArgs);
     }
 });
 (0, config_1.task)("upgrade:feesManager", "Upgrade implementation of feesManager contract")
@@ -99,7 +91,7 @@ const createSIP_1 = require("./sips/createSIP");
     .addOptionalParam("isSIP", "flag if transaction needs to be initiated from the SIP")
     .setAction(async ({ isMultisig, isSIP }, hre) => {
     helpers.injectHre(hre);
-    const { ethers, deployments: { get }, getNamedAccounts } = hre;
+    const { ethers, deployments: { get }, getNamedAccounts, } = hre;
     const { deployer } = await getNamedAccounts();
     const myntAdminProxy = await ethers.getContract("MyntAdminProxy");
     const feesManagerProxy = await ethers.getContract("FeesManager");
@@ -108,24 +100,20 @@ const createSIP_1 = require("./sips/createSIP");
     console.log(`Upgrading feesManager implementation to ${newFeesManagerImpl.address}`);
     if (isMultisig) {
         const multisigAddress = (await get("MultisigWallet")).address;
-        const dataUpgrade = myntAdminProxy.interface.encodeFunctionData("upgrade", [
-            feesManagerProxy.address, newFeesManagerImpl.address
-        ]);
+        const dataUpgrade = myntAdminProxy.interface.encodeFunctionData("upgrade", [feesManagerProxy.address, newFeesManagerImpl.address]);
         await helpers.sendWithMultisig(multisigAddress, myntAdminProxy.address, dataUpgrade, deployer);
     }
     else if (isSIP) {
         const signatureUpgrade = "upgrade(address,address)";
-        const dataUpgrade = myntAdminProxy.interface.encodeFunctionData("upgrade", [
-            feesManagerProxy.address, newFeesManagerImpl.address
-        ]);
+        const dataUpgrade = myntAdminProxy.interface.encodeFunctionData("upgrade", [feesManagerProxy.address, newFeesManagerImpl.address]);
         const sipArgs = {
             targets: [feesManagerProxy.address],
             values: [0],
             signatures: [signatureUpgrade],
             data: [dataUpgrade],
-            description: "Upgrade fees manager contract"
+            description: "Upgrade fees manager contract",
         };
-        (0, createSIP_1._createSIP)(hre, sipArgs);
+        (0, createSIP_1.createSIP)(hre, sipArgs);
     }
 });
 (0, config_1.task)("upgrade:basketManager", "Upgrade implementation of basketManager contract")
@@ -133,7 +121,7 @@ const createSIP_1 = require("./sips/createSIP");
     .addOptionalParam("isSIP", "flag if transaction needs to be initiated from the SIP")
     .setAction(async ({ isMultisig, isSIP }, hre) => {
     helpers.injectHre(hre);
-    const { ethers, deployments: { get }, getNamedAccounts } = hre;
+    const { ethers, deployments: { get }, getNamedAccounts, } = hre;
     const { deployer } = await getNamedAccounts();
     const myntAdminProxy = await ethers.getContract("MyntAdminProxy");
     const basketManagerProxy = await ethers.getContract("BasketManagerV3"); // basketManagerV3
@@ -142,24 +130,20 @@ const createSIP_1 = require("./sips/createSIP");
     console.log(`Upgrading basket manager implementation to ${newBasketManagerImpl.address}`);
     if (isMultisig) {
         const multisigAddress = (await get("MultisigWallet")).address;
-        const dataUpgrade = myntAdminProxy.interface.encodeFunctionData("upgrade", [
-            basketManagerProxy.address, newBasketManagerImpl.address
-        ]);
+        const dataUpgrade = myntAdminProxy.interface.encodeFunctionData("upgrade", [basketManagerProxy.address, newBasketManagerImpl.address]);
         await helpers.sendWithMultisig(multisigAddress, myntAdminProxy.address, dataUpgrade, deployer);
     }
     else if (isSIP) {
         const signatureUpgrade = "upgrade(address,address)";
-        const dataUpgrade = myntAdminProxy.interface.encodeFunctionData("upgrade", [
-            basketManagerProxy.address, newBasketManagerImpl.address
-        ]);
+        const dataUpgrade = myntAdminProxy.interface.encodeFunctionData("upgrade", [basketManagerProxy.address, newBasketManagerImpl.address]);
         const sipArgs = {
             targets: [basketManagerProxy.address],
             values: [0],
             signatures: [signatureUpgrade],
             data: [dataUpgrade],
-            description: "Upgrade fees vault contract"
+            description: "Upgrade fees vault contract",
         };
-        (0, createSIP_1._createSIP)(hre, sipArgs);
+        (0, createSIP_1.createSIP)(hre, sipArgs);
     }
 });
 //# sourceMappingURL=upgradeContract.js.map

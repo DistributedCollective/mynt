@@ -58,7 +58,6 @@ task("check-fork-patch", "Check Hardhat Fork Patch by Rainer").setAction(
 );
 
 dotenv.config();
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 require("cryptoenv").parse();
 
 const testnetAccounts: any = process.env.TESTNET_DEPLOYER_PRIVATE_KEY

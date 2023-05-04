@@ -1,13 +1,32 @@
+const { warn } = require("console");
+
 module.exports = {
     env: {
+        node: true,
         browser: true,
-        commonjs: true,
-        es2021: true,
-        mocha: true, // for test files
+        jest: true,
+        mocha: true,
     },
-    extends: "prettier",
+    extends: [
+        "eslint:recommended",
+        "prettier", // "prettier" should be last
+    ],
+    parser: "@typescript-eslint/parser",
     parserOptions: {
-        ecmaVersion: 2020,
+        ecmaVersion: 2021,
+        sourceType: "module",
+        project: "./tsconfig.json",
     },
-    rules: {},
+    settings: {
+        "import/resolver": {
+            alias: {
+                map: [
+                    ["@utils", "./test-utils"],
+                    ["types/generated", "./types/generated/index"],
+                ],
+                extensions: [".ts", ".d.ts", ".js", ".jsx", ".json"],
+            },
+        },
+    },
+    rules: { "no-unused-vars": "warn" },
 };

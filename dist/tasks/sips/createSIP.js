@@ -3,19 +3,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports._createSIP = void 0;
+exports.createSIP = void 0;
 /* eslint-disable no-console */
 const config_1 = require("hardhat/config");
 const node_logs_1 = __importDefault(require("node-logs"));
 const SIPArgs_1 = __importDefault(require("./args/SIPArgs"));
 const logger = new node_logs_1.default().showInConsole(true);
-(0, config_1.task)("createSIP", "Create SIP to Sovryn Governance")
-    .addParam("argsModuleName", "module name that is located in tasks/sips//args folder which and returning the sip arguments")
-    .setAction(async ({ argsModuleName }, hre) => {
-    const sipArgs = await SIPArgs_1.default[argsModuleName](hre);
-    await (0, exports._createSIP)(hre, sipArgs);
-});
-const _createSIP = async (hre, sipArgs) => {
+const createSIP = async (hre, sipArgs) => {
     const { ethers, deployments: { get }, } = hre;
     const Governor = await get("GovernorOwner");
     const governor = await ethers.getContractAt(Governor.abi, Governor.address);
@@ -29,7 +23,7 @@ const _createSIP = async (hre, sipArgs) => {
     logger.info(`============================================================='`);
     const tx = await governor.propose(sipArgs.targets, sipArgs.values, sipArgs.signatures, sipArgs.data, sipArgs.description);
     const receipt = await tx.wait();
-    const eventData = governor.interface.parseLog(receipt.logs[0])["args"];
+    const eventData = governor.interface.parseLog(receipt.logs[0]).args;
     logger.success("=== SIP has been created ===");
     logger.success(`Governor Address:     ${governor.address}`);
     logger.success(`Proposal ID:          ${eventData.id.toString()}`);
@@ -43,5 +37,11 @@ const _createSIP = async (hre, sipArgs) => {
     logger.success(`End Block:            ${eventData.endBlock}`);
     logger.success(`============================================================='`);
 };
-exports._createSIP = _createSIP;
+exports.createSIP = createSIP;
+(0, config_1.task)("createSIP", "Create SIP to Sovryn Governance")
+    .addParam("argsModuleName", "module name that is located in tasks/sips//args folder which and returning the sip arguments")
+    .setAction(async ({ argsModuleName }, hre) => {
+    const sipArgs = await SIPArgs_1.default[argsModuleName](hre);
+    await (0, exports.createSIP)(hre, sipArgs);
+});
 //# sourceMappingURL=createSIP.js.map

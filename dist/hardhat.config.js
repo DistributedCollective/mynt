@@ -74,7 +74,6 @@ require("node_modules/sovrynsmartcontracts/hardhat/tasks/multisig");
         console.log("Hardhat mainnet forking does NOT work properly!");
 });
 dotenv.config();
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 require("cryptoenv").parse();
 const testnetAccounts = process.env.TESTNET_DEPLOYER_PRIVATE_KEY
     ? [

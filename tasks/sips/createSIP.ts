@@ -5,17 +5,7 @@ import SIPArgs, { ISipArgument } from "./args/SIPArgs";
 
 const logger = new Logs().showInConsole(true);
 
-task("createSIP", "Create SIP to Sovryn Governance")
-  .addParam(
-    "argsModuleName",
-    "module name that is located in tasks/sips//args folder which and returning the sip arguments"
-  )
-  .setAction(async ({ argsModuleName }, hre) => {
-    const sipArgs: ISipArgument = await SIPArgs[argsModuleName](hre);
-    await _createSIP(hre, sipArgs);
-  });
-
-export const _createSIP = async (hre, sipArgs: ISipArgument) => {
+export const createSIP = async (hre, sipArgs: ISipArgument) => {
   const {
     ethers,
     deployments: { get },
@@ -41,7 +31,7 @@ export const _createSIP = async (hre, sipArgs: ISipArgument) => {
   );
   const receipt = await tx.wait();
 
-  const eventData = governor.interface.parseLog(receipt.logs[0])["args"];
+  const eventData = governor.interface.parseLog(receipt.logs[0]).args;
 
   logger.success("=== SIP has been created ===");
   logger.success(`Governor Address:     ${governor.address}`);
@@ -58,3 +48,13 @@ export const _createSIP = async (hre, sipArgs: ISipArgument) => {
     `============================================================='`
   );
 };
+
+task("createSIP", "Create SIP to Sovryn Governance")
+  .addParam(
+    "argsModuleName",
+    "module name that is located in tasks/sips//args folder which and returning the sip arguments"
+  )
+  .setAction(async ({ argsModuleName }, hre) => {
+    const sipArgs: ISipArgument = await SIPArgs[argsModuleName](hre);
+    await createSIP(hre, sipArgs);
+  });

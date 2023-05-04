@@ -162,10 +162,10 @@ const createProposal = async (
 };
 
 const defaultValueMultisigOrSipFlag = (networkTags: Record<string, boolean>): {isMultisigFlag: boolean, isSIPFlag: boolean} => {
-  let isMultisigFlag, isSIPFlag;
-  if(networkTags["testnet"]) {
+  let isMultisigFlag; let isSIPFlag;
+  if(networkTags.testnet) {
     isMultisigFlag = true;
-  } else if(networkTags["mainnet"]) {
+  } else if(networkTags.mainnet) {
     isSIPFlag = true;
   } else {
     throw new Error(`Non-supported ${JSON.stringify(networkTags)} network tags`);

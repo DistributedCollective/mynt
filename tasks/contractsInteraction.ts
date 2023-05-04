@@ -11,7 +11,7 @@ import {
   stopImpersonatingAccount,
 } from "@nomicfoundation/hardhat-network-helpers";
 import * as helpers from "../scripts/utils/helpers";
-import { _createSIP } from "./sips/createSIP";
+import { createSIP } from "./sips/createSIP";
 import { ISipArgument } from "./sips/args/SIPArgs";
 
 /// ------ REPLACE bAsset ----- ///
@@ -95,7 +95,7 @@ task("mynt:replace-basset", "Replace bAsset")
           description: "Replace Basset",
         };
 
-        _createSIP(hre, sipArgs);
+        createSIP(hre, sipArgs);
       } else {
         // @todo forked mainnet to replace bAsset - impersonate accounts: TimelockOwner, GvernorOwner, whale accounts
         //   - create proposal (impersonate a whale account)

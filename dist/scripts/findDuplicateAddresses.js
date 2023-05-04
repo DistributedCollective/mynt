@@ -4,7 +4,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 /* eslint-disable no-continue */
-/* eslint-disable @typescript-eslint/no-use-before-define */
 /* eslint-disable no-restricted-syntax */
 const fs_1 = __importDefault(require("fs"));
 const node_logs_1 = __importDefault(require("node-logs"));
@@ -16,7 +15,7 @@ const main = async () => {
     const fileStream = fs_1.default.createReadStream("addressList_joined");
     const rl = readline_1.default.createInterface({
         input: fileStream,
-        crlfDelay: Infinity
+        crlfDelay: Infinity,
     });
     for await (const line of rl) {
         const [address, power] = line.split(",");

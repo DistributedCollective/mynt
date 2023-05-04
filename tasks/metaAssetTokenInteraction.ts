@@ -1,7 +1,8 @@
+/* eslint-disable no-empty-pattern */
 import { task, types } from "hardhat/config";
 import Logs from "node-logs";
 import * as helpers from "../scripts/utils/helpers";
-import { _createSIP } from "./sips/createSIP";
+import { createSIP } from "./sips/createSIP";
 import { ISipArgument } from "./sips/args/SIPArgs";
 
 const logger = new Logs().showInConsole(true);
@@ -143,7 +144,7 @@ task("multisig:set-massetManagerProxy", "Set massetManagerProxy")
           description: "Set massetManagerProxy address",
         };
 
-        _createSIP(hre, sipArgs);
+        createSIP(hre, sipArgs);
       } else {
         await MetaAssetToken.setMassetManagerProxy(newMassetManagerProxy);
       }
@@ -225,7 +226,7 @@ task("multisig:set-basketManagerProxy", "Set basketManagerProxy")
           description: "Set basketManagerProxy address",
         };
 
-        _createSIP(hre, sipArgs);
+        createSIP(hre, sipArgs);
       } else {
         await MetaAssetToken.setBasketManagerProxy(newBasketManagerProxy);
       }

@@ -26,6 +26,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+/* eslint-disable no-empty-pattern */
 const config_1 = require("hardhat/config");
 const node_logs_1 = __importDefault(require("node-logs"));
 const helpers = __importStar(require("../scripts/utils/helpers"));
@@ -86,7 +87,7 @@ const logger = new node_logs_1.default().showInConsole(true);
             data: [data],
             description: "Set massetManagerProxy address",
         };
-        (0, createSIP_1._createSIP)(hre, sipArgs);
+        (0, createSIP_1.createSIP)(hre, sipArgs);
     }
     else {
         await MetaAssetToken.setMassetManagerProxy(newMassetManagerProxy);
@@ -124,7 +125,7 @@ const logger = new node_logs_1.default().showInConsole(true);
             data: [data],
             description: "Set basketManagerProxy address",
         };
-        (0, createSIP_1._createSIP)(hre, sipArgs);
+        (0, createSIP_1.createSIP)(hre, sipArgs);
     }
     else {
         await MetaAssetToken.setBasketManagerProxy(newBasketManagerProxy);
