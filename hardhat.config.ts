@@ -1,4 +1,4 @@
-import { HardhatUserConfig, task } from "hardhat/config";
+import { HardhatUserConfig, task, extendEnvironment } from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox";
 
 import * as dotenv from "dotenv";
@@ -17,7 +17,19 @@ import "hardhat-contract-sizer";
 import "@openzeppelin/hardhat-upgrades";
 import "@nomiclabs/hardhat-solhint";
 
+import {
+  HardhatRuntimeEnvironment,
+  HttpNetworkUserConfig,
+} from "hardhat/types";
+
 import "./tasks";
+
+extendEnvironment((hre: HardhatRuntimeEnvironment) => {
+  const config = hre.network.config as HttpNetworkUserConfig;
+  if (config?.url) {
+    hre.ethers.provider = new hre.ethers.providers.JsonRpcProvider(config.url);
+  }
+});
 
 /*
  * Test hardhat forking with patched hardhat
