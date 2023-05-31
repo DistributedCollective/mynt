@@ -19,6 +19,16 @@
         "allowJs": true,
         "typeRoots": ["node_modules/@0x/typescript-typings/types", "node_modules/@types"]
     },
-    "include": ["./tasks/**/*.ts", ".eslintrc.js"],
-    "files": ["./hardhat.config.ts"]
+    // "include": ["./tasks/**/*.ts", ".eslintrc.js"],
+    "files": ["./hardhat.config.ts"],
+
+    "include": [
+        "./scripts",
+        // "./tests", @todo uncomment when tests are converted to support ethers typechain typings
+        "./types",
+        "./tasks",
+        "./deployment/deploy",
+        "./tests-onchain"
+    ],
+    "exclude": ["./scripts/utils"]
 }

@@ -92,11 +92,12 @@ const createProposal = async (governorAddress, targets, values, signatures, call
 };
 exports.createProposal = createProposal;
 const defaultValueMultisigOrSipFlag = (networkTags) => {
-    let isMultisigFlag, isSIPFlag;
-    if (networkTags["testnet"]) {
+    let isMultisigFlag;
+    let isSIPFlag;
+    if (networkTags.testnet) {
         isMultisigFlag = true;
     }
-    else if (networkTags["mainnet"]) {
+    else if (networkTags.mainnet) {
         isSIPFlag = true;
     }
     else {

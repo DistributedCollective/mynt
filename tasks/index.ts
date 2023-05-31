@@ -1,5 +1,2 @@
-import "./contractsInteraction";
-import "./metaAssetTokenInteraction";
-import "./upgradeContract";
-import "./transferOwnership";
-import "./sips/createSIP";
+import "./mynt";
+import "./sips";

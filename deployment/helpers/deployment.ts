@@ -4,8 +4,8 @@ import hre from "hardhat";
 
 import Logs from "node-logs";
 import col from "cli-color";
-import { sendWithMultisig } from "scripts/helpers/multisig";
-import { TransparentUpgradeableProxy } from "types/generated";
+import { sendWithMultisig } from "../../scripts/helpers/helpers";
+import { TransparentUpgradeableProxy } from "../../types/generated";
 
 const {
   deployments: { deploy, get, getOrNull, log, save },

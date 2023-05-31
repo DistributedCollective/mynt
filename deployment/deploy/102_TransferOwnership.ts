@@ -1,6 +1,6 @@
 import { deployments, ethers, network } from "hardhat";
 import { DeployFunction } from "hardhat-deploy/types";
-import { transferOwnership } from "../../tasks/transferOwnership";
+import { transferOwnership } from "../../scripts/helpers/helpers";
 
 // import hardhat from "hardhat";
 

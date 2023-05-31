@@ -23,6 +23,14 @@ import {
 } from "hardhat/types";
 
 import "./tasks";
+import "node_modules/sovrynsmartcontracts/hardhat/tasks/multisig";
+
+extendEnvironment((hre: HardhatRuntimeEnvironment) => {
+  const config = hre.network.config as HttpNetworkUserConfig;
+  if (config?.url && hre.network.tags["forked"]) {
+    hre.ethers.provider = new hre.ethers.providers.JsonRpcProvider(config.url);
+  }
+});
 
 extendEnvironment((hre: HardhatRuntimeEnvironment) => {
   const config = hre.network.config as HttpNetworkUserConfig;
@@ -69,7 +77,6 @@ task("check-fork-patch", "Check Hardhat Fork Patch by Rainer").setAction(
 );
 
 dotenv.config();
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 require("cryptoenv").parse();
 
 const testnetAccounts: any = process.env.TESTNET_DEPLOYER_PRIVATE_KEY
@@ -258,6 +265,10 @@ const config: HardhatUserConfig = {
     contracts: [
       {
         artifacts: "external/artifacts/*.sol/!(*.dbg.json)",
+        // deploy: "node_modules/@cartesi/arbitration/export/deploy",
+      },
+      {
+        artifacts: "external/artifacts",
         // deploy: "node_modules/@cartesi/arbitration/export/deploy",
       },
       /* {
