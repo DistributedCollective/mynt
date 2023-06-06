@@ -8,9 +8,7 @@ const func: DeployFunction = async ({
   const { deployer } = await getNamedAccounts();
 
   const depositFee = 0;
-  const depositBridgeFee = 0;
   const withdrawalFee = 0;
-  const withdrawalBridgeFee = 0;
 
   const deploymentName = "FeesManager";
   const deployment = await getOrNull(deploymentName);
@@ -34,12 +32,7 @@ const func: DeployFunction = async ({
         execute: {
           init: {
             methodName: "initialize",
-            args: [
-              depositFee,
-              depositBridgeFee,
-              withdrawalFee,
-              withdrawalBridgeFee,
-            ],
+            args: [depositFee, withdrawalFee],
           },
         },
       },

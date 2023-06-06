@@ -363,8 +363,7 @@ async function createBasketManager(
     1
   );
   const bassets = [mockToken1.address, mockToken2.address];
-  const bridges = [ZERO_ADDRESS, ZERO_ADDRESS];
-  const basketManager = await BasketManager.new(bassets, factors, bridges);
+  const basketManager = await BasketManager.new(bassets, factors);
   return {
     mockToken1,
     mockToken2,
