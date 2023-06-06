@@ -63,8 +63,7 @@ const func: DeployFunction = async ({
         { from: deployer },
         "initialize",
         deployedBasketManager.address,
-        deployedToken.address,
-        false
+        deployedToken.address
       );
     }
 

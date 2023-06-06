@@ -68,8 +68,7 @@ contract("MassetManager", async (accounts) => {
       it("when given a valid basket manager", async () => {
         await massetManager.initialize(
           basketManagerObj.basketManager.address,
-          mAsset.address,
-          false
+          mAsset.address
         );
 
         let version = await massetManager.getVersion();
@@ -96,7 +95,7 @@ contract("MassetManager", async (accounts) => {
     context("should fail", async () => {
       it("when basket manager missing", async () => {
         await expectRevert(
-          massetManager.initialize(ZERO_ADDRESS, mAsset.address, false),
+          massetManager.initialize(ZERO_ADDRESS, mAsset.address),
           "VM Exception while processing transaction: reverted with reason string 'invalid basket manager'"
         );
       });
@@ -104,8 +103,7 @@ contract("MassetManager", async (accounts) => {
         await expectRevert(
           massetManager.initialize(
             basketManagerObj.basketManager.address,
-            ZERO_ADDRESS,
-            false
+            ZERO_ADDRESS
           ),
           "VM Exception while processing transaction: reverted with reason string 'invalid mAssetToken'"
         );
@@ -113,14 +111,12 @@ contract("MassetManager", async (accounts) => {
       it("when already initialized", async () => {
         await massetManager.initialize(
           basketManagerObj.basketManager.address,
-          mAsset.address,
-          false
+          mAsset.address
         );
         await expectRevert(
           massetManager.initialize(
             basketManagerObj.basketManager.address,
-            mAsset.address,
-            false
+            mAsset.address
           ),
           "VM Exception while processing transaction: reverted with reason string 'Initializable: contract is already initialized'"
         );
@@ -602,7 +598,10 @@ contract("MassetManager", async (accounts) => {
           massetManager.redeemTo(
             basketManagerObj.mockToken1.address,
             tokens(10),
-            { from: standardAccounts.dummy1 }
+            ZERO_ADDRESS,
+            {
+              from: standardAccounts.dummy1,
+            }
           ),
           "VM Exception while processing transaction: reverted with reason string 'must be a valid recipient'"
         );
@@ -773,12 +772,7 @@ async function initMassetManager(
 
   await feesManager.initialize(fees.deposit, fees.withdrawal);
 
-  await massetManager.initialize(
-    basketManagerAddress,
-    tokenAddress,
-    false,
-    txDetails
-  );
+  await massetManager.initialize(basketManagerAddress, tokenAddress, txDetails);
 
   await massetManager.upgradeToV3(
     basketManagerAddress,

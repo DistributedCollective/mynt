@@ -249,7 +249,7 @@ contract MassetManager is
 
         // massetsToBurn is the amount of massets that is left to burn after the fee was taken.
         // It is used to calculate amount of bassets that are transfered to user.
-        uint256 massetsAfterFee = _transferAndCalulateFee(_massetQuantity, _recipient);
+        uint256 massetsAfterFee = _transferAndCalulateFee(_massetQuantity, msg.sender);
         (uint256 bassetQuantity, uint256 massetsToBurn) = basketManager
             .convertMassetToBassetQuantity(_basset, massetsAfterFee);
 
@@ -258,11 +258,11 @@ contract MassetManager is
             "invalid basket"
         );
 
-        mAssetToken.burn(_recipient, massetsToBurn);
+        mAssetToken.burn(msg.sender, massetsToBurn);
 
         IERC20(_basset).safeTransfer(_recipient, bassetQuantity);
 
-        emit Redeemed(_recipient, _recipient, _massetQuantity, _basset, bassetQuantity);
+        emit Redeemed(msg.sender, _recipient, _massetQuantity, _basset, bassetQuantity);
 
         return massetsToBurn;
     }

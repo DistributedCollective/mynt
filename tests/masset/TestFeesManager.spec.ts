@@ -37,7 +37,7 @@ contract("FeesManager", async (accounts) => {
 
     context("should succeed", async () => {
       it("when all params are valid", async () => {
-        await feesManager.initialize(1, 2, 3, 4);
+        await feesManager.initialize(1, 3);
         expect(await feesManager.getDepositFee()).bignumber.to.eq(new BN(1));
         expect(await feesManager.getWithdrawalFee()).bignumber.to.eq(new BN(3));
       });
@@ -45,9 +45,9 @@ contract("FeesManager", async (accounts) => {
 
     context("should fail", async () => {
       it("when already initialized", async () => {
-        await feesManager.initialize(1, 2, 3, 4);
+        await feesManager.initialize(1, 3);
         await expectRevert(
-          feesManager.initialize(5, 6, 7, 8),
+          feesManager.initialize(1, 4),
           "VM Exception while processing transaction: reverted with reason string 'Initializable: contract is already initialized'"
         );
       });
@@ -61,7 +61,7 @@ contract("FeesManager", async (accounts) => {
       admin = standardAccounts.governor;
 
       feesManager = await FeesManager.new({ from: admin });
-      await feesManager.initialize(0, 0, 0, 0, { from: admin });
+      await feesManager.initialize(0, 0, { from: admin });
     });
 
     context("should fail", async () => {
@@ -129,8 +129,6 @@ contract("FeesManager", async (accounts) => {
 
         expect(await feesManager.getDepositFee()).bignumber.to.eq(ZERO);
         expect(await feesManager.getWithdrawalFee()).bignumber.to.eq(ZERO);
-          ZERO
-        );
       });
     });
   });
@@ -140,7 +138,7 @@ contract("FeesManager", async (accounts) => {
       feesManager = await FeesManager.new();
       await feesManager.initialize(
         standardFees.deposit,
-        standardFees.withdrawal,
+        standardFees.withdrawal
       );
     });
 
