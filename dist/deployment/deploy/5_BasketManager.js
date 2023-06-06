@@ -41,7 +41,7 @@ const func = async ({ ethers, deployments, getNamedAccounts, }) => {
             ethers.constants.AddressZero &&
             (await massetManager.getToken()) !== ethers.constants.AddressZero;
         if (!mmInitialized) {
-            await deployments.execute("MassetManager", { from: deployer }, "initialize", deployedBasketManager.address, deployedToken.address, false);
+            await deployments.execute("MassetManager", { from: deployer }, "initialize", deployedBasketManager.address, deployedToken.address);
         }
         const mmUpgraded = (await massetManager.getFeesVault()) === deployedFeesVault.address &&
             (await massetManager.getFeesManager()) === deployedFeesManager.address;
