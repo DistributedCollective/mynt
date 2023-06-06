@@ -81,80 +81,6 @@ const _abi = [
         type: "event",
     },
     {
-        anonymous: false,
-        inputs: [
-            {
-                indexed: true,
-                internalType: "address",
-                name: "sender",
-                type: "address",
-            },
-            {
-                indexed: false,
-                internalType: "uint256",
-                name: "orderAmount",
-                type: "uint256",
-            },
-            {
-                indexed: false,
-                internalType: "address",
-                name: "tokenAddress",
-                type: "address",
-            },
-            {
-                indexed: false,
-                internalType: "bytes",
-                name: "userData",
-                type: "bytes",
-            },
-        ],
-        name: "onTokensMintedCalled",
-        type: "event",
-    },
-    {
-        anonymous: false,
-        inputs: [
-            {
-                indexed: false,
-                internalType: "address",
-                name: "operator",
-                type: "address",
-            },
-            {
-                indexed: false,
-                internalType: "address",
-                name: "from",
-                type: "address",
-            },
-            {
-                indexed: false,
-                internalType: "address",
-                name: "to",
-                type: "address",
-            },
-            {
-                indexed: false,
-                internalType: "uint256",
-                name: "amount",
-                type: "uint256",
-            },
-            {
-                indexed: false,
-                internalType: "bytes",
-                name: "userData",
-                type: "bytes",
-            },
-            {
-                indexed: false,
-                internalType: "bytes",
-                name: "operatorData",
-                type: "bytes",
-            },
-        ],
-        name: "onTokensReceivedCalled",
-        type: "event",
-    },
-    {
         inputs: [],
         name: "getBasketManager",
         outputs: [
@@ -288,29 +214,6 @@ const _abi = [
     {
         inputs: [
             {
-                internalType: "uint256",
-                name: "_orderAmount",
-                type: "uint256",
-            },
-            {
-                internalType: "address",
-                name: "_tokenAddress",
-                type: "address",
-            },
-            {
-                internalType: "bytes",
-                name: "_userData",
-                type: "bytes",
-            },
-        ],
-        name: "onTokensMinted",
-        outputs: [],
-        stateMutability: "nonpayable",
-        type: "function",
-    },
-    {
-        inputs: [
-            {
                 internalType: "address",
                 name: "_bAsset",
                 type: "address",
@@ -322,35 +225,6 @@ const _abi = [
             },
         ],
         name: "redeem",
-        outputs: [
-            {
-                internalType: "uint256",
-                name: "massetRedeemed",
-                type: "uint256",
-            },
-        ],
-        stateMutability: "nonpayable",
-        type: "function",
-    },
-    {
-        inputs: [
-            {
-                internalType: "address",
-                name: "_basset",
-                type: "address",
-            },
-            {
-                internalType: "uint256",
-                name: "_massetQuantity",
-                type: "uint256",
-            },
-            {
-                internalType: "address",
-                name: "_recipient",
-                type: "address",
-            },
-        ],
-        name: "redeemByBridge",
         outputs: [
             {
                 internalType: "uint256",
@@ -387,107 +261,6 @@ const _abi = [
                 type: "uint256",
             },
         ],
-        stateMutability: "nonpayable",
-        type: "function",
-    },
-    {
-        inputs: [
-            {
-                internalType: "address",
-                name: "_basset",
-                type: "address",
-            },
-            {
-                internalType: "uint256",
-                name: "_massetQuantity",
-                type: "uint256",
-            },
-            {
-                internalType: "address",
-                name: "_recipient",
-                type: "address",
-            },
-            {
-                internalType: "address",
-                name: "_bridgeAddress",
-                type: "address",
-            },
-        ],
-        name: "redeemToBridge",
-        outputs: [
-            {
-                internalType: "uint256",
-                name: "massetRedeemed",
-                type: "uint256",
-            },
-        ],
-        stateMutability: "nonpayable",
-        type: "function",
-    },
-    {
-        inputs: [
-            {
-                internalType: "address",
-                name: "_basset",
-                type: "address",
-            },
-            {
-                internalType: "uint256",
-                name: "_massetQuantity",
-                type: "uint256",
-            },
-            {
-                internalType: "address",
-                name: "_recipient",
-                type: "address",
-            },
-        ],
-        name: "redeemToBridge",
-        outputs: [
-            {
-                internalType: "uint256",
-                name: "massetRedeemed",
-                type: "uint256",
-            },
-        ],
-        stateMutability: "nonpayable",
-        type: "function",
-    },
-    {
-        inputs: [
-            {
-                internalType: "address",
-                name: "_operator",
-                type: "address",
-            },
-            {
-                internalType: "address",
-                name: "_from",
-                type: "address",
-            },
-            {
-                internalType: "address",
-                name: "_to",
-                type: "address",
-            },
-            {
-                internalType: "uint256",
-                name: "_amount",
-                type: "uint256",
-            },
-            {
-                internalType: "bytes",
-                name: "_userData",
-                type: "bytes",
-            },
-            {
-                internalType: "bytes",
-                name: "_operatorData",
-                type: "bytes",
-            },
-        ],
-        name: "tokensReceived",
-        outputs: [],
         stateMutability: "nonpayable",
         type: "function",
     },

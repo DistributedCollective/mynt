@@ -1,13 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const ethers_1 = require("ethers");
 const func = async ({ ethers, deployments, getNamedAccounts, network, }) => {
     const networkName = deployments.getNetworkName();
     const { log, get } = deployments;
     const { deployer } = await getNamedAccounts();
     let bAssets;
     let factors = [1, 1];
-    let bridges = [ethers_1.constants.AddressZero, ethers_1.constants.AddressZero];
     let mins = [0, 0];
     let maxs = [1000, 1000]; // need to set to what MAX_VALUE defined in BasketManager contract
     let pausedFlags = [false, false];
@@ -38,7 +36,6 @@ const func = async ({ ethers, deployments, getNamedAccounts, network, }) => {
           bAssetsNames,
           bAssets,
           factors,
-          bridges,
           mins,
           maxs,
           pausedFlags,
@@ -52,17 +49,16 @@ const func = async ({ ethers, deployments, getNamedAccounts, network, }) => {
         .map((basset, index) => existingBAssets.includes(basset) ? index : undefined)
         .filter((el) => el !== undefined);
     if (bassetsToExclude.length !== 0) {
-        [bAssets, factors, bridges, mins, maxs, pausedFlags] = [
+        [bAssets, factors, mins, maxs, pausedFlags] = [
             bAssets,
             factors,
-            bridges,
             mins,
             maxs,
             pausedFlags,
         ].map((arg) => arg.filter((el, index) => !bassetsToExclude.includes(index)));
     }
     if (bAssets.length !== 0) {
-        await deployments.execute("BasketManagerV3", { from: deployer }, "addBassets", bAssets, factors, bridges, mins, maxs, pausedFlags);
+        await deployments.execute("BasketManagerV3", { from: deployer }, "addBassets", bAssets, factors, mins, maxs, pausedFlags);
     }
     else {
         log("SKIPPING bAssets registration: all bAssets already registered");
