@@ -25,20 +25,6 @@ import {
 import "./tasks";
 import "node_modules/sovrynsmartcontracts/hardhat/tasks/multisig";
 
-extendEnvironment((hre: HardhatRuntimeEnvironment) => {
-  const config = hre.network.config as HttpNetworkUserConfig;
-  if (config?.url && hre.network.tags["forked"]) {
-    hre.ethers.provider = new hre.ethers.providers.JsonRpcProvider(config.url);
-  }
-});
-
-extendEnvironment((hre: HardhatRuntimeEnvironment) => {
-  const config = hre.network.config as HttpNetworkUserConfig;
-  if (config?.url) {
-    hre.ethers.provider = new hre.ethers.providers.JsonRpcProvider(config.url);
-  }
-});
-
 /*
  * Test hardhat forking with patched hardhat
  *
@@ -93,6 +79,9 @@ const config: HardhatUserConfig = {
   namedAccounts: {
     deployer: {
       default: 0,
+    },
+    signer: {
+      default: 1,
     },
   },
   networks: {
@@ -279,20 +268,20 @@ const config: HardhatUserConfig = {
       rskSovrynTestnet: ["external/deployments/rskTestnet"],
       rskTestnet: [
         "external/deployments/rskTestnet",
-        "deployments/rskSovrynTestnet",
+        "deployment/deployments/rskSovrynTestnet",
       ],
       rskForkedTestnet: [
         "external/deployments/rskTestnet",
-        "deployments/rskSovrynTestnet",
+        // "deployment/deployments/rskSovrynTestnet",
       ],
       rskSovrynMainnet: ["external/deployments/rskMainnet"],
       rskMainnet: [
         "external/deployments/rskMainnet",
-        "deployments/rskSovrynMainnet",
+        "deployment/deployments/rskSovrynMainnet",
       ],
       rskForkedMainnet: [
         "external/deployments/rskMainnet",
-        "deployments/rskSovrynMainnet",
+        //"deployment/deployments/rskSovrynMainnet",
       ],
     },
   },
