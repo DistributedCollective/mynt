@@ -8,14 +8,14 @@ const utils_1 = require("./utils");
 Object.defineProperty(exports, "injectHre", { enumerable: true, get: function () { return utils_1.injectHre; } });
 const node_logs_1 = __importDefault(require("node-logs"));
 const logger = new node_logs_1.default().showInConsole(true);
-let hre;
-let ethers;
+// let hre: HardhatRuntimeEnvironment;
+// let ethers: HardhatRuntimeEnvironment["ethers"];
 const sendWithMultisig = async (multisigAddress, contractAddress, data, sender, value = 0) => {
-    const multisig = await ethers.getContractAt("MultiSigWallet", multisigAddress);
+    const { ethers } = hre;
     const signer = await ethers.getSigner(sender);
-    const receipt = await (await multisig
-        .connect(signer)
-        .submitTransaction(contractAddress, value, data)).wait();
+    console.log("signer:", signer.address);
+    const multisig = await ethers.getContractAt("MultiSigWallet", multisigAddress, signer);
+    const receipt = await (await multisig.submitTransaction(contractAddress, value, data)).wait();
     const abi = ["event Submission(uint256 indexed transactionId)"];
     const iface = new ethers.utils.Interface(abi);
     const parsedEvent = await getParsedEventLogFromReceipt(receipt, iface, "Submission");
@@ -23,6 +23,7 @@ const sendWithMultisig = async (multisigAddress, contractAddress, data, sender, 
 };
 exports.sendWithMultisig = sendWithMultisig;
 const signWithMultisig = async (multisigAddress, txId, sender) => {
+    const { ethers } = hre;
     console.log("Signing multisig txId:", txId);
     const multisig = await ethers.getContractAt("MultiSigWallet", multisigAddress);
     const signer = await ethers.getSigner(sender);
@@ -55,7 +56,7 @@ const multisigRemoveOwner = async (removeAddress, sender) => {
     logger.info(`>>> DONE. Requires Multisig (${multisigDeployment.address}) signing to execute tx <<<`);
 };
 exports.multisigRemoveOwner = multisigRemoveOwner;
-const multisigExecuteTx = async (txId, sender, multisigAddress = ethers.constants.AddressZero) => {
+const multisigExecuteTx = async (txId, sender, multisigAddress = hre.ethers.constants.AddressZero) => {
     const { ethers, deployments: { get }, } = hre;
     const signer = await ethers.getSigner(sender);
     const multisig = await ethers.getContractAt("MultiSigWallet", multisigAddress == ethers.constants.AddressZero
@@ -90,9 +91,10 @@ const multisigExecuteTx = async (txId, sender, multisigAddress = ethers.constant
     logger.warn("===============================================================================");
 };
 exports.multisigExecuteTx = multisigExecuteTx;
-const multisigCheckTx = async (txId, multisigAddress = ethers.constants.AddressZero) => {
-    const { deployments: { get }, } = hre;
-    const multisig = await ethers.getContractAt("MultiSigWallet", multisigAddress === ethers.constants.AddressZero
+const multisigCheckTx = async (hre, txId, multisigAddress = undefined) => {
+    // console.log(hre);
+    const { ethers, deployments: { get }, } = hre;
+    const multisig = await ethers.getContractAt("MultiSigWallet", multisigAddress === undefined
         ? (await get("MultiSigWallet")).address
         : multisigAddress);
     const transaction = await multisig.transactions(txId);
@@ -105,7 +107,7 @@ const isMultisigOwner = async (multisigAddress, checkAddress) => {
     return await multisig.isOwner(checkAddress);
 };
 exports.isMultisigOwner = isMultisigOwner;
-const multisigRevokeConfirmation = async (txId, sender, multisigAddress = ethers.constants.AddressZero) => {
+const multisigRevokeConfirmation = async (txId, sender, multisigAddress = hre.ethers.constants.AddressZero) => {
     const { ethers, deployments: { get }, } = hre;
     const signer = await ethers.getSigner(sender);
     const multisig = await ethers.getContractAt("MultiSigWallet", multisigAddress == ethers.constants.AddressZero
@@ -182,6 +184,7 @@ const createProposal = async (governorAddress, targets, values, signatures, call
     Data:                ${callDatas}
     Description:         ${description}
     =============================================================`);
+    const { ethers } = hre;
     const gov = await ethers.getContractAt("GovernorAlpha", governorAddress);
     const tx = await (await gov
         .connect(signer)

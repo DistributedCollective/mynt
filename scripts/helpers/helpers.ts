@@ -1,19 +1,16 @@
 /* eslint-disable no-plusplus */
 import { Interface } from "@ethersproject/abi/lib/interface";
 import { BytesLike, Contract } from "ethers";
-import { injectHre } from "./utils";
+import { injectHre, hre, ethers } from "./utils";
 import { Address } from "hardhat-deploy/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { GovernorAlpha, MultiSigWallet } from "../../types/generated";
 import Logs from "node-logs";
-import {
-  TransactionReceipt,
-  TransactionResponse,
-} from "@ethersproject/providers";
+import { TransactionReceipt } from "@ethersproject/providers";
 const logger = new Logs().showInConsole(true);
 
-let hre: HardhatRuntimeEnvironment;
-let ethers: HardhatRuntimeEnvironment["ethers"];
+// let hre: HardhatRuntimeEnvironment;
+// let ethers: HardhatRuntimeEnvironment["ethers"];
 
 const sendWithMultisig = async (
   multisigAddress: Address,
@@ -22,15 +19,14 @@ const sendWithMultisig = async (
   sender: Address,
   value = 0
 ) => {
+  const signer = await ethers.getSigner(sender);
   const multisig = await ethers.getContractAt(
     "MultiSigWallet",
-    multisigAddress
+    multisigAddress,
+    signer
   );
-  const signer = await ethers.getSigner(sender);
   const receipt = await (
-    await multisig
-      .connect(signer)
-      .submitTransaction(contractAddress, value, data)
+    await multisig.submitTransaction(contractAddress, value, data)
   ).wait();
 
   const abi = ["event Submission(uint256 indexed transactionId)"];
@@ -47,6 +43,7 @@ const sendWithMultisig = async (
 };
 
 const signWithMultisig = async (multisigAddress, txId, sender) => {
+  const { ethers } = hre;
   console.log("Signing multisig txId:", txId);
   const multisig = await ethers.getContractAt(
     "MultiSigWallet",
@@ -107,7 +104,7 @@ const multisigRemoveOwner = async (removeAddress, sender) => {
 const multisigExecuteTx = async (
   txId,
   sender,
-  multisigAddress = ethers.constants.AddressZero
+  multisigAddress = hre.ethers.constants.AddressZero
 ) => {
   const {
     ethers,
@@ -164,15 +161,16 @@ const multisigExecuteTx = async (
 };
 
 const multisigCheckTx = async (
-  txId,
-  multisigAddress = ethers.constants.AddressZero
+  txId: string,
+  multisigAddress: string | undefined = undefined
 ) => {
   const {
+    ethers,
     deployments: { get },
   } = hre;
   const multisig = await ethers.getContractAt(
     "MultiSigWallet",
-    multisigAddress === ethers.constants.AddressZero
+    multisigAddress === undefined
       ? (
           await get("MultiSigWallet")
         ).address
@@ -210,7 +208,7 @@ const isMultisigOwner = async (multisigAddress, checkAddress) => {
 const multisigRevokeConfirmation = async (
   txId,
   sender,
-  multisigAddress = ethers.constants.AddressZero
+  multisigAddress = hre.ethers.constants.AddressZero
 ) => {
   const {
     ethers,
@@ -316,6 +314,7 @@ const createProposal = async (
     Data:                ${callDatas}
     Description:         ${description}
     =============================================================`);
+  const { ethers } = hre;
   const gov = await ethers.getContractAt("GovernorAlpha", governorAddress);
   const tx = await (
     await gov

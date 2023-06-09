@@ -72,12 +72,12 @@ _flat/
 *.code-workspace
 
 # local deployment
-deployments/development/
-deployments/localhost/
-deployments/rskDev
-deployments/rskForkedTestnet
-deployments/rskForkedMainnet
+deployment/deployments/development/
+deployment/deployments/localhost/
+deployment/deployments/rskDev
+deployment/deployments/rskForkedTestnet
+deployment/deployments/rskForkedMainnet
+
 .openzeppelin
 
 tmp/
-deployment/deployments/localhost

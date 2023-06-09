@@ -26,16 +26,19 @@ const func: DeployFunction = async ({ deployments, getNamedAccounts }) => {
 
   const deploymentName = "MocIntegration";
   const deployment = await getOrNull(deploymentName);
+  const massetManagerAddress = (await get("MassetManager")).address;
   if (deployment) {
     await upgradeWithTransparentUpgradableProxy(
       deployer,
       deploymentName,
       "TransparentUpgradeableProxy",
       undefined,
-      `${deploymentName}_Proxy`
+      `${deploymentName}_Proxy`,
+      "MyntAdminProxy",
+      false,
+      [mocAddress, docAddress, dllrAddress, massetManagerAddress]
     );
   } else {
-    const massetManagerAddress = (await get("MassetManager")).address;
     await deploy(deploymentName, {
       args: [mocAddress, docAddress, dllrAddress, massetManagerAddress],
       proxy: {

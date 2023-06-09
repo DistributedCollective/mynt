@@ -23,7 +23,7 @@ import {
 } from "hardhat/types";
 
 import "./tasks";
-import "node_modules/sovrynsmartcontracts/hardhat/tasks/multisig";
+// import "node_modules/sovrynsmartcontracts/hardhat/tasks/multisig";
 
 /*
  * Test hardhat forking with patched hardhat
@@ -37,6 +37,7 @@ import "node_modules/sovrynsmartcontracts/hardhat/tasks/multisig";
  *
  * Then the forking doesn't work correctly (ie. hardhat was not properly patched)
  */
+
 task("check-fork-patch", "Check Hardhat Fork Patch by Rainer").setAction(
   async (taskArgs, hre) => {
     await hre.network.provider.request({
@@ -101,6 +102,9 @@ const config: HardhatUserConfig = {
       gas: 6800000,
       gasPrice: 660000010, // ~66GWei,
     },
+    localhost: {
+      timeout: 1e6,
+    },
     rskDev: {
       from: "0xcd2a3d9f938e13cd947ec05abc7fe734df8dd826",
       url: "http://localhost:4444",
@@ -138,8 +142,7 @@ const config: HardhatUserConfig = {
       url: "https://mainnet-dev.sovryn.app/rpc ",
       gasPrice: 66000010, // ~66GWei,
       blockGasLimit: 6800000,
-
-      timeout: 1e9,
+      timeout: 1e6,
       tags: ["mainnet"],
     },
     rskMainnet: {
@@ -148,8 +151,7 @@ const config: HardhatUserConfig = {
       url: "https://public-node.rsk.co/",
       gasPrice: 66000010, // ~66GWei,
       blockGasLimit: 6800000,
-
-      timeout: 1e9,
+      timeout: 1e6,
       tags: ["mainnet"],
     },
     rskForkedMainnet: {
@@ -160,6 +162,7 @@ const config: HardhatUserConfig = {
       gas: 6800000,
       gasPrice: 660000010, // ~66GWei,
       tags: ["mainnet", "forked"],
+      timeout: 1e6,
     },
     coverage: {
       url: "http://127.0.0.1:7546",
@@ -272,7 +275,7 @@ const config: HardhatUserConfig = {
       ],
       rskForkedTestnet: [
         "external/deployments/rskTestnet",
-        // "deployment/deployments/rskSovrynTestnet",
+        "deployment/deployments/rskSovrynTestnet",
       ],
       rskSovrynMainnet: ["external/deployments/rskMainnet"],
       rskMainnet: [
@@ -281,7 +284,7 @@ const config: HardhatUserConfig = {
       ],
       rskForkedMainnet: [
         "external/deployments/rskMainnet",
-        //"deployment/deployments/rskSovrynMainnet",
+        "deployment/deployments/rskSovrynMainnet",
       ],
     },
   },

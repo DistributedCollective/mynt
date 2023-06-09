@@ -22,6 +22,9 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 /* eslint-disable no-empty-pattern */
 const config_1 = require("hardhat/config");
@@ -33,8 +36,9 @@ const config_1 = require("hardhat/config");
 } from "types/generated"; */
 const hardhat_network_helpers_1 = require("@nomicfoundation/hardhat-network-helpers");
 const helpers = __importStar(require("../scripts/helpers/helpers"));
-const sips_1 = require("./sips");
 const helpers_1 = require("../scripts/helpers/helpers");
+const node_logs_1 = __importDefault(require("node-logs"));
+const logger = new node_logs_1.default().showInConsole(true);
 /// ------ REPLACE bAsset ----- ///
 (0, config_1.task)("mynt:replace-basset", "Replace bAsset")
     .addParam("prevBasset", "bAsset to replace", undefined, config_1.types.string, false)
@@ -85,9 +89,11 @@ const helpers_1 = require("../scripts/helpers/helpers");
                 values: [0, 0],
                 signatures: [signatureRemove, signatureAdd],
                 data: [dataRemove, dataAdd],
-                description: "Replace Basset",
+                description: "",
             };
-            (0, sips_1.createSIP)(hre, sipArgs);
+            logger.warn(">>> CREATE A SIP WITH THIS ARGS: <<<");
+            logger.info(sipArgs);
+            logger.warn("====================================");
         }
         else {
             // @todo forked mainnet to replace bAsset - impersonate accounts: TimelockOwner, GvernorOwner, whale accounts
@@ -280,9 +286,11 @@ const helpers_1 = require("../scripts/helpers/helpers");
             values: [0],
             signatures: [signature],
             data: [data],
-            description: "Set massetManagerProxy address",
+            description: "",
         };
-        (0, sips_1.createSIP)(hre, sipArgs);
+        logger.warn(">>> CREATE A SIP WITH THIS ARGS: <<<");
+        logger.info(sipArgs);
+        logger.warn("====================================");
     }
     else {
         await MetaAssetToken.setMassetManagerProxy(newMassetManagerProxy);
@@ -320,7 +328,9 @@ const helpers_1 = require("../scripts/helpers/helpers");
             data: [data],
             description: "Set basketManagerProxy address",
         };
-        (0, sips_1.createSIP)(hre, sipArgs);
+        logger.warn(">>> CREATE A SIP WITH THIS ARGS: <<<");
+        logger.info(sipArgs);
+        logger.warn("====================================");
     }
     else {
         await MetaAssetToken.setBasketManagerProxy(newBasketManagerProxy);
@@ -450,7 +460,9 @@ const helpers_1 = require("../scripts/helpers/helpers");
             data: [dataUpgrade],
             description: "Upgrade masset manager contract",
         };
-        (0, sips_1.createSIP)(hre, sipArgs);
+        logger.warn(">>> CREATE A SIP WITH THIS ARGS: <<<");
+        logger.info(sipArgs);
+        logger.warn("====================================");
     }
 });
 (0, config_1.task)("mynt:upgrade:feesVault", "Upgrade implementation of feesVault contract")
@@ -480,7 +492,9 @@ const helpers_1 = require("../scripts/helpers/helpers");
             data: [dataUpgrade],
             description: "Upgrade fees vault contract",
         };
-        (0, sips_1.createSIP)(hre, sipArgs);
+        logger.warn(">>> CREATE A SIP WITH THIS ARGS: <<<");
+        logger.info(sipArgs);
+        logger.warn("====================================");
     }
 });
 (0, config_1.task)("mynt:upgrade:feesManager", "Upgrade implementation of feesManager contract")
@@ -510,7 +524,9 @@ const helpers_1 = require("../scripts/helpers/helpers");
             data: [dataUpgrade],
             description: "Upgrade fees manager contract",
         };
-        (0, sips_1.createSIP)(hre, sipArgs);
+        logger.warn(">>> CREATE A SIP WITH THIS ARGS: <<<");
+        logger.info(sipArgs);
+        logger.warn("====================================");
     }
 });
 (0, config_1.task)("mynt:upgrade:basketManager", "Upgrade implementation of basketManager contract")
@@ -540,7 +556,9 @@ const helpers_1 = require("../scripts/helpers/helpers");
             data: [dataUpgrade],
             description: "Upgrade fees vault contract",
         };
-        (0, sips_1.createSIP)(hre, sipArgs);
+        logger.warn(">>> CREATE A SIP WITH THIS ARGS: <<<");
+        logger.info(sipArgs);
+        logger.warn("====================================");
     }
 });
 //# sourceMappingURL=mynt.js.map

@@ -3,7 +3,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createSIP = void 0;
 /* eslint-disable no-console */
 const config_1 = require("hardhat/config");
 const node_logs_1 = __importDefault(require("node-logs"));
@@ -11,15 +10,18 @@ const SIPArgs_1 = __importDefault(require("./sips/args/SIPArgs"));
 const helpers_1 = require("scripts/helpers/helpers");
 const utils_1 = require("scripts/helpers/utils");
 const logger = new node_logs_1.default().showInConsole(true);
-const createSIP = async (hre, sipArgs) => {
+(0, config_1.task)("sips:create", "Create SIP to Sovryn Governance")
+    .addParam("argsFunc", "Function name from tasks/sips/args/sipArgs.ts which returns the sip arguments")
+    .setAction(async ({ argsFunc }, hre) => {
+    const { governorName, args: sipArgs } = await SIPArgs_1.default[argsFunc](hre);
     const { ethers, deployments: { get }, } = hre;
-    const Governor = await get("GovernorOwner");
-    const governor = await ethers.getContractAt(Governor.abi, Governor.address);
+    const governorDeployment = await get(governorName);
+    const governor = await ethers.getContract(governorName);
     logger.info("=== Creating SIP ===");
-    logger.info(`Governor Address:    ${governor.address}`);
-    logger.info(`Targets:              ${sipArgs.targets}`);
+    logger.info(`Governor Address:    ${governorDeployment.address}`);
+    logger.info(`Targets:             ${sipArgs.targets}`);
     logger.info(`Values:              ${sipArgs.values}`);
-    logger.info(`Signatures:           ${sipArgs.signatures}`);
+    logger.info(`Signatures:          ${sipArgs.signatures}`);
     logger.info(`Data:                ${sipArgs.data}`);
     logger.info(`Description:         ${sipArgs.description}`);
     logger.info(`============================================================='`);
@@ -38,13 +40,6 @@ const createSIP = async (hre, sipArgs) => {
     logger.success(`Start Block:          ${eventData.startBlock}`);
     logger.success(`End Block:            ${eventData.endBlock}`);
     logger.success(`============================================================='`);
-};
-exports.createSIP = createSIP;
-(0, config_1.task)("createSIP", "Create SIP to Sovryn Governance")
-    .addParam("argsModuleName", "module name that is located in tasks/sips//args folder which and returning the sip arguments")
-    .setAction(async ({ argsModuleName }, hre) => {
-    const sipArgs = await SIPArgs_1.default[argsModuleName](hre);
-    await (0, exports.createSIP)(hre, sipArgs);
 });
 (0, config_1.task)("sips:queue", "Queue proposal in the Governor Owner contract")
     .addParam("proposal", "Proposal Id", undefined, config_1.types.string)

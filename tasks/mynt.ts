@@ -12,10 +12,12 @@ import {
   stopImpersonatingAccount,
 } from "@nomicfoundation/hardhat-network-helpers";
 import * as helpers from "../scripts/helpers/helpers";
-import { createSIP } from "./sips";
 import { ISipArgument } from "./sips/args/SIPArgs";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { transferOwnership } from "../scripts/helpers/helpers";
+
+import Logs from "node-logs";
+const logger = new Logs().showInConsole(true);
 
 /// ------ REPLACE bAsset ----- ///
 task("mynt:replace-basset", "Replace bAsset")
@@ -90,15 +92,17 @@ task("mynt:replace-basset", "Replace bAsset")
           : "removeBasset(address)";
         const signatureAdd =
           "addBasset(address,int256,address,uint256,uint256,bool)";
-        const sipArgs: ISipArgument = {
+        const sipArgs: ISipArgument["args"] = {
           targets: [contractAddress, contractAddress],
           values: [0, 0],
           signatures: [signatureRemove, signatureAdd],
           data: [dataRemove, dataAdd],
-          description: "Replace Basset",
+          description: "",
         };
 
-        createSIP(hre, sipArgs);
+        logger.warn(">>> CREATE A SIP WITH THIS ARGS: <<<");
+        logger.info(sipArgs);
+        logger.warn("====================================");
       } else {
         // @todo forked mainnet to replace bAsset - impersonate accounts: TimelockOwner, GvernorOwner, whale accounts
         //   - create proposal (impersonate a whale account)
@@ -421,15 +425,17 @@ task("mynt:set-massetManagerProxy", "Set massetManagerProxy")
           [newMassetManagerProxy]
         );
 
-        const sipArgs: ISipArgument = {
+        const sipArgs: ISipArgument["args"] = {
           targets: [contractAddress],
           values: [0],
           signatures: [signature],
           data: [data],
-          description: "Set massetManagerProxy address",
+          description: "",
         };
 
-        createSIP(hre, sipArgs);
+        logger.warn(">>> CREATE A SIP WITH THIS ARGS: <<<");
+        logger.info(sipArgs);
+        logger.warn("====================================");
       } else {
         await MetaAssetToken.setMassetManagerProxy(newMassetManagerProxy);
       }
@@ -503,15 +509,16 @@ task("mynt:set-basketManagerProxy", "Set basketManagerProxy")
           [newBasketManagerProxy]
         );
 
-        const sipArgs: ISipArgument = {
+        const sipArgs: ISipArgument["args"] = {
           targets: [contractAddress],
           values: [0],
           signatures: [signature],
           data: [data],
           description: "Set basketManagerProxy address",
         };
-
-        createSIP(hre, sipArgs);
+        logger.warn(">>> CREATE A SIP WITH THIS ARGS: <<<");
+        logger.info(sipArgs);
+        logger.warn("====================================");
       } else {
         await MetaAssetToken.setBasketManagerProxy(newBasketManagerProxy);
       }
@@ -783,15 +790,16 @@ task(
         [massetManagerProxy.address, newMassetManagerImpl.address]
       );
 
-      const sipArgs: ISipArgument = {
+      const sipArgs: ISipArgument["args"] = {
         targets: [massetManagerProxy.address],
         values: [0],
         signatures: [signatureUpgrade],
         data: [dataUpgrade],
         description: "Upgrade masset manager contract",
       };
-
-      createSIP(hre, sipArgs);
+      logger.warn(">>> CREATE A SIP WITH THIS ARGS: <<<");
+      logger.info(sipArgs);
+      logger.warn("====================================");
     }
   });
 
@@ -841,15 +849,16 @@ task("mynt:upgrade:feesVault", "Upgrade implementation of feesVault contract")
         [feesVaultProxy.address, newFeesVaultImpl.address]
       );
 
-      const sipArgs: ISipArgument = {
+      const sipArgs: ISipArgument["args"] = {
         targets: [feesVaultProxy.address],
         values: [0],
         signatures: [signatureUpgrade],
         data: [dataUpgrade],
         description: "Upgrade fees vault contract",
       };
-
-      createSIP(hre, sipArgs);
+      logger.warn(">>> CREATE A SIP WITH THIS ARGS: <<<");
+      logger.info(sipArgs);
+      logger.warn("====================================");
     }
   });
 
@@ -902,15 +911,16 @@ task(
         [feesManagerProxy.address, newFeesManagerImpl.address]
       );
 
-      const sipArgs: ISipArgument = {
+      const sipArgs: ISipArgument["args"] = {
         targets: [feesManagerProxy.address],
         values: [0],
         signatures: [signatureUpgrade],
         data: [dataUpgrade],
         description: "Upgrade fees manager contract",
       };
-
-      createSIP(hre, sipArgs);
+      logger.warn(">>> CREATE A SIP WITH THIS ARGS: <<<");
+      logger.info(sipArgs);
+      logger.warn("====================================");
     }
   });
 
@@ -965,14 +975,15 @@ task(
         [basketManagerProxy.address, newBasketManagerImpl.address]
       );
 
-      const sipArgs: ISipArgument = {
+      const sipArgs: ISipArgument["args"] = {
         targets: [basketManagerProxy.address],
         values: [0],
         signatures: [signatureUpgrade],
         data: [dataUpgrade],
         description: "Upgrade fees vault contract",
       };
-
-      createSIP(hre, sipArgs);
+      logger.warn(">>> CREATE A SIP WITH THIS ARGS: <<<");
+      logger.info(sipArgs);
+      logger.warn("====================================");
     }
   });

@@ -40,19 +40,7 @@ require("hardhat-contract-sizer");
 require("@openzeppelin/hardhat-upgrades");
 require("@nomiclabs/hardhat-solhint");
 require("./tasks");
-require("node_modules/sovrynsmartcontracts/hardhat/tasks/multisig");
-(0, config_1.extendEnvironment)((hre) => {
-    const config = hre.network.config;
-    if (config?.url && hre.network.tags["forked"]) {
-        hre.ethers.provider = new hre.ethers.providers.JsonRpcProvider(config.url);
-    }
-});
-(0, config_1.extendEnvironment)((hre) => {
-    const config = hre.network.config;
-    if (config?.url) {
-        hre.ethers.provider = new hre.ethers.providers.JsonRpcProvider(config.url);
-    }
-});
+// import "node_modules/sovrynsmartcontracts/hardhat/tasks/multisig";
 /*
  * Test hardhat forking with patched hardhat
  *
@@ -100,6 +88,9 @@ const config = {
     namedAccounts: {
         deployer: {
             default: 0,
+        },
+        signer: {
+            default: 1,
         },
     },
     networks: {
@@ -281,20 +272,20 @@ const config = {
             rskSovrynTestnet: ["external/deployments/rskTestnet"],
             rskTestnet: [
                 "external/deployments/rskTestnet",
-                "deployments/rskSovrynTestnet",
+                "deployment/deployments/rskSovrynTestnet",
             ],
             rskForkedTestnet: [
                 "external/deployments/rskTestnet",
-                "deployments/rskSovrynTestnet",
+                "deployment/deployments/rskSovrynTestnet",
             ],
             rskSovrynMainnet: ["external/deployments/rskMainnet"],
             rskMainnet: [
                 "external/deployments/rskMainnet",
-                "deployments/rskSovrynMainnet",
+                "deployment/deployments/rskSovrynMainnet",
             ],
             rskForkedMainnet: [
                 "external/deployments/rskMainnet",
-                "deployments/rskSovrynMainnet",
+                //"deployment/deployments/rskSovrynMainnet",
             ],
         },
     },
