@@ -39,7 +39,13 @@ describe("SIP-0064 onchain test", () => {
   };
 
   const setupTest = createFixture(async ({ deployments, getNamedAccounts }) => {
-    const { deployer } = await getNamedAccounts();
+    let { deployer } = await getNamedAccounts();
+
+    if (!deployer) {
+      deployer = (await ethers.getSigners())[0].address;
+    }
+
+    console.log("deployer:", deployer);
 
     const deployerSigner = await ethers.getSigner(deployer);
     await setBalance(deployer, ONE_RBTC.mul(10));
@@ -119,7 +125,13 @@ describe("SIP-0064 onchain test", () => {
     // CREATE PROPOSAL
     console.log("deploying new contracts...");
     await deployments.fixture(
-      ["BasketManager", "MasssetManager", "FeesManager"],
+      [
+        "BasketManager",
+        "MasssetManager",
+        "FeesManager",
+        "FeesVault",
+        "MocIntegration",
+      ],
       {
         keepExistingDeployments: true,
       }
@@ -167,8 +179,11 @@ describe("SIP-0064 onchain test", () => {
     await mine();
 
     // CREATE PROPOSAL AND VERIFY
-    const proposalIdBeforeSIP = await governorOwner.latestProposalIds(deployer);
-    await hre.run("sips:create", { argsFunc: "sip0064" });
+    const proposalIdBeforeSIP = await governorOwner.proposalCount();
+    await hre.run("sips:create", {
+      argsFunc: "sip0064",
+      deployer: deployer,
+    });
     const proposalId = await governorOwner.latestProposalIds(deployer);
     expect(
       proposalId.toNumber(),
@@ -206,9 +221,13 @@ describe("SIP-0064 onchain test", () => {
     const bmProxyDeployment = await get("BasketManagerV3_Proxy");
     const mmProxyDeployment = await get("MassetManager_Proxy");
     const fmProxyDeployment = await get("FeesManager_Proxy");
+    const fvProxyDeployment = await get("FeesVault_Proxy");
+    const miProxyDeployment = await get("MocIntegration_Proxy");
     const bmDeployment = await get("BasketManagerV3");
     const mmDeployment = await get("MassetManager");
     const fmDeployment = await get("FeesManager");
+    const fvDeployment = await get("FeesVault");
+    const miDeployment = await get("MocIntegration");
 
     const myntAdminProxy = await ethers.getContract("MyntAdminProxy");
     expect(
@@ -220,5 +239,11 @@ describe("SIP-0064 onchain test", () => {
     expect(
       await myntAdminProxy.getProxyImplementation(fmProxyDeployment.address)
     ).to.equal(fmDeployment.implementation);
+    expect(
+      await myntAdminProxy.getProxyImplementation(fvProxyDeployment.address)
+    ).to.equal(fvDeployment.implementation);
+    expect(
+      await myntAdminProxy.getProxyImplementation(miProxyDeployment.address)
+    ).to.equal(miDeployment.implementation);
   });
 });

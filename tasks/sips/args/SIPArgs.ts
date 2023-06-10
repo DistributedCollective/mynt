@@ -96,6 +96,8 @@ const sip0064 = async (
     "BasketManagerV3",
     "MassetManager",
     "FeesManager",
+    "FeesVault",
+    "MocIntegration",
   ];
 
   const deploymentProxies = await Promise.all(
