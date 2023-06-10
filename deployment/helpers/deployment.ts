@@ -115,7 +115,7 @@ const upgradeWithTransparentUpgradableProxy = async (
             ),
           ],
         };
-        log(col.yellowBright(sipArgs));
+        log(col.yellowBright(JSON.stringify(sipArgs)));
         log(
           ">>> DON'T MERGE DEPLOYMENTS TO THE MAIN (DEVELOPMENT) BRANCH UNTIL THE SIP IS SUCCESSFULLY EXECUTED <<<`"
         );

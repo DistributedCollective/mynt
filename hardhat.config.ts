@@ -157,7 +157,7 @@ const config: HardhatUserConfig = {
     rskForkedMainnet: {
       // npx hardhat node --fork https://mainnet-dev.sovryn.app/rpc --no-deploy --fork-block-number 4929553
       chainId: 31337,
-      accounts: mainnetAccounts,
+      accounts: mainnetAccounts.length !== 0 ? mainnetAccounts : "remote",
       url: "http://127.0.0.1:8545",
       gas: 6800000,
       gasPrice: 660000010, // ~66GWei,

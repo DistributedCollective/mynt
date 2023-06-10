@@ -16,7 +16,7 @@ const func: DeployFunction = async ({
   let maxs = [1000, 1000]; // need to set to what MAX_VALUE defined in BasketManager contract
   let pausedFlags = [false, false];
 
-  if (["rskTestnet", "rskForkedTestnet"].includes(networkName)) {
+  if (["rskTestnet", "rskSovrynTestnet", "rskForkedTestnet"].includes(networkName)) {
     // @todo add forked nets to hh config
     bAssets = [
       "0x6b41566353d6c7b8c2a7931d498f11489dacac29", // ZUSD Testnet
