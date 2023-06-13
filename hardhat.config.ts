@@ -70,6 +70,7 @@ const testnetAccounts: any = process.env.TESTNET_DEPLOYER_PRIVATE_KEY
   ? [
       process.env.TESTNET_DEPLOYER_PRIVATE_KEY,
       process.env.TESTNET_SIGNER_PRIVATE_KEY,
+      process.env.TESTNET_SIGNER_PRIVATE_KEY_2,
     ]
   : [];
 const mainnetAccounts: any = process.env.MAINNET_DEPLOYER_PRIVATE_KEY
@@ -83,6 +84,9 @@ const config: HardhatUserConfig = {
     },
     signer: {
       default: 1,
+    },
+    signerShared: {
+      default: 2,
     },
   },
   networks: {

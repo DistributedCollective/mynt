@@ -35,6 +35,7 @@ task("multisig:sign-txs", "Sign multiple multisig tx")
     const {
       deployments: { get },
     } = hre;
+    injectHre(hre);
     const signerAcc = (await hre.getNamedAccounts())[signer];
     const ms = await get("MultiSigWallet");
     const txnArray = ids.split(",");
@@ -54,8 +55,36 @@ task("multisig:execute-tx", "Execute multisig tx by one of tx signers")
   .addParam("id", "Multisig transaction to sign", undefined, types.string)
   .addOptionalParam("signer", "Signer name: 'signer' or 'deployer'", "deployer")
   .setAction(async ({ id, signer }, hre) => {
+    injectHre(hre);
     const signerAcc = (await hre.getNamedAccounts())[signer];
     await multisigExecuteTx(id, signerAcc);
+  });
+
+task(
+  "multisig:execute-txs",
+  "Execute multiple multisig txs by one of tx signers"
+)
+  .addParam("ids", "Multisig transaction to sign", undefined, types.string)
+  .addOptionalParam(
+    "signer",
+    "Signer name from named signers: 'signer', 'deployer' etc.",
+    "deployer"
+  )
+  .setAction(async ({ ids, signer }, hre) => {
+    injectHre(hre);
+    const signerAcc = (await hre.getNamedAccounts())[signer];
+
+    const txnArray = ids.split(",");
+    for (let txId of txnArray) {
+      if (typeof txId !== "string" || txId.indexOf("-") === -1) {
+        await multisigExecuteTx(txId, signerAcc);
+      } else {
+        const txnRangeArray = txId.split("-", 2).map((num) => parseInt(num));
+        for (let id = txnRangeArray[0]; id <= txnRangeArray[1]; id++) {
+          await multisigExecuteTx(id, signerAcc);
+        }
+      }
+    }
   });
 
 task("multisig:check-tx", "Check multisig tx")
@@ -74,6 +103,7 @@ task("multisig:check-txs", "Check multiple multisig txs")
     types.string
   )
   .setAction(async ({ ids }, hre) => {
+    injectHre(hre);
     const txnArray = ids.split(",");
     for (let txId of txnArray) {
       if (typeof txId !== "string" || txId.indexOf("-") === -1) {
@@ -96,6 +126,7 @@ task("multisig:revoke-sig", "Revoke multisig tx confirmation")
   )
   .addOptionalParam("signer", "Signer name: 'signer' or 'deployer'", "deployer")
   .setAction(async ({ id, signer }, hre) => {
+    injectHre(hre);
     const signerAcc = (await hre.getNamedAccounts())[signer];
     await multisigRevokeConfirmation(id, signerAcc);
   });
@@ -123,6 +154,7 @@ task("multisig:remove-owner", "Add or remove multisig owner")
   )
   .addOptionalParam("signer", "Signer name: 'signer' or 'deployer'", "deployer")
   .setAction(async ({ address, signer }, hre) => {
+    injectHre(hre);
     const signerAcc = (await hre.getNamedAccounts())[signer];
     await multisigRemoveOwner(address, signerAcc);
   });
