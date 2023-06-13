@@ -93,5 +93,9 @@ const func: DeployFunction = async ({
 func.tags = ["AddBassetsInBasketManager"];
 func.dependencies = ["DeployMockBAssets"];
 func.runAtTheEnd = true;
+func.skip = async (hre) => {
+  return true;
+};
+func.id = "1";
 
 export default func;

@@ -79,5 +79,6 @@ func.tags = ["TransferOwnership"];
 func.skip = async (hre) => {
   return true;
 };
+func.id = "1";
 
 export default func;

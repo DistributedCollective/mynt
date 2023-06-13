@@ -49,5 +49,9 @@ const func: DeployFunction = async ({ deployments, getNamedAccounts }) => {
 };
 
 func.tags = ["DeployMockBAssets"];
+func.skip = async (hre) => {
+  return true;
+};
+func.id = "1";
 
 export default func;
