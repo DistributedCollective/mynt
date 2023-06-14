@@ -104,7 +104,7 @@ describe("SIP-0064 onchain test", () => {
   });
   let snapshot: SnapshotRestorer;
   before(async () => {
-    await reset("https://mainnet-dev.sovryn.app/rpc", 5374345);
+    await reset("https://mainnet-dev.sovryn.app/rpc", 5387748);
     snapshot = await takeSnapshot();
   });
   async () => {
