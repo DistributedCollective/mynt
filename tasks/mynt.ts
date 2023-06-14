@@ -11,9 +11,11 @@ import {
   impersonateAccount,
   stopImpersonatingAccount,
 } from "@nomicfoundation/hardhat-network-helpers";
-import * as helpers from "../scripts/helpers/helpers";
+import {
+  sendWithMultisig,
+  defaultValueMultisigOrSipFlag,
+} from "../scripts/helpers/helpers";
 import { ISipArgument } from "./sips/args/SIPArgs";
-import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { transferOwnership } from "../scripts/helpers/helpers";
 
 import Logs from "node-logs";
@@ -61,7 +63,6 @@ task("mynt:replace-basset", "Replace bAsset")
       false,
     ]);
 
-    helpers.injectHre(hre);
     const { deployer } = await getNamedAccounts();
 
     const networkName = getNetworkName();
@@ -71,14 +72,16 @@ task("mynt:replace-basset", "Replace bAsset")
       const sender = deployer;
 
       console.log(`removing basset multisig tx:`);
-      await helpers.sendWithMultisig(
+      await sendWithMultisig(
+        hre,
         multisigAddress,
         contractAddress,
         dataRemove,
         sender
       );
       console.log(`adding basset multisig tx:`);
-      await helpers.sendWithMultisig(
+      await sendWithMultisig(
+        hre,
         multisigAddress,
         contractAddress,
         dataAdd,
@@ -176,7 +179,6 @@ task("mynt:transfer-ownership", "Transfer contracts ownership")
       })
     );
 
-    helpers.injectHre(hre);
     const { deployer } = await getNamedAccounts();
     const ownableABI = [
       "function transferOwnership(address newOwner)",
@@ -197,7 +199,8 @@ task("mynt:transfer-ownership", "Transfer contracts ownership")
       await Promise.all(
         contractsAddresses.map(async (contractAddress) => {
           console.log(`processing ${contractAddress}:`);
-          await helpers.sendWithMultisig(
+          await sendWithMultisig(
+            hre,
             multisigAddress,
             contractAddress,
             data,
@@ -388,13 +391,13 @@ task("mynt:set-massetManagerProxy", "Set massetManagerProxy")
       // if isMultisig & isSIP are false, assign based on network tags.
       const { network } = hre;
       if (!isMultisig && !isSIP) {
-        const { isMultisigFlag, isSIPFlag } =
-          helpers.defaultValueMultisigOrSipFlag(network.tags);
+        const { isMultisigFlag, isSIPFlag } = defaultValueMultisigOrSipFlag(
+          network.tags
+        );
         isMultisig = isMultisigFlag;
         isSIP = isSIPFlag;
       }
 
-      helpers.injectHre(hre);
       const {
         ethers,
         deployments: { get },
@@ -412,7 +415,8 @@ task("mynt:set-massetManagerProxy", "Set massetManagerProxy")
           "setMassetManagerProxy",
           [newMassetManagerProxy]
         );
-        await helpers.sendWithMultisig(
+        await sendWithMultisig(
+          hre,
           multisigAddress,
           MetaAssetToken.address,
           data,
@@ -472,14 +476,15 @@ task("mynt:set-basketManagerProxy", "Set basketManagerProxy")
     ) => {
       const { network } = hre;
       if (!isMultisig && !isSIP) {
-        const { isMultisigFlag, isSIPFlag } =
-          helpers.defaultValueMultisigOrSipFlag(network.tags);
+        const { isMultisigFlag, isSIPFlag } = defaultValueMultisigOrSipFlag(
+          network.tags
+        );
         isMultisig = isMultisigFlag;
         isSIP = isSIPFlag;
       }
 
       // if isMultisig & isSIP are false, transaction will be initiated as per normal
-      helpers.injectHre(hre);
+
       const {
         ethers,
         deployments: { get },
@@ -496,7 +501,8 @@ task("mynt:set-basketManagerProxy", "Set basketManagerProxy")
           "setBasketManagerProxy",
           [newBasketManagerProxy]
         );
-        await helpers.sendWithMultisig(
+        await sendWithMultisig(
+          hre,
           multisigAddress,
           MetaAssetToken.address,
           data,
@@ -752,7 +758,6 @@ task(
     "flag if transaction needs to be initiated from the SIP"
   )
   .setAction(async ({ isMultisig, isSIP }, hre) => {
-    helpers.injectHre(hre);
     const {
       ethers,
       deployments: { get },
@@ -777,7 +782,8 @@ task(
         [massetManagerProxy.address, newMassetManagerImpl.address]
       );
 
-      await helpers.sendWithMultisig(
+      await sendWithMultisig(
+        hre,
         multisigAddress,
         myntAdminProxy.address,
         dataUpgrade,
@@ -813,7 +819,6 @@ task("mynt:upgrade:feesVault", "Upgrade implementation of feesVault contract")
     "flag if transaction needs to be initiated from the SIP"
   )
   .setAction(async ({ isMultisig, isSIP }, hre) => {
-    helpers.injectHre(hre);
     const {
       ethers,
       deployments: { get },
@@ -836,7 +841,8 @@ task("mynt:upgrade:feesVault", "Upgrade implementation of feesVault contract")
         [feesVaultProxy.address, newFeesVaultImpl.address]
       );
 
-      await helpers.sendWithMultisig(
+      await sendWithMultisig(
+        hre,
         multisigAddress,
         myntAdminProxy.address,
         dataUpgrade,
@@ -875,7 +881,6 @@ task(
     "flag if transaction needs to be initiated from the SIP"
   )
   .setAction(async ({ isMultisig, isSIP }, hre) => {
-    helpers.injectHre(hre);
     const {
       ethers,
       deployments: { get },
@@ -898,7 +903,8 @@ task(
         [feesManagerProxy.address, newFeesManagerImpl.address]
       );
 
-      await helpers.sendWithMultisig(
+      await sendWithMultisig(
+        hre,
         multisigAddress,
         myntAdminProxy.address,
         dataUpgrade,
@@ -937,7 +943,6 @@ task(
     "flag if transaction needs to be initiated from the SIP"
   )
   .setAction(async ({ isMultisig, isSIP }, hre) => {
-    helpers.injectHre(hre);
     const {
       ethers,
       deployments: { get },
@@ -962,7 +967,8 @@ task(
         [basketManagerProxy.address, newBasketManagerImpl.address]
       );
 
-      await helpers.sendWithMultisig(
+      await sendWithMultisig(
+        hre,
         multisigAddress,
         myntAdminProxy.address,
         dataUpgrade,

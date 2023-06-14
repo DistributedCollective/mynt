@@ -1,27 +1,4 @@
 "use strict";
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -35,8 +12,8 @@ const config_1 = require("hardhat/config");
   Ownable__factory,
 } from "types/generated"; */
 const hardhat_network_helpers_1 = require("@nomicfoundation/hardhat-network-helpers");
-const helpers = __importStar(require("../scripts/helpers/helpers"));
 const helpers_1 = require("../scripts/helpers/helpers");
+const helpers_2 = require("../scripts/helpers/helpers");
 const node_logs_1 = __importDefault(require("node-logs"));
 const logger = new node_logs_1.default().showInConsole(true);
 /// ------ REPLACE bAsset ----- ///
@@ -65,7 +42,6 @@ const logger = new node_logs_1.default().showInConsole(true);
         1000,
         false,
     ]);
-    helpers.injectHre(hre);
     const { deployer } = await getNamedAccounts();
     const networkName = getNetworkName();
     if (network.tags.testnet) {
@@ -73,9 +49,9 @@ const logger = new node_logs_1.default().showInConsole(true);
         const multisigAddress = (await get("MultiSigWallet")).address;
         const sender = deployer;
         console.log(`removing basset multisig tx:`);
-        await helpers.sendWithMultisig(multisigAddress, contractAddress, dataRemove, sender);
+        await (0, helpers_1.sendWithMultisig)(hre, multisigAddress, contractAddress, dataRemove, sender);
         console.log(`adding basset multisig tx:`);
-        await helpers.sendWithMultisig(multisigAddress, contractAddress, dataAdd, sender);
+        await (0, helpers_1.sendWithMultisig)(hre, multisigAddress, contractAddress, dataAdd, sender);
     }
     else if (network.tags.mainnet) {
         if (!network.tags.forked) {
@@ -147,7 +123,6 @@ const logger = new node_logs_1.default().showInConsole(true);
         console.log(`${contract}: ${addr}`);
         return addr;
     }));
-    helpers.injectHre(hre);
     const { deployer } = await getNamedAccounts();
     const ownableABI = [
         "function transferOwnership(address newOwner)",
@@ -165,7 +140,7 @@ const logger = new node_logs_1.default().showInConsole(true);
         ]);
         await Promise.all(contractsAddresses.map(async (contractAddress) => {
             console.log(`processing ${contractAddress}:`);
-            await helpers.sendWithMultisig(multisigAddress, contractAddress, data, sender);
+            await (0, helpers_1.sendWithMultisig)(hre, multisigAddress, contractAddress, data, sender);
         }));
     }
     if (network.tags.mainnet) {
@@ -265,18 +240,17 @@ const logger = new node_logs_1.default().showInConsole(true);
     // if isMultisig & isSIP are false, assign based on network tags.
     const { network } = hre;
     if (!isMultisig && !isSIP) {
-        const { isMultisigFlag, isSIPFlag } = helpers.defaultValueMultisigOrSipFlag(network.tags);
+        const { isMultisigFlag, isSIPFlag } = (0, helpers_1.defaultValueMultisigOrSipFlag)(network.tags);
         isMultisig = isMultisigFlag;
         isSIP = isSIPFlag;
     }
-    helpers.injectHre(hre);
     const { ethers, deployments: { get }, getNamedAccounts, } = hre;
     const MetaAssetToken = await ethers.getContractAt("MetaAssetToken", contractAddress);
     const { deployer } = await getNamedAccounts();
     if (isMultisig) {
         const multisigAddress = (await get("MultisigWallet")).address;
         const data = MetaAssetToken.interface.encodeFunctionData("setMassetManagerProxy", [newMassetManagerProxy]);
-        await helpers.sendWithMultisig(multisigAddress, MetaAssetToken.address, data, deployer);
+        await (0, helpers_1.sendWithMultisig)(hre, multisigAddress, MetaAssetToken.address, data, deployer);
     }
     else if (isSIP) {
         const signature = "setMassetManagerProxy(address)";
@@ -304,19 +278,18 @@ const logger = new node_logs_1.default().showInConsole(true);
     .setAction(async ({ contractAddress, newBasketManagerProxy, isMultisig, isSIP }, hre) => {
     const { network } = hre;
     if (!isMultisig && !isSIP) {
-        const { isMultisigFlag, isSIPFlag } = helpers.defaultValueMultisigOrSipFlag(network.tags);
+        const { isMultisigFlag, isSIPFlag } = (0, helpers_1.defaultValueMultisigOrSipFlag)(network.tags);
         isMultisig = isMultisigFlag;
         isSIP = isSIPFlag;
     }
     // if isMultisig & isSIP are false, transaction will be initiated as per normal
-    helpers.injectHre(hre);
     const { ethers, deployments: { get }, getNamedAccounts, } = hre;
     const MetaAssetToken = await ethers.getContractAt("MetaAssetToken", contractAddress);
     const { deployer } = await getNamedAccounts();
     if (isMultisig) {
         const multisigAddress = (await get("MultisigWallet")).address;
         const data = MetaAssetToken.interface.encodeFunctionData("setBasketManagerProxy", [newBasketManagerProxy]);
-        await helpers.sendWithMultisig(multisigAddress, MetaAssetToken.address, data, deployer);
+        await (0, helpers_1.sendWithMultisig)(hre, multisigAddress, MetaAssetToken.address, data, deployer);
     }
     else if (isSIP) {
         const signature = "setBasketManagerProxy(address)";
@@ -430,14 +403,13 @@ const logger = new node_logs_1.default().showInConsole(true);
     .addOptionalParam("isMultisig", "flag if transaction needs to be intiated from the multisig contract")
     .setAction(async ({ contractAddresses, newOwner, isMultisig }, hre) => {
     await Promise.all(contractAddresses.map(async (contractAddress) => {
-        await (0, helpers_1.transferOwnership)(hre, contractAddress, newOwner, isMultisig);
+        await (0, helpers_2.transferOwnership)(hre, contractAddress, newOwner, isMultisig);
     }));
 });
 (0, config_1.task)("mynt:upgrade:massetManager", "Upgrade implementation of massetManager contract")
     .addOptionalParam("isMultisig", "flag if transaction needs to be intiated from the multisig contract")
     .addOptionalParam("isSIP", "flag if transaction needs to be initiated from the SIP")
     .setAction(async ({ isMultisig, isSIP }, hre) => {
-    helpers.injectHre(hre);
     const { ethers, deployments: { get }, getNamedAccounts, } = hre;
     const { deployer } = await getNamedAccounts();
     const myntAdminProxy = await ethers.getContract("MyntAdminProxy");
@@ -448,7 +420,7 @@ const logger = new node_logs_1.default().showInConsole(true);
     if (isMultisig) {
         const multisigAddress = (await get("MultisigWallet")).address;
         const dataUpgrade = myntAdminProxy.interface.encodeFunctionData("upgrade", [massetManagerProxy.address, newMassetManagerImpl.address]);
-        await helpers.sendWithMultisig(multisigAddress, myntAdminProxy.address, dataUpgrade, deployer);
+        await (0, helpers_1.sendWithMultisig)(hre, multisigAddress, myntAdminProxy.address, dataUpgrade, deployer);
     }
     else if (isSIP) {
         const signatureUpgrade = "upgrade(address,address)";
@@ -469,7 +441,6 @@ const logger = new node_logs_1.default().showInConsole(true);
     .addOptionalParam("isMultisig", "flag if transaction needs to be intiated from the multisig contract")
     .addOptionalParam("isSIP", "flag if transaction needs to be initiated from the SIP")
     .setAction(async ({ isMultisig, isSIP }, hre) => {
-    helpers.injectHre(hre);
     const { ethers, deployments: { get }, getNamedAccounts, } = hre;
     const { deployer } = await getNamedAccounts();
     const myntAdminProxy = await ethers.getContract("MyntAdminProxy");
@@ -480,7 +451,7 @@ const logger = new node_logs_1.default().showInConsole(true);
     if (isMultisig) {
         const multisigAddress = (await get("MultisigWallet")).address;
         const dataUpgrade = myntAdminProxy.interface.encodeFunctionData("upgrade", [feesVaultProxy.address, newFeesVaultImpl.address]);
-        await helpers.sendWithMultisig(multisigAddress, myntAdminProxy.address, dataUpgrade, deployer);
+        await (0, helpers_1.sendWithMultisig)(hre, multisigAddress, myntAdminProxy.address, dataUpgrade, deployer);
     }
     else if (isSIP) {
         const signatureUpgrade = "upgrade(address,address)";
@@ -501,7 +472,6 @@ const logger = new node_logs_1.default().showInConsole(true);
     .addOptionalParam("isMultisig", "flag if transaction needs to be intiated from the multisig contract")
     .addOptionalParam("isSIP", "flag if transaction needs to be initiated from the SIP")
     .setAction(async ({ isMultisig, isSIP }, hre) => {
-    helpers.injectHre(hre);
     const { ethers, deployments: { get }, getNamedAccounts, } = hre;
     const { deployer } = await getNamedAccounts();
     const myntAdminProxy = await ethers.getContract("MyntAdminProxy");
@@ -512,7 +482,7 @@ const logger = new node_logs_1.default().showInConsole(true);
     if (isMultisig) {
         const multisigAddress = (await get("MultisigWallet")).address;
         const dataUpgrade = myntAdminProxy.interface.encodeFunctionData("upgrade", [feesManagerProxy.address, newFeesManagerImpl.address]);
-        await helpers.sendWithMultisig(multisigAddress, myntAdminProxy.address, dataUpgrade, deployer);
+        await (0, helpers_1.sendWithMultisig)(hre, multisigAddress, myntAdminProxy.address, dataUpgrade, deployer);
     }
     else if (isSIP) {
         const signatureUpgrade = "upgrade(address,address)";
@@ -533,7 +503,6 @@ const logger = new node_logs_1.default().showInConsole(true);
     .addOptionalParam("isMultisig", "flag if transaction needs to be intiated from the multisig contract")
     .addOptionalParam("isSIP", "flag if transaction needs to be initiated from the SIP")
     .setAction(async ({ isMultisig, isSIP }, hre) => {
-    helpers.injectHre(hre);
     const { ethers, deployments: { get }, getNamedAccounts, } = hre;
     const { deployer } = await getNamedAccounts();
     const myntAdminProxy = await ethers.getContract("MyntAdminProxy");
@@ -544,7 +513,7 @@ const logger = new node_logs_1.default().showInConsole(true);
     if (isMultisig) {
         const multisigAddress = (await get("MultisigWallet")).address;
         const dataUpgrade = myntAdminProxy.interface.encodeFunctionData("upgrade", [basketManagerProxy.address, newBasketManagerImpl.address]);
-        await helpers.sendWithMultisig(multisigAddress, myntAdminProxy.address, dataUpgrade, deployer);
+        await (0, helpers_1.sendWithMultisig)(hre, multisigAddress, myntAdminProxy.address, dataUpgrade, deployer);
     }
     else if (isSIP) {
         const signatureUpgrade = "upgrade(address,address)";

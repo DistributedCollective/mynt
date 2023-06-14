@@ -155,7 +155,13 @@ task("sips:cancel", "Queue proposal in the Governor Owner contract")
       (await get(governor)).abi
     );
     const data = governorInterface.encodeFunctionData("cancel", [proposal]);
-    await sendWithMultisig(msAddress, governorContract.address, data, signer);
+    await sendWithMultisig(
+      hre,
+      msAddress,
+      governorContract.address,
+      data,
+      signer
+    );
   });
 
 task(

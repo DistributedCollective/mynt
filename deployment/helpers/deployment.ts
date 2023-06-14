@@ -3,13 +3,12 @@ import hre from "hardhat";
 /// @dev This file requires HardhatRuntimeEnvironment `hre` variable in its parent context for functions using hre to work
 
 import col from "cli-color";
-import * as helpers from "../../scripts/helpers/helpers";
+import { sendWithMultisig } from "../../scripts/helpers/helpers";
 import {
   MyntAdminProxy,
   TransparentUpgradeableProxy,
 } from "../../types/generated";
 
-const { sendWithMultisig, injectHre } = helpers;
 const {
   deployments: { deploy, get, log, save },
   ethers,
@@ -84,8 +83,8 @@ const upgradeWithTransparentUpgradableProxy = async (
           `Creating multisig tx to set ${logicArtifactName} (${logicDeploymentTx.address}) as implementation for ${proxyName} (${proxyDeployment.address}...`
         );
         log();
-        injectHre(hre);
         await sendWithMultisig(
+          hre,
           multisigDeployment.address,
           proxyAdminDeployment.address,
           data,
@@ -142,4 +141,4 @@ const upgradeWithTransparentUpgradableProxy = async (
   }
 };
 
-export { upgradeWithTransparentUpgradableProxy, injectHre };
+export { upgradeWithTransparentUpgradableProxy };

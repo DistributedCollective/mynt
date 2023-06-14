@@ -4,11 +4,6 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 let hre: HardhatRuntimeEnvironment;
 let ethers: HardhatRuntimeEnvironment["ethers"];
 
-const injectHre = (_hre: HardhatRuntimeEnvironment) => {
-  hre = _hre;
-  ethers = hre.ethers;
-};
-
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const getContractNameFromScriptFileName = (filename) => {
@@ -48,9 +43,6 @@ export {
   getContractNameFromScriptFileName,
   arrayToUnique,
   encodeParameters,
-  injectHre,
   logTimer,
   delay,
-  hre,
-  ethers,
 };

@@ -70,6 +70,8 @@ const sip0064 = async (hre) => {
         "BasketManagerV3",
         "MassetManager",
         "FeesManager",
+        "FeesVault",
+        "MocIntegration",
     ];
     const deploymentProxies = await Promise.all(targetContractsList.map(async (val) => {
         return (await get(val)).address;
@@ -104,7 +106,7 @@ const sip0064 = async (hre) => {
             values: Array(deploymentProxies.length).fill(0),
             signatures: signatures,
             data: datas,
-            description: "SIP-0064: Remove Bridge Functions from Mynt, Details: TBD, sha256: TBD",
+            description: "SIP-0064: Remove Bridge Functions from Mynt, Details: https://github.com/DistributedCollective/SIPS/blob/3a3051a/SIP-0064.md, sha256: f3992c60dd7fce078e3afcd3d1687d61c852f62e01deabb67daaac83dcbd0dbd",
         },
         governorName: "GovernorOwner",
     };

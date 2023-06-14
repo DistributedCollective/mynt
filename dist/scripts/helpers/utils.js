@@ -1,16 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ethers = exports.hre = exports.delay = exports.logTimer = exports.injectHre = exports.encodeParameters = exports.arrayToUnique = exports.getContractNameFromScriptFileName = void 0;
+exports.delay = exports.logTimer = exports.encodeParameters = exports.arrayToUnique = exports.getContractNameFromScriptFileName = void 0;
 // e.g. 1-deploy-PerpetualDepositManager.ts -> PerpetualDepositManager
 let hre;
-exports.hre = hre;
 let ethers;
-exports.ethers = ethers;
-const injectHre = (_hre) => {
-    exports.hre = hre = _hre;
-    exports.ethers = ethers = hre.ethers;
-};
-exports.injectHre = injectHre;
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 exports.delay = delay;
 const getContractNameFromScriptFileName = (filename) => {

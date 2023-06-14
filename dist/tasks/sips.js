@@ -12,11 +12,13 @@ const utils_1 = require("scripts/helpers/utils");
 const logger = new node_logs_1.default().showInConsole(true);
 (0, config_1.task)("sips:create", "Create SIP to Sovryn Governance")
     .addParam("argsFunc", "Function name from tasks/sips/args/sipArgs.ts which returns the sip arguments")
-    .setAction(async ({ argsFunc }, hre) => {
+    .addOptionalParam("deployer", "Deployer address in the accounts list", undefined)
+    .setAction(async ({ argsFunc, deployer }, hre) => {
     const { governorName, args: sipArgs } = await SIPArgs_1.default[argsFunc](hre);
     const { ethers, deployments: { get }, } = hre;
+    const deployerSigner = await ethers.getSigner(deployer ?? (await ethers.getSigners())[0].address);
     const governorDeployment = await get(governorName);
-    const governor = await ethers.getContract(governorName);
+    const governor = await ethers.getContract(governorName, deployerSigner);
     logger.info("=== Creating SIP ===");
     logger.info(`Governor Address:    ${governorDeployment.address}`);
     logger.info(`Targets:             ${sipArgs.targets}`);
@@ -90,7 +92,7 @@ const logger = new node_logs_1.default().showInConsole(true);
     }
     const governorInterface = new ethers.utils.Interface((await get(governor)).abi);
     const data = governorInterface.encodeFunctionData("cancel", [proposal]);
-    await (0, helpers_1.sendWithMultisig)(msAddress, governorContract.address, data, signer);
+    await (0, helpers_1.sendWithMultisig)(hre, msAddress, governorContract.address, data, signer);
 });
 (0, config_1.task)("sips:vote-for", "Vote for or against a proposal in the Governor Owner contract")
     .addParam("proposal", "Proposal Id", undefined, config_1.types.string)

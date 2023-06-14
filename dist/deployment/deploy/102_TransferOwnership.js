@@ -60,5 +60,6 @@ func.tags = ["TransferOwnership"];
 func.skip = async (hre) => {
     return true;
 };
+func.id = "1";
 exports.default = func;
 //# sourceMappingURL=102_TransferOwnership.js.map

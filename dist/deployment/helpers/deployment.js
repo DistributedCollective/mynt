@@ -26,13 +26,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.injectHre = exports.upgradeWithTransparentUpgradableProxy = void 0;
+exports.upgradeWithTransparentUpgradableProxy = void 0;
 const hardhat_1 = __importDefault(require("hardhat"));
 /// @dev This file requires HardhatRuntimeEnvironment `hre` variable in its parent context for functions using hre to work
 const cli_color_1 = __importDefault(require("cli-color"));
 const helpers = __importStar(require("../../scripts/helpers/helpers"));
-const { sendWithMultisig, injectHre } = helpers;
-exports.injectHre = injectHre;
+const { sendWithMultisig } = helpers;
 const { deployments: { deploy, get, log, save }, ethers, } = hardhat_1.default;
 const upgradeWithTransparentUpgradableProxy = async (deployer, logicArtifactName, // logic contract artifact name
 proxyArtifactName, // proxy deployment name
@@ -46,8 +45,6 @@ args = [], multisigName = "MultiSigWallet") => {
     const proxyAdminDeployment = await get(proxyAdminName);
     const proxyAdmin = await ethers.getContract(proxyAdminName);
     const proxyName = proxyInstanceName ?? proxyArtifactName; // support multiple deployments of the same artifact
-    console.log("proxyName:", proxyName);
-    console.log("deployer:", deployer);
     const logicName = logicInstanceName ?? logicArtifactName;
     const logicImplName = `${logicName}_Implementation`; // naming convention like in hh deployment
     const logicDeploymentTx = await deploy(logicImplName, {
@@ -58,8 +55,6 @@ args = [], multisigName = "MultiSigWallet") => {
     });
     const proxy = await ethers.getContract(proxyName);
     const proxyDeployment = await get(proxyName);
-    console.log("proxy.address:", proxy.address);
-    // console.log(await proxy.implementation());
     const prevImpl = await proxyAdmin.getProxyImplementation(proxy.address);
     log(`Current ${proxyName} implementation: ${prevImpl}`);
     if (logicDeploymentTx.newlyDeployed ||
@@ -86,11 +81,8 @@ args = [], multisigName = "MultiSigWallet") => {
                     logicDeploymentTx.address,
                 ]);
                 log(`Creating multisig tx to set ${logicArtifactName} (${logicDeploymentTx.address}) as implementation for ${proxyName} (${proxyDeployment.address}...`);
-                log("data:", data);
-                log("deployer", deployer);
                 log();
-                injectHre(hardhat_1.default);
-                await sendWithMultisig(multisigDeployment.address, proxyAdminDeployment.address, data, deployer);
+                await sendWithMultisig(hardhat_1.default, multisigDeployment.address, proxyAdminDeployment.address, data, deployer);
                 log(cli_color_1.default.bgBlue(`>>> DONE. Requires Multisig (${multisigDeployment.address}) signing to execute tx <<<
                  >>> DON'T PUSH DEPLOYMENTS TO THE REPO UNTIL THE MULTISIG TX SUCCESSFULLY SIGNED & EXECUTED <<<`));
             }
@@ -105,7 +97,7 @@ args = [], multisigName = "MultiSigWallet") => {
                         ethers.utils.defaultAbiCoder.encode(["address", "address"], [proxyDeployment.address, logicDeploymentTx.address]),
                     ],
                 };
-                log(sipArgs);
+                log(cli_color_1.default.yellowBright(JSON.stringify(sipArgs)));
                 log(">>> DON'T MERGE DEPLOYMENTS TO THE MAIN (DEVELOPMENT) BRANCH UNTIL THE SIP IS SUCCESSFULLY EXECUTED <<<`");
                 // governance is the owner - need a SIP to register
                 // TODO: implementation ; meanwhile use brownie sip_interaction scripts to create proposal

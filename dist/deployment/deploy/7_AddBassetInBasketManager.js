@@ -9,7 +9,7 @@ const func = async ({ ethers, deployments, getNamedAccounts, network, }) => {
     let mins = [0, 0];
     let maxs = [1000, 1000]; // need to set to what MAX_VALUE defined in BasketManager contract
     let pausedFlags = [false, false];
-    if (["rskTestnet", "rskForkedTestnet"].includes(networkName)) {
+    if (["rskTestnet", "rskSovrynTestnet", "rskForkedTestnet"].includes(networkName)) {
         // @todo add forked nets to hh config
         bAssets = [
             "0x6b41566353d6c7b8c2a7931d498f11489dacac29",
@@ -68,5 +68,9 @@ const func = async ({ ethers, deployments, getNamedAccounts, network, }) => {
 func.tags = ["AddBassetsInBasketManager"];
 func.dependencies = ["DeployMockBAssets"];
 func.runAtTheEnd = true;
+func.skip = async (hre) => {
+    return true;
+};
+func.id = "1";
 exports.default = func;
 //# sourceMappingURL=7_AddBassetInBasketManager.js.map
