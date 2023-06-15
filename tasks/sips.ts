@@ -5,8 +5,8 @@ import sipArgsList, { ISipArgument } from "./sips/args/SIPArgs";
 import {
   parseEthersLogToValue,
   sendWithMultisig,
-} from "scripts/helpers/helpers";
-import { delay, logTimer } from "scripts/helpers/utils";
+} from "../scripts/helpers/helpers";
+import { delay, logTimer } from "../scripts/helpers/utils";
 
 const logger = new Logs().showInConsole(true);
 
@@ -72,7 +72,52 @@ task("sips:create", "Create SIP to Sovryn Governance")
     logger.success(
       `============================================================='`
     );
-  });
+});
+
+task("sips:populate", "Create SIP Proposal Transaction")
+  .addParam(
+    "argsFunc",
+    "Function name from tasks/sips/args/sipArgs.ts which returns the sip arguments"
+  )
+  .setAction(async ({ argsFunc }, hre) => {
+    const { governorName, args: sipArgs }: ISipArgument = await sipArgsList[
+      argsFunc
+    ](hre);
+    const {
+      ethers,
+      deployments: { get },
+    } = hre;
+
+    const governorDeployment = await get(governorName);
+    const governor = await ethers.getContract(governorName);
+
+    logger.info("=== Creating SIP ===");
+    logger.info(`Governor Address:    ${governorDeployment.address}`);
+    logger.info(`Targets:             ${sipArgs.targets}`);
+    logger.info(`Values:              ${sipArgs.values}`);
+    logger.info(`Signatures:          ${sipArgs.signatures}`);
+    logger.info(`Data:                ${sipArgs.data}`);
+    logger.info(`Description:         ${sipArgs.description}`);
+    logger.info(
+      `============================================================='`
+    );
+
+    const tx = await governor.populateTransaction.propose(
+      sipArgs.targets,
+      sipArgs.values,
+      sipArgs.signatures,
+      sipArgs.data,
+      sipArgs.description,
+      { gasLimit: 6500000, gasPrice: 66e6 }
+    );
+
+    delete tx.from;
+    logger.warning("==================== populated tx start ====================");
+    logger.info(tx);
+    logger.warning("==================== populated tx end   =================");
+    return tx;
+    
+});
 
 task("sips:queue", "Queue proposal in the Governor Owner contract")
   .addParam("proposal", "Proposal Id", undefined, types.string)
@@ -96,7 +141,7 @@ task("sips:queue", "Queue proposal in the Governor Owner contract")
     } else {
       logger.error(`SIP ${proposal} is NOT queued`);
     }
-  });
+});
 
 task("sips:execute", "Execute proposal in a Governor contract")
   .addParam("proposal", "Proposal Id", undefined, types.string)
@@ -127,7 +172,7 @@ task("sips:execute", "Execute proposal in a Governor contract")
     } else {
       logger.error(`SIP ${proposal} is NOT executed`);
     }
-  });
+});
 
 task("sips:cancel", "Queue proposal in the Governor Owner contract")
   .addParam("proposal", "Proposal Id", undefined, types.string)
@@ -162,12 +207,12 @@ task("sips:cancel", "Queue proposal in the Governor Owner contract")
       data,
       signer
     );
-  });
+});
 
 task(
   "sips:vote-for",
   "Vote for or against a proposal in the Governor Owner contract"
-)
+ )
   .addParam("proposal", "Proposal Id", undefined, types.string)
   .addParam(
     "governor",
@@ -196,7 +241,7 @@ task(
         parseEthersLogToValue(governorContract.interface.parseLog(log))
       )
     );
-  });
+});
 
 task("sips:queue-timer", "Queue SIP for execution with timer")
   .addParam("proposal", "Proposal Id", undefined, types.string)
@@ -248,7 +293,7 @@ task("sips:queue-timer", "Queue SIP for execution with timer")
     logger.success(
       `Proposal ${proposalId} queued. Execution ETA: ${proposal.eta}.`
     );
-  });
+});
 
 task("sips:execute-timer", "Execute SIP with countdown")
   .addParam("proposal", "Proposal Id", undefined, types.string)
@@ -300,4 +345,4 @@ task("sips:execute-timer", "Execute SIP with countdown")
     } else {
       logger.error(`Proposal ${proposalId} is NOT executed`);
     }
-  });
+});
