@@ -23,7 +23,7 @@ import {
 } from "hardhat/types";
 
 import "./tasks";
-// import "node_modules/sovrynsmartcontracts/hardhat/tasks/multisig";
+import "node_modules/sovrynsmartcontracts/hardhat/tasks/multisig";
 
 /*
  * Test hardhat forking with patched hardhat

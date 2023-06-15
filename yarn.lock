@@ -10755,7 +10755,7 @@ source-map@~0.2.0:
 
 "sovrynsmartcontracts@git+https://github.com/DistributedCollective/Sovryn-smart-contracts.git":
   version "1.0.0"
-  resolved "git+https://github.com/DistributedCollective/Sovryn-smart-contracts.git#6d1b2df1a741d961f736ed798e6a996d7674d476"
+  resolved "git+https://github.com/DistributedCollective/Sovryn-smart-contracts.git#422222087c11e79d47fa1431bd461e6c4bba13b5"
 
 spdx-correct@^3.0.0:
   version "3.2.0"
