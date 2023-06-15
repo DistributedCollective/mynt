@@ -10,7 +10,7 @@ import { delay, logTimer } from "../scripts/helpers/utils";
 
 const logger = new Logs().showInConsole(true);
 
-task("sips:create", "Create SIP to Sovryn Governance")
+task("mynt-sips:create", "Create SIP to Sovryn Governance")
   .addParam(
     "argsFunc",
     "Function name from tasks/sips/args/sipArgs.ts which returns the sip arguments"
@@ -74,7 +74,7 @@ task("sips:create", "Create SIP to Sovryn Governance")
     );
 });
 
-task("sips:populate", "Create SIP Proposal Transaction")
+task("mynt-sips:populate", "Create SIP Proposal Transaction")
   .addParam(
     "argsFunc",
     "Function name from tasks/sips/args/sipArgs.ts which returns the sip arguments"
@@ -119,7 +119,7 @@ task("sips:populate", "Create SIP Proposal Transaction")
     
 });
 
-task("sips:queue", "Queue proposal in the Governor Owner contract")
+task("mynt-sips:queue", "Queue proposal in the Governor Owner contract")
   .addParam("proposal", "Proposal Id", undefined, types.string)
   .addParam(
     "governor",
@@ -143,7 +143,7 @@ task("sips:queue", "Queue proposal in the Governor Owner contract")
     }
 });
 
-task("sips:execute", "Execute proposal in a Governor contract")
+task("mynt-sips:execute", "Execute proposal in a Governor contract")
   .addParam("proposal", "Proposal Id", undefined, types.string)
   .addParam(
     "governor",
@@ -174,7 +174,7 @@ task("sips:execute", "Execute proposal in a Governor contract")
     }
 });
 
-task("sips:cancel", "Queue proposal in the Governor Owner contract")
+task("mynt-sips:cancel", "Queue proposal in the Governor Owner contract")
   .addParam("proposal", "Proposal Id", undefined, types.string)
   .addParam(
     "governor",
@@ -210,7 +210,7 @@ task("sips:cancel", "Queue proposal in the Governor Owner contract")
 });
 
 task(
-  "sips:vote-for",
+  "mynt-sips:vote-for",
   "Vote for or against a proposal in the Governor Owner contract"
  )
   .addParam("proposal", "Proposal Id", undefined, types.string)
@@ -243,7 +243,7 @@ task(
     );
 });
 
-task("sips:queue-timer", "Queue SIP for execution with timer")
+task("mynt-sips:queue-timer", "Queue SIP for execution with timer")
   .addParam("proposal", "Proposal Id", undefined, types.string)
   .addParam(
     "governor",
@@ -295,7 +295,7 @@ task("sips:queue-timer", "Queue SIP for execution with timer")
     );
 });
 
-task("sips:execute-timer", "Execute SIP with countdown")
+task("mynt-sips:execute-timer", "Execute SIP with countdown")
   .addParam("proposal", "Proposal Id", undefined, types.string)
   .addParam(
     "governor",

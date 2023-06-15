@@ -63,7 +63,7 @@ describe("SIP-0064 onchain test", () => {
     });
     let snapshot;
     before(async () => {
-        await (0, hardhat_network_helpers_1.reset)("https://mainnet-dev.sovryn.app/rpc", 5374345);
+        await (0, hardhat_network_helpers_1.reset)("https://mainnet-dev.sovryn.app/rpc", 5387748);
         snapshot = await (0, hardhat_network_helpers_1.takeSnapshot)();
     });
     async () => {
@@ -118,7 +118,7 @@ describe("SIP-0064 onchain test", () => {
         await (0, hardhat_network_helpers_1.mine)();
         // CREATE PROPOSAL AND VERIFY
         const proposalIdBeforeSIP = await governorOwner.proposalCount();
-        await hardhat_1.default.run("sips:create", {
+        await hardhat_1.default.run("mynt-sips:create", {
             argsFunc: "sip0064",
             deployer: deployer,
         });

@@ -7,10 +7,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const config_1 = require("hardhat/config");
 const node_logs_1 = __importDefault(require("node-logs"));
 const SIPArgs_1 = __importDefault(require("./sips/args/SIPArgs"));
-const helpers_1 = require("scripts/helpers/helpers");
-const utils_1 = require("scripts/helpers/utils");
+const helpers_1 = require("../scripts/helpers/helpers");
+const utils_1 = require("../scripts/helpers/utils");
 const logger = new node_logs_1.default().showInConsole(true);
-(0, config_1.task)("sips:create", "Create SIP to Sovryn Governance")
+(0, config_1.task)("mynt-sips:create", "Create SIP to Sovryn Governance")
     .addParam("argsFunc", "Function name from tasks/sips/args/sipArgs.ts which returns the sip arguments")
     .addOptionalParam("deployer", "Deployer address in the accounts list", undefined)
     .setAction(async ({ argsFunc, deployer }, hre) => {
@@ -43,7 +43,29 @@ const logger = new node_logs_1.default().showInConsole(true);
     logger.success(`End Block:            ${eventData.endBlock}`);
     logger.success(`============================================================='`);
 });
-(0, config_1.task)("sips:queue", "Queue proposal in the Governor Owner contract")
+(0, config_1.task)("mynt-sips:populate", "Create SIP Proposal Transaction")
+    .addParam("argsFunc", "Function name from tasks/sips/args/sipArgs.ts which returns the sip arguments")
+    .setAction(async ({ argsFunc }, hre) => {
+    const { governorName, args: sipArgs } = await SIPArgs_1.default[argsFunc](hre);
+    const { ethers, deployments: { get }, } = hre;
+    const governorDeployment = await get(governorName);
+    const governor = await ethers.getContract(governorName);
+    logger.info("=== Creating SIP ===");
+    logger.info(`Governor Address:    ${governorDeployment.address}`);
+    logger.info(`Targets:             ${sipArgs.targets}`);
+    logger.info(`Values:              ${sipArgs.values}`);
+    logger.info(`Signatures:          ${sipArgs.signatures}`);
+    logger.info(`Data:                ${sipArgs.data}`);
+    logger.info(`Description:         ${sipArgs.description}`);
+    logger.info(`============================================================='`);
+    const tx = await governor.populateTransaction.propose(sipArgs.targets, sipArgs.values, sipArgs.signatures, sipArgs.data, sipArgs.description, { gasLimit: 6500000, gasPrice: 66e6 });
+    delete tx.from;
+    logger.warning("==================== populated tx start ====================");
+    logger.info(tx);
+    logger.warning("==================== populated tx end   =================");
+    return tx;
+});
+(0, config_1.task)("mynt-sips:queue", "Queue proposal in the Governor Owner contract")
     .addParam("proposal", "Proposal Id", undefined, config_1.types.string)
     .addParam("governor", "Governor deployment name: 'GovernorOwner' or 'GovernorAdmin'", undefined, config_1.types.string)
     .addOptionalParam("signer", "Signer name: 'signer' or 'deployer'", "deployer")
@@ -59,7 +81,7 @@ const logger = new node_logs_1.default().showInConsole(true);
         logger.error(`SIP ${proposal} is NOT queued`);
     }
 });
-(0, config_1.task)("sips:execute", "Execute proposal in a Governor contract")
+(0, config_1.task)("mynt-sips:execute", "Execute proposal in a Governor contract")
     .addParam("proposal", "Proposal Id", undefined, config_1.types.string)
     .addParam("governor", "Governor deployment name: 'GovernorOwner' or 'GovernorAdmin'", undefined, config_1.types.string)
     .addOptionalParam("signer", "Signer name: 'signer' or 'deployer'", "deployer")
@@ -78,7 +100,7 @@ const logger = new node_logs_1.default().showInConsole(true);
         logger.error(`SIP ${proposal} is NOT executed`);
     }
 });
-(0, config_1.task)("sips:cancel", "Queue proposal in the Governor Owner contract")
+(0, config_1.task)("mynt-sips:cancel", "Queue proposal in the Governor Owner contract")
     .addParam("proposal", "Proposal Id", undefined, config_1.types.string)
     .addParam("governor", "Governor deployment name: 'GovernorOwner' or 'GovernorAdmin'", undefined, config_1.types.string)
     .addOptionalParam("signer", "Signer name: 'signer' or 'deployer'", "deployer")
@@ -94,7 +116,7 @@ const logger = new node_logs_1.default().showInConsole(true);
     const data = governorInterface.encodeFunctionData("cancel", [proposal]);
     await (0, helpers_1.sendWithMultisig)(hre, msAddress, governorContract.address, data, signer);
 });
-(0, config_1.task)("sips:vote-for", "Vote for or against a proposal in the Governor Owner contract")
+(0, config_1.task)("mynt-sips:vote-for", "Vote for or against a proposal in the Governor Owner contract")
     .addParam("proposal", "Proposal Id", undefined, config_1.types.string)
     .addParam("governor", "Governor deployment name: 'GovernorOwner' or 'GovernorAdmin'", undefined, config_1.types.string)
     .addOptionalParam("signer", "Signer name: 'signer' or 'deployer'", "deployer")
@@ -110,7 +132,7 @@ const logger = new node_logs_1.default().showInConsole(true);
     console.log("{ to:", tx.to, "from:", tx.from, "}");
     console.log("log:\n", tx.logs.map((log) => (0, helpers_1.parseEthersLogToValue)(governorContract.interface.parseLog(log))));
 });
-(0, config_1.task)("sips:queue-timer", "Queue SIP for execution with timer")
+(0, config_1.task)("mynt-sips:queue-timer", "Queue SIP for execution with timer")
     .addParam("proposal", "Proposal Id", undefined, config_1.types.string)
     .addParam("governor", "Governor deployment name: 'GovernorOwner' or 'GovernorAdmin'", undefined, config_1.types.string)
     .addOptionalParam("signer", "Signer name: 'signer' or 'deployer'", "deployer")
@@ -146,7 +168,7 @@ const logger = new node_logs_1.default().showInConsole(true);
     console.log("");
     logger.success(`Proposal ${proposalId} queued. Execution ETA: ${proposal.eta}.`);
 });
-(0, config_1.task)("sips:execute-timer", "Execute SIP with countdown")
+(0, config_1.task)("mynt-sips:execute-timer", "Execute SIP with countdown")
     .addParam("proposal", "Proposal Id", undefined, config_1.types.string)
     .addParam("governor", "Governor deployment name: 'GovernorOwner' or 'GovernorAdmin'", undefined, config_1.types.string)
     .addOptionalParam("signer", "Signer name: 'signer' or 'deployer'", "deployer")

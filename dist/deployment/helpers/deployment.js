@@ -1,27 +1,4 @@
 "use strict";
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -30,8 +7,7 @@ exports.upgradeWithTransparentUpgradableProxy = void 0;
 const hardhat_1 = __importDefault(require("hardhat"));
 /// @dev This file requires HardhatRuntimeEnvironment `hre` variable in its parent context for functions using hre to work
 const cli_color_1 = __importDefault(require("cli-color"));
-const helpers = __importStar(require("../../scripts/helpers/helpers"));
-const { sendWithMultisig } = helpers;
+const helpers_1 = require("../../scripts/helpers/helpers");
 const { deployments: { deploy, get, log, save }, ethers, } = hardhat_1.default;
 const upgradeWithTransparentUpgradableProxy = async (deployer, logicArtifactName, // logic contract artifact name
 proxyArtifactName, // proxy deployment name
@@ -82,7 +58,7 @@ args = [], multisigName = "MultiSigWallet") => {
                 ]);
                 log(`Creating multisig tx to set ${logicArtifactName} (${logicDeploymentTx.address}) as implementation for ${proxyName} (${proxyDeployment.address}...`);
                 log();
-                await sendWithMultisig(hardhat_1.default, multisigDeployment.address, proxyAdminDeployment.address, data, deployer);
+                await (0, helpers_1.sendWithMultisig)(hardhat_1.default, multisigDeployment.address, proxyAdminDeployment.address, data, deployer);
                 log(cli_color_1.default.bgBlue(`>>> DONE. Requires Multisig (${multisigDeployment.address}) signing to execute tx <<<
                  >>> DON'T PUSH DEPLOYMENTS TO THE REPO UNTIL THE MULTISIG TX SUCCESSFULLY SIGNED & EXECUTED <<<`));
             }
