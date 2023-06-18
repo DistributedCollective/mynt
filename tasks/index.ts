@@ -1,3 +1,3 @@
 import "./mynt";
 import "./sips";
-import "./multisig";
+// import "./multisig"; // hh config imports sovrynsmartcontracts multisig tasks

@@ -410,7 +410,7 @@ task("mynt:set-massetManagerProxy", "Set massetManagerProxy")
       const { deployer } = await getNamedAccounts();
 
       if (isMultisig) {
-        const multisigAddress = (await get("MultisigWallet")).address;
+        const multisigAddress = (await get("MultiSigWallet")).address;
         const data = MetaAssetToken.interface.encodeFunctionData(
           "setMassetManagerProxy",
           [newMassetManagerProxy]
@@ -496,7 +496,7 @@ task("mynt:set-basketManagerProxy", "Set basketManagerProxy")
       );
       const { deployer } = await getNamedAccounts();
       if (isMultisig) {
-        const multisigAddress = (await get("MultisigWallet")).address;
+        const multisigAddress = (await get("MultiSigWallet")).address;
         const data = MetaAssetToken.interface.encodeFunctionData(
           "setBasketManagerProxy",
           [newBasketManagerProxy]
@@ -776,7 +776,7 @@ task(
     );
 
     if (isMultisig) {
-      const multisigAddress = (await get("MultisigWallet")).address;
+      const multisigAddress = (await get("MultiSigWallet")).address;
       const dataUpgrade = myntAdminProxy.interface.encodeFunctionData(
         "upgrade",
         [massetManagerProxy.address, newMassetManagerImpl.address]
@@ -835,7 +835,7 @@ task("mynt:upgrade:feesVault", "Upgrade implementation of feesVault contract")
     );
 
     if (isMultisig) {
-      const multisigAddress = (await get("MultisigWallet")).address;
+      const multisigAddress = (await get("MultiSigWallet")).address;
       const dataUpgrade = myntAdminProxy.interface.encodeFunctionData(
         "upgrade",
         [feesVaultProxy.address, newFeesVaultImpl.address]
@@ -897,7 +897,7 @@ task(
     );
 
     if (isMultisig) {
-      const multisigAddress = (await get("MultisigWallet")).address;
+      const multisigAddress = (await get("MultiSigWallet")).address;
       const dataUpgrade = myntAdminProxy.interface.encodeFunctionData(
         "upgrade",
         [feesManagerProxy.address, newFeesManagerImpl.address]
@@ -961,7 +961,7 @@ task(
     );
 
     if (isMultisig) {
-      const multisigAddress = (await get("MultisigWallet")).address;
+      const multisigAddress = (await get("MultiSigWallet")).address;
       const dataUpgrade = myntAdminProxy.interface.encodeFunctionData(
         "upgrade",
         [basketManagerProxy.address, newBasketManagerImpl.address]

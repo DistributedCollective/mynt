@@ -248,7 +248,7 @@ const logger = new node_logs_1.default().showInConsole(true);
     const MetaAssetToken = await ethers.getContractAt("MetaAssetToken", contractAddress);
     const { deployer } = await getNamedAccounts();
     if (isMultisig) {
-        const multisigAddress = (await get("MultisigWallet")).address;
+        const multisigAddress = (await get("MultiSigWallet")).address;
         const data = MetaAssetToken.interface.encodeFunctionData("setMassetManagerProxy", [newMassetManagerProxy]);
         await (0, helpers_1.sendWithMultisig)(hre, multisigAddress, MetaAssetToken.address, data, deployer);
     }
@@ -287,7 +287,7 @@ const logger = new node_logs_1.default().showInConsole(true);
     const MetaAssetToken = await ethers.getContractAt("MetaAssetToken", contractAddress);
     const { deployer } = await getNamedAccounts();
     if (isMultisig) {
-        const multisigAddress = (await get("MultisigWallet")).address;
+        const multisigAddress = (await get("MultiSigWallet")).address;
         const data = MetaAssetToken.interface.encodeFunctionData("setBasketManagerProxy", [newBasketManagerProxy]);
         await (0, helpers_1.sendWithMultisig)(hre, multisigAddress, MetaAssetToken.address, data, deployer);
     }
@@ -418,7 +418,7 @@ const logger = new node_logs_1.default().showInConsole(true);
     const newMassetManagerImpl = await MassetManagerFactory.deploy();
     console.log(`Upgrading massetManager implementation to ${newMassetManagerImpl.address}`);
     if (isMultisig) {
-        const multisigAddress = (await get("MultisigWallet")).address;
+        const multisigAddress = (await get("MultiSigWallet")).address;
         const dataUpgrade = myntAdminProxy.interface.encodeFunctionData("upgrade", [massetManagerProxy.address, newMassetManagerImpl.address]);
         await (0, helpers_1.sendWithMultisig)(hre, multisigAddress, myntAdminProxy.address, dataUpgrade, deployer);
     }
@@ -449,7 +449,7 @@ const logger = new node_logs_1.default().showInConsole(true);
     const newFeesVaultImpl = await FeesVaultFactory.deploy();
     console.log(`Upgrading feesVault implementation to ${newFeesVaultImpl.address}`);
     if (isMultisig) {
-        const multisigAddress = (await get("MultisigWallet")).address;
+        const multisigAddress = (await get("MultiSigWallet")).address;
         const dataUpgrade = myntAdminProxy.interface.encodeFunctionData("upgrade", [feesVaultProxy.address, newFeesVaultImpl.address]);
         await (0, helpers_1.sendWithMultisig)(hre, multisigAddress, myntAdminProxy.address, dataUpgrade, deployer);
     }
@@ -480,7 +480,7 @@ const logger = new node_logs_1.default().showInConsole(true);
     const newFeesManagerImpl = await FeesManagerFactory.deploy();
     console.log(`Upgrading feesManager implementation to ${newFeesManagerImpl.address}`);
     if (isMultisig) {
-        const multisigAddress = (await get("MultisigWallet")).address;
+        const multisigAddress = (await get("MultiSigWallet")).address;
         const dataUpgrade = myntAdminProxy.interface.encodeFunctionData("upgrade", [feesManagerProxy.address, newFeesManagerImpl.address]);
         await (0, helpers_1.sendWithMultisig)(hre, multisigAddress, myntAdminProxy.address, dataUpgrade, deployer);
     }
@@ -511,7 +511,7 @@ const logger = new node_logs_1.default().showInConsole(true);
     const newBasketManagerImpl = await BasketManagerFactory.deploy();
     console.log(`Upgrading basket manager implementation to ${newBasketManagerImpl.address}`);
     if (isMultisig) {
-        const multisigAddress = (await get("MultisigWallet")).address;
+        const multisigAddress = (await get("MultiSigWallet")).address;
         const dataUpgrade = myntAdminProxy.interface.encodeFunctionData("upgrade", [basketManagerProxy.address, newBasketManagerImpl.address]);
         await (0, helpers_1.sendWithMultisig)(hre, multisigAddress, myntAdminProxy.address, dataUpgrade, deployer);
     }

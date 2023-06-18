@@ -2,5 +2,5 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 require("./mynt");
 require("./sips");
-require("./multisig");
+// import "./multisig"; // hh config imports sovrynsmartcontracts multisig tasks
 //# sourceMappingURL=index.js.map
