@@ -182,7 +182,6 @@ describe("SIP-0064 onchain test", () => {
     const proposalIdBeforeSIP = await governorOwner.proposalCount();
     await hre.run("mynt-sips:create", {
       argsFunc: "sip0064",
-      deployer: deployer,
     });
     const proposalId = await governorOwner.latestProposalIds(deployer);
     expect(

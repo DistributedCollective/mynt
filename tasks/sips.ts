@@ -18,7 +18,7 @@ task("mynt-sips:create", "Create SIP to Sovryn Governance")
   .addOptionalParam(
     "deployer",
     "Deployer address in the accounts list",
-    undefined
+    "deployer"
   )
   .setAction(async ({ argsFunc, deployer }, hre) => {
     const { governorName, args: sipArgs }: ISipArgument = await sipArgsList[
@@ -29,8 +29,16 @@ task("mynt-sips:create", "Create SIP to Sovryn Governance")
       deployments: { get },
     } = hre;
 
+    const signerAcc = ethers.utils.isAddress(deployer)
+      ? deployer
+      : (await hre.getNamedAccounts())[deployer];
+
     const deployerSigner = await ethers.getSigner(
-      deployer ?? (await ethers.getSigners())[0].address
+      ethers.utils.isAddress(signerAcc)
+        ? signerAcc
+        : (
+            await ethers.getSigners()
+          )[0].address
     );
 
     const governorDeployment = await get(governorName);
@@ -72,7 +80,7 @@ task("mynt-sips:create", "Create SIP to Sovryn Governance")
     logger.success(
       `============================================================='`
     );
-});
+  });
 
 task("mynt-sips:populate", "Create SIP Proposal Transaction")
   .addParam(
@@ -112,12 +120,13 @@ task("mynt-sips:populate", "Create SIP Proposal Transaction")
     );
 
     delete tx.from;
-    logger.warning("==================== populated tx start ====================");
+    logger.warning(
+      "==================== populated tx start ===================="
+    );
     logger.info(tx);
     logger.warning("==================== populated tx end   =================");
     return tx;
-    
-});
+  });
 
 task("mynt-sips:queue", "Queue proposal in the Governor Owner contract")
   .addParam("proposal", "Proposal Id", undefined, types.string)
@@ -141,7 +150,7 @@ task("mynt-sips:queue", "Queue proposal in the Governor Owner contract")
     } else {
       logger.error(`SIP ${proposal} is NOT queued`);
     }
-});
+  });
 
 task("mynt-sips:execute", "Execute proposal in a Governor contract")
   .addParam("proposal", "Proposal Id", undefined, types.string)
@@ -172,7 +181,7 @@ task("mynt-sips:execute", "Execute proposal in a Governor contract")
     } else {
       logger.error(`SIP ${proposal} is NOT executed`);
     }
-});
+  });
 
 task("mynt-sips:cancel", "Queue proposal in the Governor Owner contract")
   .addParam("proposal", "Proposal Id", undefined, types.string)
@@ -207,12 +216,12 @@ task("mynt-sips:cancel", "Queue proposal in the Governor Owner contract")
       data,
       signer
     );
-});
+  });
 
 task(
   "mynt-sips:vote-for",
   "Vote for or against a proposal in the Governor Owner contract"
- )
+)
   .addParam("proposal", "Proposal Id", undefined, types.string)
   .addParam(
     "governor",
@@ -241,7 +250,7 @@ task(
         parseEthersLogToValue(governorContract.interface.parseLog(log))
       )
     );
-});
+  });
 
 task("mynt-sips:queue-timer", "Queue SIP for execution with timer")
   .addParam("proposal", "Proposal Id", undefined, types.string)
@@ -293,7 +302,7 @@ task("mynt-sips:queue-timer", "Queue SIP for execution with timer")
     logger.success(
       `Proposal ${proposalId} queued. Execution ETA: ${proposal.eta}.`
     );
-});
+  });
 
 task("mynt-sips:execute-timer", "Execute SIP with countdown")
   .addParam("proposal", "Proposal Id", undefined, types.string)
@@ -345,4 +354,4 @@ task("mynt-sips:execute-timer", "Execute SIP with countdown")
     } else {
       logger.error(`Proposal ${proposalId} is NOT executed`);
     }
-});
+  });
