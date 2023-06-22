@@ -35,6 +35,7 @@ const sendWithMultisig = async (
     "Submission"
   );
   await multisigCheckTx(
+    hre,
     parsedEvent.transactionId.value.toNumber(),
     multisig.address
   );
