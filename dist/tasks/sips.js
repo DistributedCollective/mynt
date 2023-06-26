@@ -12,11 +12,16 @@ const utils_1 = require("../scripts/helpers/utils");
 const logger = new node_logs_1.default().showInConsole(true);
 (0, config_1.task)("mynt-sips:create", "Create SIP to Sovryn Governance")
     .addParam("argsFunc", "Function name from tasks/sips/args/sipArgs.ts which returns the sip arguments")
-    .addOptionalParam("deployer", "Deployer address in the accounts list", undefined)
+    .addOptionalParam("deployer", "Deployer address in the accounts list", "deployer")
     .setAction(async ({ argsFunc, deployer }, hre) => {
     const { governorName, args: sipArgs } = await SIPArgs_1.default[argsFunc](hre);
     const { ethers, deployments: { get }, } = hre;
-    const deployerSigner = await ethers.getSigner(deployer ?? (await ethers.getSigners())[0].address);
+    const signerAcc = ethers.utils.isAddress(deployer)
+        ? deployer
+        : (await hre.getNamedAccounts())[deployer];
+    const deployerSigner = await ethers.getSigner(ethers.utils.isAddress(signerAcc)
+        ? signerAcc
+        : (await ethers.getSigners())[0].address);
     const governorDeployment = await get(governorName);
     const governor = await ethers.getContract(governorName, deployerSigner);
     logger.info("=== Creating SIP ===");

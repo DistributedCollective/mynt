@@ -120,7 +120,6 @@ describe("SIP-0064 onchain test", () => {
         const proposalIdBeforeSIP = await governorOwner.proposalCount();
         await hardhat_1.default.run("mynt-sips:create", {
             argsFunc: "sip0064",
-            deployer: deployer,
         });
         const proposalId = await governorOwner.latestProposalIds(deployer);
         expect(proposalId.toNumber(), "Proposal was not created. Check the SIP creation is not commented out.").equals(proposalIdBeforeSIP.toNumber() + 1);
