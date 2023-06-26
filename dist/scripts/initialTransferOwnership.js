@@ -4,9 +4,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const hardhat_1 = __importDefault(require("hardhat"));
+const node_logs_1 = __importDefault(require("node-logs"));
+const logger = new node_logs_1.default().showInConsole(true);
 (async () => {
     console.log("starting...");
-    const { ethers, network, getNamedAccounts, deployments: { get, getNetworkName }, } = hardhat_1.default;
+    const { ethers, network, getNamedAccounts, deployments: { get, getNetworkName, getArtifact }, } = hardhat_1.default;
     let contractsList = [
         "DLLR",
         "MassetManager",
@@ -35,20 +37,27 @@ const hardhat_1 = __importDefault(require("hardhat"));
         // await Promise.all(
         let index = 0;
         for await (const contractAddress of contractsAddresses) {
-            const ownable = await ethers.getContractAt(ownableABI, 
-            // contractsList[index],
+            const contractAbi = (await getArtifact(contractsList[index])).abi;
+            const ownable = await ethers.getContractAt(
+            //ownableABI,
+            //contractsList[index],
+            contractAbi, // taking ABI from deployment for consistency
             contractAddress, signer);
             if (Object.keys(ownable.functions).includes("owner()")) {
                 const currentOwner = await ownable.owner();
                 console.log(`processing ${contractsList[index]} @ ${contractAddress}, owner ${currentOwner}`);
                 if (currentOwner !== multisigAddress) {
-                    console.log("transferring .............");
-                    (await await ownable.transferOwnership(multisigAddress)).wait();
+                    console.log("transferring ownership .............");
+                    await (await ownable.transferOwnership(multisigAddress)).wait();
                     console.log(`processed contract ${contractsList[index]} @ ${contractAddress} - ownership transferred`);
                 }
                 else {
                     console.log(`contract ${contractsList[index]} @ ${contractAddress} - ownership ALREADY transferred`);
                 }
+                logger.warning(`Contract ${contractsList[index]} @ ${contractAddress} owner ${await ownable.owner()}`);
+            }
+            else {
+                logger.error(`Contract ${contractsList[index]} @ ${contractAddress} doesn't have 'owner()' function - cannot transfer ownership`);
             }
             index++;
         }

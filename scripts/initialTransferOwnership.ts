@@ -1,4 +1,6 @@
 import hre from "hardhat";
+import Logs from "node-logs";
+const logger = new Logs().showInConsole(true);
 
 (async () => {
   console.log("starting...");
@@ -6,7 +8,7 @@ import hre from "hardhat";
     ethers,
     network,
     getNamedAccounts,
-    deployments: { get, getNetworkName },
+    deployments: { get, getNetworkName, getArtifact },
   } = hre;
   let contractsList = [
     "DLLR",
@@ -14,6 +16,7 @@ import hre from "hardhat";
     "BasketManagerV3",
     "FeesManager",
     "MocIntegration",
+    "FeesVault",
     // "MyntAdminProxy",
   ];
 
@@ -46,9 +49,11 @@ import hre from "hardhat";
     // await Promise.all(
     let index = 0;
     for await (const contractAddress of contractsAddresses) {
+      const contractAbi = (await getArtifact(contractsList[index])).abi;
       const ownable = await ethers.getContractAt(
-        ownableABI,
-        // contractsList[index],
+        //ownableABI,
+        //contractsList[index],
+        contractAbi, // taking ABI from deployment for consistency
         contractAddress,
         signer
       );
@@ -60,8 +65,8 @@ import hre from "hardhat";
         );
 
         if (currentOwner !== multisigAddress) {
-          console.log("transferring .............");
-          (await await ownable.transferOwnership(multisigAddress)).wait();
+          console.log("transferring ownership .............");
+          await (await ownable.transferOwnership(multisigAddress)).wait();
           console.log(
             `processed contract ${contractsList[index]} @ ${contractAddress} - ownership transferred`
           );
@@ -70,6 +75,15 @@ import hre from "hardhat";
             `contract ${contractsList[index]} @ ${contractAddress} - ownership ALREADY transferred`
           );
         }
+        logger.warning(
+          `Contract ${
+            contractsList[index]
+          } @ ${contractAddress} owner ${await ownable.owner()}`
+        );
+      } else {
+        logger.error(
+          `Contract ${contractsList[index]} @ ${contractAddress} doesn't have 'owner()' function - cannot transfer ownership`
+        );
       }
 
       index++;
