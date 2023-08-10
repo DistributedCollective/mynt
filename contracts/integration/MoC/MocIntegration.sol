@@ -20,7 +20,7 @@ contract MocIntegration is OwnableUpgradeable, ERC1967UpgradeUpgradeable {
 
     address public mocVendorAccount;
 
-    event GetDocFromDllrAndRedeemRBTC(uint256 fromDLLR, uint256 toRBTC);
+    event GetDocFromDllrAndRedeemRBTC(address indexed from, uint256 fromDLLR, uint256 toRBTC);
     event MocVendorAccountSet(address newMocVendorAccount);
 
     /**
@@ -95,7 +95,7 @@ contract MocIntegration is OwnableUpgradeable, ERC1967UpgradeUpgradeable {
         (bool success, ) = msg.sender.call{ value: rbtcAmount }("");
         require(success, "MocIntegration:: error transferring redeemed RBTC");
 
-        emit GetDocFromDllrAndRedeemRBTC(_dllrAmount, rbtcAmount);
+        emit GetDocFromDllrAndRedeemRBTC(msg.sender, _dllrAmount, rbtcAmount);
     }
 
     /// Set MoC registered Vendor account to receive markup fees https://docs.moneyonchain.com/main-rbtc-contract/integration-with-moc-platform/vendors
