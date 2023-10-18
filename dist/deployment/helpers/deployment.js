@@ -6,7 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.upgradeWithTransparentUpgradableProxy = void 0;
 const hardhat_1 = __importDefault(require("hardhat"));
 const cli_color_1 = __importDefault(require("cli-color"));
-const multisig_1 = require("scripts/helpers/multisig");
+const helpers_1 = require("../../scripts/helpers/helpers");
 const { deployments: { deploy, get, getOrNull, log, save }, getNamedAccounts, ethers, } = hardhat_1.default;
 const upgradeWithTransparentUpgradableProxy = async (deployer, logicArtifactName, // logic contract artifact name
 proxyArtifactName, // proxy deployment name
@@ -60,7 +60,7 @@ args = [], multisigName = "MultiSigWallet") => {
                 ]);
                 log(`Creating multisig tx to set ${logicArtifactName} (${logicDeploymentTx.address}) as implementation for ${proxyName} (${proxyDeployment.address}...`);
                 log();
-                await (0, multisig_1.sendWithMultisig)(multisigDeployment.address, proxyAdminDeployment.address, data, deployer);
+                await (0, helpers_1.sendWithMultisig)(multisigDeployment.address, proxyAdminDeployment.address, data, deployer);
                 log(cli_color_1.default.bgBlue(`>>> DONE. Requires Multisig (${multisigDeployment.address}) signing to execute tx <<<
                  >>> DON'T PUSH DEPLOYMENTS TO THE REPO UNTIL THE MULTISIG TX SUCCESSFULLY SIGNED & EXECUTED <<<`));
             }

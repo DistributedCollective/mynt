@@ -4,14 +4,8 @@ pragma solidity ^0.8.17;
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-/**
- * @title Token
- * @dev Implementation of mAsset Token.
- * Inherits from ERC20 and ERC20Detailed with implemented
- * mint and burn functions.
- */
 
-contract Token is ERC20, Ownable {
+contract MockMyntToken is ERC20, Ownable {
     uint8 private _decimals;
 
     /**
@@ -20,11 +14,7 @@ contract Token is ERC20, Ownable {
      * @param _symbol The symbol of the token.
      * @param _decimalsValue The decimals of the token.
      * */
-    constructor(
-        string memory _name,
-        string memory _symbol,
-        uint8 _decimalsValue
-    ) ERC20(_name, _symbol) {
+    constructor(string memory _name, string memory _symbol, uint8 _decimalsValue) ERC20(_name, _symbol) {
         _decimals = _decimalsValue;
     }
 
@@ -46,7 +36,7 @@ contract Token is ERC20, Ownable {
      * @param _account The recipient address to get the minted tokens.
      * @param _amount The amount of tokens to be minted.
      * */
-    function burn(address _account, uint256 _amount) public onlyOwner {
+    function burn(address _account, uint256 _amount) public {
         _burn(_account, _amount);
     }
 }
