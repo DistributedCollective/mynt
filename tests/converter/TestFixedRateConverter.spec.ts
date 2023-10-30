@@ -53,16 +53,6 @@ contract("FixedRateConverter", async (accounts) => {
         expect(admin).to.equal(newAdmin);
       });
 
-      it("setSovContractAddress should set the sov contract address successfully", async () => {
-        let sovTokenAddress = await fixedRateConverter.sovContractAddress();
-        expect(sovTokenAddress).to.equal(sovToken.address);
-        const newSovToken = await Token.new("New SOV", "NSOV", 18);
-        await fixedRateConverter.setSovContractAddress(newSovToken.address);
-        sovTokenAddress = await fixedRateConverter.sovContractAddress();
-
-        expect(sovTokenAddress).to.equal(newSovToken.address);
-      });
-
       it("setMyntContractAddress should set the mynt contract address successfully", async () => {
         let myntTokenAddress = await fixedRateConverter.myntContractAddress();
         expect(myntTokenAddress).to.equal(myntToken.address);
@@ -90,11 +80,6 @@ contract("FixedRateConverter", async (accounts) => {
       it("setMyntContractAddress should revert if set by non-admin address", async () => {
         const newMyntToken = await Token.new("New MYNT", "NMYNT", 18);
         await expectRevert(fixedRateConverter.setMyntContractAddress(newMyntToken.address, {from: accounts[3]}), "unauthorized");
-      });
-
-      it("setSovContractAddress should revert if set by non-admin address", async () => {
-        const newSovToken = await Token.new("New SOV", "NSOV", 18);
-        await expectRevert(fixedRateConverter.setSovContractAddress(newSovToken.address, {from: accounts[3]}), "unauthorized");
       });
     });
   });

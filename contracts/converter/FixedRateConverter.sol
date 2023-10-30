@@ -8,29 +8,23 @@ interface IMynt {
     function burn(address _account, uint256 _amount) external;
 }
 
+/**
+ * @title FixedRateConverter
+ * @dev Standalone contract for sunsetting (by converting the MYNT to SOV at a fixed rate)
+ */
 contract FixedRateConverter {
     using SafeERC20 for IERC20;
 
     address public admin;
     address public myntContractAddress;
     address public sovContractAddress;
-    uint256 public conversionFixedRate;
+    uint256 public immutable conversionFixedRate;
 
     event SetAdmin(address indexed sender, address indexed oldAdmin, address indexed newAdmin);
     event SetMyntContractAddress(
         address indexed sender,
         address indexed oldMyntContractAddress,
         address indexed newMyntContractAddreess
-    );
-    event SetSovContractAddress(
-        address indexed sender,
-        address indexed oldSovContractAddress,
-        address indexed newSovContractAddreess
-    );
-    event SetConversionFixedRate(
-        address indexed sender,
-        uint256 indexed oldConversionFixedrate,
-        uint256 indexed newConversionFixedRate
     );
     event SovWithdrawn(address indexed recipient, uint256 amountWithdrawn);
     event Convert(address indexed sender, uint256 myntSent, uint256 sovReceived);
@@ -48,8 +42,9 @@ contract FixedRateConverter {
     ) {
         _setAdmin(msg.sender);
         setMyntContractAddress(_myntContractAddress);
-        setSovContractAddress(_sovContractAddress);
-        setConversionFixedRate(_conversionFixedRate);
+
+        sovContractAddress = _sovContractAddress;
+        conversionFixedRate = _conversionFixedRate;
     }
 
     /**
@@ -70,38 +65,9 @@ contract FixedRateConverter {
      * @param _newMyntContractAddress The new MYNT contract address.
      * */
     function setMyntContractAddress(address _newMyntContractAddress) public onlyAdmin {
-        address oldMyntContractAddress = myntContractAddress;
-
+        emit SetMyntContractAddress(msg.sender, myntContractAddress, _newMyntContractAddress);
         myntContractAddress = _newMyntContractAddress;
-        emit SetMyntContractAddress(msg.sender, oldMyntContractAddress, myntContractAddress);
-    }
-
-    /**
-     * @notice Set the sov contract address.
-     *
-     * only admin can perform this action.
-     *
-     * @param _newSovContractAddress The new sov contract address.
-     * */
-    function setSovContractAddress(address _newSovContractAddress) public onlyAdmin {
-        address oldSovContractAddress = sovContractAddress;
-
-        sovContractAddress = _newSovContractAddress;
-        emit SetSovContractAddress(msg.sender, oldSovContractAddress, sovContractAddress);
-    }
-
-    /**
-     * @notice Set the conversion fixed rate.
-     *
-     * only admin can perform this action.
-     *
-     * @param _newConversionFixedRate The new conversion fixed rate.
-     * */
-    function setConversionFixedRate(uint256 _newConversionFixedRate) public onlyAdmin {
-        uint256 oldConversionFixedRate = conversionFixedRate;
-
-        conversionFixedRate = _newConversionFixedRate;
-        emit SetConversionFixedRate(msg.sender, oldConversionFixedRate, conversionFixedRate);
+        
     }
 
     /**
