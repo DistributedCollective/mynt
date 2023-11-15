@@ -185,7 +185,10 @@ contract MetaAssetToken is ERC20Permit, Ownable {
         bytes32 _r,
         bytes32 _s
     ) external requireValidRecipient(_to) {
-        permit(_from, msg.sender, _amount, _deadline, _v, _r, _s);
+        if (allowance(_from, msg.sender) < _amount) {
+            permit(_from, msg.sender, _amount, _deadline, _v, _r, _s);
+        }
+
         require(
             transferFrom(_from, _to, _amount),
             "MetaAssetToken::transferWithPermit: transfer failed"
