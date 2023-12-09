@@ -2,7 +2,7 @@ import { DeployFunction } from "hardhat-deploy/types";
 import { DLLR, MassetManager } from "types/generated";
 import { masset } from "types/generated/artifacts/contracts";
 import { ethers, network } from "hardhat";
-import { _transferOwnership } from "../tasks/transferOwnership";
+import { transferOwnership } from "../../scripts/helpers/helpers";
 
 const func: DeployFunction = async (hre) => {
     const {
@@ -50,7 +50,7 @@ const func: DeployFunction = async (hre) => {
   // DLLR
   log(`=== Transferring DllrTransferWithPermit ownership to: ${targetOwner} ===`);
   const DllrTransferWithPermit = await ethers.getContract("DllrTransferWithPermit");
-  _transferOwnership(hre, DllrTransferWithPermit.address, targetOwner);
+  transferOwnership(hre, DllrTransferWithPermit.address, targetOwner);
   log(`DllrTransferWithPermit ownership is transferred to: ${await DllrTransferWithPermit.owner()}`);
 };
 
