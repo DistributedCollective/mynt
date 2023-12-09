@@ -25,8 +25,10 @@ const DllrTransferWithPermit = artifacts.require("DllrTransferWithPermit");
 const NOT_OWNER_EXCEPTION =
   "VM Exception while processing transaction: reverted with reason string 'Ownable: caller is not the owner";
 
-const tokenName = "Meta Asset Token";
-const tokenSymbol = "MAT";
+const dllrTokenName = "Sovryn Dollar";
+const dllrTokenSymbol = "DLLR";
+const tokenName = "Sovryn Dollar";
+const tokenSymbol = "DLLR";
 const decimals = 18;
 const maxDeadline = MAX_UINT256;
 const name = tokenName;
@@ -48,11 +50,11 @@ const buildData = (
   message: { owner: from, spender, value: amount, nonce, deadline },
 });
 
-contract("MetaAssetToken", async (accounts) => {
+contract("DllrTransferWithPermit", async (accounts) => {
   const [owner, user, newMassetManagerProxy] = accounts;
 
+  let dllr: MetaAssetTokenInstance;
   let token: MetaAssetTokenInstance;
-  let dllrTransferWithPermit: DllrTransferWithPermitInstance;
   let mockToken: MockMetaAssetTokenInstance;
   let chainId;
   let admin: string;
@@ -91,7 +93,10 @@ contract("MetaAssetToken", async (accounts) => {
         basketManagerProxyInstance.address
       );
 
-    token = await MetaAssetToken.new(tokenName, tokenSymbol, { from: owner });
+    dllr = await MetaAssetToken.new(dllrTokenName, dllrTokenSymbol, {
+      from: owner,
+    });
+    token = await DllrTransferWithPermit.new(dllr.address, { from: owner });
     mockToken = await MockMetaAssetToken.new(
       tokenName,
       tokenSymbol,
@@ -101,10 +106,6 @@ contract("MetaAssetToken", async (accounts) => {
     );
     await token.setMassetManagerProxy(massetManagerProxy, { from: owner });
     await token.setBasketManagerProxy(basketManagerProxy, { from: owner });
-
-    dllrTransferWithPermit = await DllrTransferWithPermit.new(token.address, {
-      from: owner,
-    });
   });
 
   describe("deployment", async () => {
@@ -621,12 +622,12 @@ contract("MetaAssetToken", async (accounts) => {
       it("if sender got insufficient balance", async () => {
         const deadline = MAX_UINT256;
         const amount = toWei("100");
-        const nonce = await token.nonces(ownerPermit);
+        const nonce = await dllr.nonces(ownerPermit);
         const data = buildData(
           chainId,
-          token.address,
+          dllr.address,
           ownerPermit,
-          spender,
+          token.address,
           amount,
           nonce,
           deadline
@@ -642,9 +643,10 @@ contract("MetaAssetToken", async (accounts) => {
           params: [spender],
         });
 
+        /** The transferWithPermit will be performed from token contract, which is the DLLR intermediary contract */
         const account = await ethers.provider.getSigner(spender);
         const tokenInstance = await ethers.getContractAt(
-          "MetaAssetToken",
+          "DllrTransferWithPermit",
           token.address,
           account
         );
@@ -664,17 +666,17 @@ contract("MetaAssetToken", async (accounts) => {
     });
 
     context("should succeed", async () => {
-      it("transferFrom to valid recipient", async () => {
+      it("transferFrom to valid recipient should reflect to the DLLR balance", async () => {
         const oldAssetProxyAddress = massetManagerProxy;
         const deadline = MAX_UINT256;
         const initialOwnerBalance = toWei("1000000");
         const amount = toWei("100");
-        const nonce = await token.nonces(ownerPermit);
+        const nonce = await dllr.nonces(ownerPermit);
         const data = buildData(
           chainId,
-          token.address,
+          dllr.address,
           ownerPermit,
-          spender,
+          token.address,
           amount,
           nonce,
           deadline
@@ -690,16 +692,16 @@ contract("MetaAssetToken", async (accounts) => {
           params: [spender],
         });
         massetManagerProxy = newMassetManagerProxy;
-        await token.setMassetManagerProxy(massetManagerProxy);
-        await token.mint(ownerPermit, initialOwnerBalance, {
+        await dllr.setMassetManagerProxy(massetManagerProxy);
+        await dllr.mint(ownerPermit, initialOwnerBalance, {
           from: massetManagerProxy,
         });
 
-        await token.setMassetManagerProxy(oldAssetProxyAddress);
+        await dllr.setMassetManagerProxy(oldAssetProxyAddress);
 
-        const userInitialBalance = await token.balanceOf(user);
-        const ownerInitialBalance = await token.balanceOf(ownerPermit);
-        const spenderInitialAllowance = await token.allowance(
+        const userInitialBalance = await dllr.balanceOf(user);
+        const ownerInitialBalance = await dllr.balanceOf(ownerPermit);
+        const spenderInitialAllowance = await dllr.allowance(
           ownerPermit,
           spender
         );
@@ -712,6 +714,7 @@ contract("MetaAssetToken", async (accounts) => {
           token.address,
           account
         );
+        /** The transferWithPermit will be performed from token contract, which is the DLLR intermediary contract */
         await tokenInstance.transferWithPermit(
           ownerPermit,
           user,
@@ -722,9 +725,9 @@ contract("MetaAssetToken", async (accounts) => {
           s
         );
 
-        const userLatestBalance = await token.balanceOf(user);
-        const ownerLatestBalance = await token.balanceOf(ownerPermit);
-        const spenderLatestAllowance = await token.allowance(
+        const userLatestBalance = await dllr.balanceOf(user);
+        const ownerLatestBalance = await dllr.balanceOf(ownerPermit);
+        const spenderLatestAllowance = await dllr.allowance(
           ownerPermit,
           spender
         );
@@ -832,6 +835,182 @@ contract("MetaAssetToken", async (accounts) => {
       expect((await approvalReceiver.amount()).toString(), "amount").eq(amount);
       expect(await approvalReceiver.token(), "token").eq(token.address);
       expect(await approvalReceiver.data(), "data").eq("0x1234");
+    });
+  });
+
+  describe("transfer to DLLR Intermediary", async () => {
+    const ownerWallet = Wallet.generate();
+    const spenderWallet = Wallet.generate();
+    const ownerPermit = ownerWallet.getAddressString();
+    const spender = spenderWallet.getAddressString();
+
+    before(async () => {
+      chainId = await token.getChainId();
+      // funding spender wallet
+      const funder = await ethers.provider.getSigner(owner);
+      await funder.sendTransaction({
+        to: spender,
+        value: toWei("10"),
+      });
+
+      // funding massetManagerProxy address
+      await funder.sendTransaction({
+        to: massetManagerProxy,
+        value: toWei("10"),
+      });
+    });
+
+    context("should succeed", async () => {
+      it("transferWithPermit should be working as per normal using DLLR intermediary", async () => {
+        const oldAssetProxyAddress = massetManagerProxy;
+        const deadline = MAX_UINT256;
+        const initialOwnerBalance = toWei("1000000");
+        const amount = toWei("100");
+        const nonce = await dllr.nonces(ownerPermit);
+        /** For signature, the verifying contract still needs to be DLLR, and the spender is the DLLR intermediary token contract, since it will be the one who will execute the transferWithPermit */
+        const data = buildData(
+          chainId,
+          dllr.address,
+          ownerPermit,
+          token.address,
+          amount,
+          nonce,
+          deadline
+        ) as any;
+        const signature = signTypedMessage(ownerWallet.getPrivateKey(), {
+          data,
+        });
+        const { v } = fromRpcSig(signature);
+        const { r, s }: any = fromRpcSig(signature);
+
+        await network.provider.request({
+          method: "hardhat_impersonateAccount",
+          params: [spender],
+        });
+        massetManagerProxy = newMassetManagerProxy;
+        await dllr.setMassetManagerProxy(massetManagerProxy);
+        await dllr.mint(ownerPermit, initialOwnerBalance, {
+          from: massetManagerProxy,
+        });
+
+        await dllr.setMassetManagerProxy(oldAssetProxyAddress);
+
+        const userInitialBalance = await dllr.balanceOf(user);
+        const ownerInitialBalance = await dllr.balanceOf(ownerPermit);
+        const spenderInitialAllowance = await dllr.allowance(
+          ownerPermit,
+          spender
+        );
+        expect(userInitialBalance.toString()).to.equal("0");
+        expect(spenderInitialAllowance.toString()).to.equal("0");
+
+        /** The transferWithPermit will be performed from token contract, which is the DLLR intermediary contract */
+        await token.transferWithPermit(
+          ownerPermit,
+          user,
+          amount,
+          deadline.toString(),
+          v,
+          r,
+          s
+        );
+
+        const userLatestBalance = await dllr.balanceOf(user);
+        const ownerLatestBalance = await dllr.balanceOf(ownerPermit);
+        const spenderLatestAllowance = await dllr.allowance(
+          ownerPermit,
+          spender
+        );
+        expect(userLatestBalance.toString()).to.equal(amount);
+        expect(spenderLatestAllowance.toString()).to.equal("0");
+        expect(ownerLatestBalance.toString()).to.equal(
+          ownerInitialBalance.sub(new BN(amount)).toString()
+        );
+      });
+
+      it("transferWithPermit should be working as per normal with the griefing attack trial", async () => {
+        const oldAssetProxyAddress = massetManagerProxy;
+        const deadline = MAX_UINT256;
+        const initialOwnerBalance = toWei("1000000");
+        const amount = toWei("100");
+        const nonce = await dllr.nonces(ownerPermit);
+        /** For signature, the verifying contract still needs to be DLLR, and the spender is the DLLR intermediary token contract, since it will be the one who will execute the transferWithPermit */
+        const data = buildData(
+          chainId,
+          dllr.address,
+          ownerPermit,
+          token.address,
+          amount,
+          nonce,
+          deadline
+        ) as any;
+        const signature = signTypedMessage(ownerWallet.getPrivateKey(), {
+          data,
+        });
+        const { v } = fromRpcSig(signature);
+        const { r, s }: any = fromRpcSig(signature);
+
+        await network.provider.request({
+          method: "hardhat_impersonateAccount",
+          params: [spender],
+        });
+        massetManagerProxy = newMassetManagerProxy;
+        await dllr.setMassetManagerProxy(massetManagerProxy);
+        await dllr.mint(ownerPermit, initialOwnerBalance, {
+          from: massetManagerProxy,
+        });
+
+        await dllr.setMassetManagerProxy(oldAssetProxyAddress);
+
+        const userInitialBalance = await dllr.balanceOf(user);
+        const ownerInitialBalance = await dllr.balanceOf(ownerPermit);
+        const spenderInitialAllowance = await dllr.allowance(
+          ownerPermit,
+          spender
+        );
+        expect(userInitialBalance.toString()).to.equal("0");
+        expect(spenderInitialAllowance.toString()).to.equal("0");
+
+        const account = await ethers.provider.getSigner(spender);
+        const dllrTransferWithPermit = await ethers.getContractAt(
+          "MetaAssetToken",
+          token.address,
+          account
+        );
+
+        /** Attacker try to exploit the signature and front run the tx */
+        await dllr.permit(
+          ownerPermit,
+          token.address,
+          amount,
+          deadline.toString(),
+          v,
+          r,
+          s
+        );
+        /** The transferWithPermit from token contract, will not reverted because it won't execute the permit anymore */
+        await dllrTransferWithPermit.transferWithPermit(
+          ownerPermit,
+          user,
+          amount,
+          deadline.toString(),
+          v,
+          r,
+          s
+        );
+
+        const userLatestBalance = await dllr.balanceOf(user);
+        const ownerLatestBalance = await dllr.balanceOf(ownerPermit);
+        const spenderLatestAllowance = await dllr.allowance(
+          ownerPermit,
+          spender
+        );
+        expect(userLatestBalance.toString()).to.equal(amount);
+        expect(spenderLatestAllowance.toString()).to.equal("0");
+        expect(ownerLatestBalance.toString()).to.equal(
+          ownerInitialBalance.sub(new BN(amount)).toString()
+        );
+      });
     });
   });
 });

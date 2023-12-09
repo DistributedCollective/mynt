@@ -68,7 +68,12 @@ interface IMassetManager {
      * @param tokenAddress     Address of the bAsset to redeem.
      * @param userData         Address of the final recipient as ABI encoded bytes.
      */
-    event onTokensMintedCalled(address indexed sender, uint256 orderAmount, address tokenAddress, bytes userData);
+    event onTokensMintedCalled(
+        address indexed sender,
+        uint256 orderAmount,
+        address tokenAddress,
+        bytes userData
+    );
 
     /***************************************
                 MINTING (PUBLIC)
@@ -81,7 +86,10 @@ interface IMassetManager {
      * @param _bAssetQuantity Quantity in bAsset units.
      * @return massetMinted   Quantity of newly minted mAsset.
      */
-    function mint(address _bAsset, uint256 _bAssetQuantity) external returns (uint256 massetMinted);
+    function mint(
+        address _bAsset,
+        uint256 _bAssetQuantity
+    ) external returns (uint256 massetMinted);
 
     /**
      * @dev Mint a single mAsset to recipient address, at a 1:1 ratio with the bAsset.
@@ -108,7 +116,10 @@ interface IMassetManager {
      * @param _massetQuantity   Units of the masset to redeem.
      * @return massetRedeemed   Relative number of mAsset units burned to pay for the bAssets.
      */
-    function redeem(address _bAsset, uint256 _massetQuantity) external returns (uint256 massetRedeemed);
+    function redeem(
+        address _bAsset,
+        uint256 _massetQuantity
+    ) external returns (uint256 massetRedeemed);
 
     /**
      * @dev Credits a recipient with a certain quantity of selected bAsset, in exchange for burning the
@@ -200,7 +211,11 @@ interface IMassetManager {
      * @param _tokenAddress     Address of the bAsset to redeem.
      * @param _userData         Address of the final recipient as ABI encoded bytes.
      */
-    function onTokensMinted(uint256 _orderAmount, address _tokenAddress, bytes calldata _userData) external;
+    function onTokensMinted(
+        uint256 _orderAmount,
+        address _tokenAddress,
+        bytes calldata _userData
+    ) external;
 
     // Getters
 

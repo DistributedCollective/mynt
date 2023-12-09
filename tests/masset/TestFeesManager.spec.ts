@@ -14,10 +14,10 @@ const FeesManager = artifacts.require("FeesManager");
 let standardAccounts: StandardAccounts;
 
 type Fees = {
-    deposit: BN;
-    depositBridge: BN;
-    withdrawal: BN;
-    withdrawalBridge: BN;
+  deposit: BN;
+  depositBridge: BN;
+  withdrawal: BN;
+  withdrawalBridge: BN;
 };
 
 const standardFees: Fees = {

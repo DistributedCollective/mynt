@@ -976,3 +976,47 @@ task(
       createSIP(hre, sipArgs);
     }
   });
+
+task("upgrade:mocIntegration", "Upgrade implementation of mocIntegration contract")
+.addOptionalParam("isMultisig", "flag if transaction needs to be intiated from the multisig contract")
+.addOptionalParam("isSIP", "flag if transaction needs to be initiated from the SIP")
+.setAction(async ({ isMultisig, isSIP }, hre) => {
+  helpers.injectHre(hre);
+  const { ethers, deployments: { get }, getNamedAccounts } = hre;
+  const { deployer } = await getNamedAccounts();
+  const myntAdminProxy = await ethers.getContract("MyntAdminProxy");
+  const mocIntegrationProxy = await ethers.getContract("MocIntegration"); // MocIntegration
+
+  const MocIntegrationFactory = await ethers.getContractFactory("MocIntegration");
+  const newMocIntegrationImpl = await MocIntegrationFactory.deploy();
+  console.log(`Upgrading mocIntegration implementation to ${newMocIntegrationImpl.address}`)
+
+  if(isMultisig) {
+    const multisigAddress = (await get("MultisigWallet")).address;
+    const dataUpgrade = myntAdminProxy.interface.encodeFunctionData("upgrade", [
+      mocIntegrationProxy.address, newMocIntegrationImpl.address
+    ]);
+
+    await helpers.sendWithMultisig(
+      multisigAddress,
+      myntAdminProxy.address,
+      dataUpgrade,
+      deployer
+    );
+  } else if(isSIP) {
+    const signatureUpgrade = "upgrade(address,address)";
+    const dataUpgrade = myntAdminProxy.interface.encodeFunctionData("upgrade", [
+      mocIntegrationProxy.address, newMocIntegrationImpl.address
+    ]);
+
+    const sipArgs: ISipArgument = {
+      targets: [mocIntegrationProxy.address],
+      values: [0],
+      signatures: [signatureUpgrade],
+      data: [dataUpgrade],
+      description: "Upgrade MocIntegration contract"
+    }
+
+    _createSIP(hre, sipArgs);
+  }
+});
