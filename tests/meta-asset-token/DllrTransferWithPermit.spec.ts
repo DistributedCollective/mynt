@@ -96,7 +96,10 @@ contract("DllrTransferWithPermit", async (accounts) => {
     dllr = await MetaAssetToken.new(dllrTokenName, dllrTokenSymbol, {
       from: owner,
     });
-    token = await DllrTransferWithPermit.new(dllr.address, { from: owner });
+
+    token = await DllrTransferWithPermit.new();
+    await token.initialize(dllr.address, { from: owner });
+
     mockToken = await MockMetaAssetToken.new(
       tokenName,
       tokenSymbol,
@@ -104,8 +107,6 @@ contract("DllrTransferWithPermit", async (accounts) => {
       accounts[9],
       { from: owner }
     );
-    await token.setMassetManagerProxy(massetManagerProxy, { from: owner });
-    await token.setBasketManagerProxy(basketManagerProxy, { from: owner });
   });
 
   describe("deployment", async () => {
@@ -118,242 +119,7 @@ contract("DllrTransferWithPermit", async (accounts) => {
     });
 
     it("should have correct decimal", async () => {
-      expect((await token.decimals()).toNumber()).to.equal(decimals);
-    });
-  });
-
-  describe("setMassetManagerProxy", async () => {
-    context("should fail", async () => {
-      it("when it's not called by owner", async () => {
-        await expectRevert(
-          token.setMassetManagerProxy(massetManagerProxy, { from: user }),
-          NOT_OWNER_EXCEPTION
-        );
-      });
-    });
-    context("should succeed", async () => {
-      it("when called by owner", async () => {
-        const tx = await token.setMassetManagerProxy(massetManagerProxy, {
-          from: owner,
-        });
-
-        expectEvent(tx, "MassetManagerProxyChanged", {
-          _newMassetManagerProxy: massetManagerProxy,
-        });
-
-        const [newAssetProxyPromised, newMassetManagerImplementationPromised] =
-          await Promise.all([
-            token.massetManagerProxy(),
-            token.massetManagerImplementation(),
-          ]);
-        expect(newAssetProxyPromised).to.equal(massetManagerProxy);
-        expect(newMassetManagerImplementationPromised).to.equal(
-          massetManagerImplementation
-        );
-      });
-    });
-  });
-
-  describe("setBasketManagerProxy", async () => {
-    context("should fail", async () => {
-      it("when it's not called by owner", async () => {
-        await expectRevert(
-          token.setBasketManagerProxy(basketManagerProxy, { from: user }),
-          NOT_OWNER_EXCEPTION
-        );
-      });
-    });
-    context("should succeed", async () => {
-      it("when called by owner", async () => {
-        const tx = await token.setBasketManagerProxy(basketManagerProxy, {
-          from: owner,
-        });
-
-        expectEvent(tx, "BasketManagerProxyChanged", {
-          _newBasketManagerProxy: basketManagerProxy,
-        });
-
-        const [
-          newBasketManagerProxyPromised,
-          newBasketManagerImplementationPromised,
-        ] = await Promise.all([
-          token.basketManagerProxy(),
-          token.basketManagerImplementation(),
-        ]);
-        expect(newBasketManagerProxyPromised).to.equal(basketManagerProxy);
-        expect(newBasketManagerImplementationPromised).to.equal(
-          basketManagerImplementation
-        );
-      });
-    });
-  });
-
-  describe("mint", async () => {
-    context("should fail", async () => {
-      it("when it's not called by MassetManager proxy", async () => {
-        await expectRevert(
-          token.mint(user, toWei("100"), { from: user }),
-          "DLLR:unauthorized MassetManager proxy"
-        );
-      });
-    });
-
-    context("should succeed", async () => {
-      it("when it's called by presale", async () => {
-        const mintAmount = toWei("100");
-        const initialBalance = await token.balanceOf(user);
-        expect(initialBalance.toString()).to.equal("0");
-
-        massetManagerProxy = newMassetManagerProxy;
-        await token.setMassetManagerProxy(massetManagerProxy);
-
-        const tx = await token.mint(user, mintAmount, {
-          from: massetManagerProxy,
-        });
-        expectEvent(tx, "Transfer", {
-          from: ZERO_ADDRESS,
-          to: user,
-          value: mintAmount,
-        });
-
-        const latestBalance = await token.balanceOf(user);
-        expect(latestBalance.toString()).to.equal(mintAmount);
-      });
-    });
-  });
-
-  describe("burn", async () => {
-    context("should fail", async () => {
-      it("when it's not called by presale or by a user", async () => {
-        await expectRevert(
-          token.burn(user, toWei("50"), { from: owner }),
-          "DLLR:unauthorized MassetManager proxy"
-        );
-      });
-    });
-
-    context("should succeed", async () => {
-      it("when it's called by MassetManager proxy", async () => {
-        massetManagerProxy = newMassetManagerProxy;
-        await token.setMassetManagerProxy(massetManagerProxy);
-
-        const amount = toWei("50");
-        await token.mint(user, amount, { from: massetManagerProxy });
-
-        const totalSupply = await token.totalSupply();
-
-        // amount after mint
-        const initialBalance = await token.balanceOf(user);
-        expect(initialBalance.toString()).to.equal(amount);
-        expect(totalSupply.toString()).to.equal(initialBalance.toString());
-
-        const tx = await token.burn(user, amount, { from: massetManagerProxy });
-        expectEvent(tx, "Transfer", {
-          from: user,
-          to: ZERO_ADDRESS,
-          value: amount,
-        });
-
-        // amount after burn
-        const latestBalance = await token.balanceOf(user);
-        expect(latestBalance.toString()).to.equal("0");
-      });
-    });
-  });
-
-  describe("transfer", async () => {
-    context("transfer should fail", async () => {
-      it("when recipient is zero address", async () => {
-        await expectRevert(
-          token.transfer(ZERO_ADDRESS, toWei("100"), { from: owner }),
-          "DLLR: Invalid address. Cannot transfer DLLR to the null address."
-        );
-      });
-
-      it("when recipient is MetaAsset contract address", async () => {
-        await expectRevert(
-          token.transfer(token.address, toWei("100"), { from: owner }),
-          "DLLR: Invalid address. Cannot transfer DLLR to the null address."
-        );
-      });
-    });
-
-    context("should succeed", async () => {
-      it("transfer to valid recipient", async () => {
-        token = mockToken;
-        massetManagerProxy = newMassetManagerProxy;
-        await token.setMassetManagerProxy(massetManagerProxy);
-
-        const amount = toWei("100");
-        const initialBalance = await token.balanceOf(user);
-        expect(initialBalance.toString()).to.equal("0");
-
-        const tx = await token.mint(user, amount, { from: massetManagerProxy });
-        expectEvent(tx, "Transfer", {
-          from: ZERO_ADDRESS,
-          to: user,
-          value: amount,
-        });
-
-        const balanceAfterMint = await token.balanceOf(user);
-        expect(balanceAfterMint.toString()).to.equal(amount);
-
-        const tx2 = await token.transfer(owner, amount, { from: user });
-        expectEvent(tx2, "Transfer", { from: user, to: owner, value: amount });
-
-        const latestUserBalance = await token.balanceOf(user);
-        expect(latestUserBalance.toString()).to.equal("0");
-
-        const latestOwnerBalance = await token.balanceOf(owner);
-        expect(latestOwnerBalance.toString()).to.equal(amount);
-      });
-    });
-  });
-
-  describe("transferFrom", async () => {
-    context("transferFrom should fail", async () => {
-      it("when recipient is zero address", async () => {
-        await expectRevert(
-          token.transferFrom(user, ZERO_ADDRESS, toWei("100"), { from: owner }),
-          "DLLR: Invalid address. Cannot transfer DLLR to the null address"
-        );
-      });
-    });
-
-    context("should succeed", async () => {
-      it("transferFrom to valid recipient", async () => {
-        token = mockToken;
-        massetManagerProxy = newMassetManagerProxy;
-        await token.setMassetManagerProxy(massetManagerProxy);
-
-        const amount = toWei("100");
-        const initialBalance = await token.balanceOf(user);
-        expect(initialBalance.toString()).to.equal("0");
-
-        const tx = await token.mint(user, amount, { from: massetManagerProxy });
-        expectEvent(tx, "Transfer", {
-          from: ZERO_ADDRESS,
-          to: user,
-          value: amount,
-        });
-
-        const balanceAfterMint = await token.balanceOf(user);
-        expect(balanceAfterMint.toString()).to.equal(amount);
-
-        // approve
-        await token.approve(owner, amount, { from: user });
-
-        const tx2 = await token.transferFrom(user, owner, amount, {
-          from: owner,
-        });
-        expectEvent(tx2, "Transfer", { from: user, to: owner, value: amount });
-
-        const latestUserBalance = await token.balanceOf(user);
-        expect(latestUserBalance.toString()).to.equal("0");
-
-        const latestOwnerBalance = await token.balanceOf(owner);
-        expect(latestOwnerBalance.toString()).to.equal(amount);
-      });
+      expect((await token.decimals())).to.equal(decimals);
     });
   });
 
@@ -364,25 +130,25 @@ contract("DllrTransferWithPermit", async (accounts) => {
     const spender = spenderWallet.getAddressString();
 
     before(async () => {
-      chainId = await token.getChainId();
+      chainId = (await token.getChainId()).toString();
     });
 
     context("should failed if", async () => {
       it("invalid signature", async () => {
-        const deadline = MAX_UINT256;
+        const deadline = MAX_UINT256.toString();
 
         const firstValue = toWei("100");
         const firstNonce = await token.nonces(ownerPermit);
-
         const firstData = buildData(
           chainId,
           token.address,
           ownerPermit,
           spender,
-          firstValue,
-          firstNonce,
+          firstValue.toString(),
+          firstNonce.toString(),
           deadline
         ) as any;
+;
         const firstSignature = signTypedMessage(ownerWallet.getPrivateKey(), {
           data: firstData,
         });
@@ -398,7 +164,7 @@ contract("DllrTransferWithPermit", async (accounts) => {
       });
 
       it("signature expired", async () => {
-        const deadline = new BN(1);
+        const deadline = new BN(1).toString();
 
         const firstValue = toWei("100");
         const firstNonce = await token.nonces(ownerPermit);
@@ -408,8 +174,8 @@ contract("DllrTransferWithPermit", async (accounts) => {
           token.address,
           ownerPermit,
           spender,
-          firstValue,
-          firstNonce,
+          firstValue.toString(),
+          firstNonce.toString(),
           deadline
         ) as any;
         const firstSignature = signTypedMessage(ownerWallet.getPrivateKey(), {
@@ -443,7 +209,7 @@ contract("DllrTransferWithPermit", async (accounts) => {
       });
 
       it("can set allowance through permit", async () => {
-        const deadline = MAX_UINT256;
+        const deadline = MAX_UINT256.toString();
 
         const firstValue = toWei("100");
         const firstNonce = await token.nonces(ownerPermit);
@@ -453,8 +219,8 @@ contract("DllrTransferWithPermit", async (accounts) => {
           token.address,
           ownerPermit,
           spender,
-          firstValue,
-          firstNonce,
+          firstValue.toString(),
+          firstNonce.toString(),
           deadline
         ) as any;
         const firstSignature = signTypedMessage(ownerWallet.getPrivateKey(), {
@@ -465,20 +231,21 @@ contract("DllrTransferWithPermit", async (accounts) => {
         const firstReceipt = await token.permit(
           ownerPermit,
           spender,
-          firstValue,
+          firstValue.toString(),
           deadline,
           firstECDSASig.v,
           firstECDSASig.r as any,
           firstECDSASig.s as any
         );
+
         expectEvent(firstReceipt, "Approval", {
           owner: toChecksumAddress(ownerPermit),
           spender: toChecksumAddress(spender),
-          value: firstValue,
+          value: firstValue.toString(),
         });
         expect(
           (await token.allowance(ownerPermit, spender)).toString()
-        ).to.equal(firstValue);
+        ).to.equal(firstValue.toString());
         expect((await token.nonces(ownerPermit)).toString()).to.equal("1");
 
         const secondValue = toWei("500");
@@ -489,8 +256,8 @@ contract("DllrTransferWithPermit", async (accounts) => {
           token.address,
           ownerPermit,
           spender,
-          secondValue,
-          secondNonce,
+          secondValue.toString(),
+          secondNonce.toString(),
           deadline
         ) as any;
         const secondSignature = signTypedMessage(ownerWallet.getPrivateKey(), {
@@ -502,20 +269,21 @@ contract("DllrTransferWithPermit", async (accounts) => {
         const secondReceipt = await token.permit(
           ownerPermit,
           spender,
-          secondValue,
+          secondValue.toString(),
           deadline,
           secondECDSASig.v,
           secondECDSASig.r as any,
           secondECDSASig.s as any
         );
+
         expectEvent(secondReceipt, "Approval", {
           owner: toChecksumAddress(ownerPermit),
           spender: toChecksumAddress(spender),
-          value: secondValue,
+          value: secondValue.toString(),
         });
         expect(
           (await token.allowance(ownerPermit, spender)).toString()
-        ).to.equal(secondValue);
+        ).to.equal(secondValue.toString());
         expect((await token.nonces(ownerPermit)).toString()).to.equal("2");
       });
     });
@@ -545,7 +313,7 @@ contract("DllrTransferWithPermit", async (accounts) => {
 
     context("transferWithPermit should fail", async () => {
       it("when signature expired", async () => {
-        const deadline = new BN(1);
+        const deadline = new BN(1).toString();
         const amount = toWei("100");
         const nonce = await token.nonces(ownerPermit);
         const data = buildData(
@@ -553,8 +321,8 @@ contract("DllrTransferWithPermit", async (accounts) => {
           token.address,
           ownerPermit,
           spender,
-          amount,
-          nonce,
+          amount.toString(),
+          nonce.toString(),
           deadline
         ) as any;
         const signature = signTypedMessage(ownerWallet.getPrivateKey(), {
@@ -577,7 +345,7 @@ contract("DllrTransferWithPermit", async (accounts) => {
       });
 
       it("when recipient is zero address", async () => {
-        const deadline = MAX_UINT256;
+        const deadline = MAX_UINT256.toString();
         const amount = toWei("100");
         const nonce = await token.nonces(ownerPermit);
         const data = buildData(
@@ -585,8 +353,8 @@ contract("DllrTransferWithPermit", async (accounts) => {
           token.address,
           ownerPermit,
           spender,
-          amount,
-          nonce,
+          amount.toString(),
+          nonce.toString(),
           deadline
         ) as any;
         const signature = signTypedMessage(ownerWallet.getPrivateKey(), {
@@ -610,7 +378,7 @@ contract("DllrTransferWithPermit", async (accounts) => {
             ownerPermit,
             ZERO_ADDRESS,
             amount,
-            deadline.toString(),
+            deadline,
             v,
             r,
             s
@@ -620,7 +388,7 @@ contract("DllrTransferWithPermit", async (accounts) => {
       });
 
       it("if sender got insufficient balance", async () => {
-        const deadline = MAX_UINT256;
+        const deadline = MAX_UINT256.toString();
         const amount = toWei("100");
         const nonce = await dllr.nonces(ownerPermit);
         const data = buildData(
@@ -628,8 +396,8 @@ contract("DllrTransferWithPermit", async (accounts) => {
           dllr.address,
           ownerPermit,
           token.address,
-          amount,
-          nonce,
+          amount.toString(),
+          nonce.toString(),
           deadline
         ) as any;
         const signature = signTypedMessage(ownerWallet.getPrivateKey(), {
@@ -655,7 +423,7 @@ contract("DllrTransferWithPermit", async (accounts) => {
             ownerPermit,
             user,
             amount,
-            deadline.toString(),
+            deadline,
             v,
             r,
             s
@@ -668,7 +436,7 @@ contract("DllrTransferWithPermit", async (accounts) => {
     context("should succeed", async () => {
       it("transferFrom to valid recipient should reflect to the DLLR balance", async () => {
         const oldAssetProxyAddress = massetManagerProxy;
-        const deadline = MAX_UINT256;
+        const deadline = MAX_UINT256.toString();
         const initialOwnerBalance = toWei("1000000");
         const amount = toWei("100");
         const nonce = await dllr.nonces(ownerPermit);
@@ -677,8 +445,8 @@ contract("DllrTransferWithPermit", async (accounts) => {
           dllr.address,
           ownerPermit,
           token.address,
-          amount,
-          nonce,
+          amount.toString(),
+          nonce.toString(),
           deadline
         ) as any;
         const signature = signTypedMessage(ownerWallet.getPrivateKey(), {
@@ -719,7 +487,7 @@ contract("DllrTransferWithPermit", async (accounts) => {
           ownerPermit,
           user,
           amount,
-          deadline.toString(),
+          deadline,
           v,
           r,
           s
@@ -737,104 +505,6 @@ contract("DllrTransferWithPermit", async (accounts) => {
           ownerInitialBalance.sub(new BN(amount)).toString()
         );
       });
-
-      it("transferFrom with invalid nonce", async () => {
-        const oldAssetProxyAddress = massetManagerProxy;
-        const deadline = MAX_UINT256;
-        const initialOwnerBalance = toWei("1000000");
-        const amount = toWei("100");
-        const nonce = await token.nonces(ownerPermit);
-        const data = buildData(
-          chainId,
-          token.address,
-          ownerPermit,
-          spender,
-          amount,
-          nonce,
-          deadline
-        ) as any;
-        const signature = signTypedMessage(ownerWallet.getPrivateKey(), {
-          data,
-        });
-        const { v } = fromRpcSig(signature);
-        const { r, s }: any = fromRpcSig(signature);
-
-        await network.provider.request({
-          method: "hardhat_impersonateAccount",
-          params: [spender],
-        });
-        massetManagerProxy = newMassetManagerProxy;
-        await token.setMassetManagerProxy(massetManagerProxy);
-        await token.mint(ownerPermit, initialOwnerBalance, {
-          from: massetManagerProxy,
-        });
-
-        await token.setMassetManagerProxy(oldAssetProxyAddress);
-
-        const userInitialBalance = await token.balanceOf(user);
-        const ownerInitialBalance = await token.balanceOf(ownerPermit);
-        const spenderInitialAllowance = await token.allowance(
-          ownerPermit,
-          spender
-        );
-        expect(userInitialBalance.toString()).to.equal("0");
-        expect(spenderInitialAllowance.toString()).to.equal("0");
-
-        const account = await ethers.provider.getSigner(spender);
-        const tokenInstance = await ethers.getContractAt(
-          "MetaAssetToken",
-          token.address,
-          account
-        );
-
-        await tokenInstance.permit(
-          ownerPermit,
-          spender,
-          amount,
-          deadline.toString(),
-          v,
-          r,
-          s
-        );
-        await expectRevert(
-          tokenInstance.transferWithPermit(
-            ownerPermit,
-            user,
-            amount,
-            deadline.toString(),
-            v,
-            r,
-            s
-          ),
-          "ERC20Permit: invalid signature"
-        );
-      });
-    });
-  });
-
-  describe("approveAndCall", async () => {
-    let approvalReceiver;
-
-    before(async () => {
-      approvalReceiver = await MockApprovalReceiver.new();
-    });
-
-    it("should approve for transfer and call the receiver", async () => {
-      const amount = toWei("50");
-      const tx = await token.approveAndCall(
-        approvalReceiver.address,
-        amount,
-        "0x1234"
-      );
-      await expectEvent(tx, "Approval", {
-        owner,
-        spender: approvalReceiver.address,
-        value: amount,
-      });
-      expect(await approvalReceiver.sender(), "sender").eq(owner);
-      expect((await approvalReceiver.amount()).toString(), "amount").eq(amount);
-      expect(await approvalReceiver.token(), "token").eq(token.address);
-      expect(await approvalReceiver.data(), "data").eq("0x1234");
     });
   });
 
@@ -863,7 +533,7 @@ contract("DllrTransferWithPermit", async (accounts) => {
     context("should succeed", async () => {
       it("transferWithPermit should be working as per normal using DLLR intermediary", async () => {
         const oldAssetProxyAddress = massetManagerProxy;
-        const deadline = MAX_UINT256;
+        const deadline = MAX_UINT256.toString();
         const initialOwnerBalance = toWei("1000000");
         const amount = toWei("100");
         const nonce = await dllr.nonces(ownerPermit);
@@ -873,8 +543,8 @@ contract("DllrTransferWithPermit", async (accounts) => {
           dllr.address,
           ownerPermit,
           token.address,
-          amount,
-          nonce,
+          amount.toString(),
+          nonce.toString(),
           deadline
         ) as any;
         const signature = signTypedMessage(ownerWallet.getPrivateKey(), {
@@ -909,7 +579,7 @@ contract("DllrTransferWithPermit", async (accounts) => {
           ownerPermit,
           user,
           amount,
-          deadline.toString(),
+          deadline,
           v,
           r,
           s
@@ -930,7 +600,7 @@ contract("DllrTransferWithPermit", async (accounts) => {
 
       it("transferWithPermit should be working as per normal with the griefing attack trial", async () => {
         const oldAssetProxyAddress = massetManagerProxy;
-        const deadline = MAX_UINT256;
+        const deadline = MAX_UINT256.toString();
         const initialOwnerBalance = toWei("1000000");
         const amount = toWei("100");
         const nonce = await dllr.nonces(ownerPermit);
@@ -940,8 +610,8 @@ contract("DllrTransferWithPermit", async (accounts) => {
           dllr.address,
           ownerPermit,
           token.address,
-          amount,
-          nonce,
+          amount.toString(),
+          nonce.toString(),
           deadline
         ) as any;
         const signature = signTypedMessage(ownerWallet.getPrivateKey(), {
@@ -983,7 +653,7 @@ contract("DllrTransferWithPermit", async (accounts) => {
           ownerPermit,
           token.address,
           amount,
-          deadline.toString(),
+          deadline,
           v,
           r,
           s
@@ -993,7 +663,7 @@ contract("DllrTransferWithPermit", async (accounts) => {
           ownerPermit,
           user,
           amount,
-          deadline.toString(),
+          deadline,
           v,
           r,
           s

@@ -184,7 +184,7 @@ contract MetaAssetToken is ERC20Permit, Ownable {
         uint8 _v,
         bytes32 _r,
         bytes32 _s
-    ) external virtual requireValidRecipient(_to) {
+    ) external requireValidRecipient(_to) {
         permit(_from, msg.sender, _amount, _deadline, _v, _r, _s);
         require(
             transferFrom(_from, _to, _amount),

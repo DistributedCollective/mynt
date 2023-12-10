@@ -2,6 +2,9 @@
 pragma solidity ^0.8.17;
 
 import "./MetaAssetToken.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/draft-ERC20PermitUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/ERC1967/ERC1967UpgradeUpgradeable.sol";
 
 interface IERC20PermitWithTransfer {
     /**
@@ -61,11 +64,27 @@ interface IERC20PermitWithTransfer {
 /**
  * @dev This is an intermediary contract to fix the griefing attack vulnerbility in the DLLR contract.
  */
-contract DllrTransferWithPermit is MetaAssetToken {
+contract DllrTransferWithPermit is ERC20PermitUpgradeable, OwnableUpgradeable, ERC1967UpgradeUpgradeable {
+    modifier requireValidRecipient(address _recipient) {
+        require(
+            _recipient != address(0) && _recipient != address(this),
+            "DLLR: Invalid address. Cannot transfer DLLR to the null address."
+        );
+        _;
+    }
+
+    /**
+     * @dev Emitted when transfer  Manager config is changed.
+     */
+    event TransferWithPermit(address _from, address _to, uint256 _amount);
+
     IERC20PermitWithTransfer public dllr;
 
-    constructor(address _dllrTokenAddress) MetaAssetToken("Sovryn Dollar", "DLLR") {
+    function initialize(address payable _dllrTokenAddress) external initializer {
+        __ERC20Permit_init("Sovryn Dollar");
+        __ERC20_init("Sovryn Dollar", "DLLR");
         dllr = IERC20PermitWithTransfer(_dllrTokenAddress);
+        __Ownable_init();
     }
 
     function transferWithPermit(
@@ -76,7 +95,7 @@ contract DllrTransferWithPermit is MetaAssetToken {
         uint8 _v,
         bytes32 _r,
         bytes32 _s
-    ) external override requireValidRecipient(_to) {
+    ) external requireValidRecipient(_to) {
         if (dllr.allowance(_from, address(this)) < _amount) {
             dllr.permit(_from, address(this), _amount, _deadline, _v, _r, _s);
         }
@@ -87,5 +106,15 @@ contract DllrTransferWithPermit is MetaAssetToken {
         );
 
         emit TransferWithPermit(_from, _to, _amount);
+    }
+
+    /**
+     * @dev to support EIP712, will need the token contract to return the chain id.
+     *
+     * @return chain id.
+     *
+     */
+    function getChainId() external view returns (uint256) {
+        return block.chainid;
     }
 }
