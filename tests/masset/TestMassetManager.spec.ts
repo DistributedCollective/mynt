@@ -27,6 +27,7 @@ const MockERC20 = artifacts.require("MockERC20");
 const MockBridge = artifacts.require("MockBridge");
 const FeesVault = artifacts.require("FeesVault");
 const FeesManager = artifacts.require("FeesManager");
+const DllrTransferWithPermit = artifacts.require("DllrTransferWithPermit");
 
 let standardAccounts: StandardAccounts;
 
@@ -1228,6 +1229,46 @@ contract("MassetManager", async (accounts) => {
       expect(vaultBalance).bignumber.to.eq(totalFee);
     });
   });
+
+  describe("setMassetTokenIntermediary", async() => {
+    let feesManager: FeesManagerInstance;
+    beforeEach(async () => {
+      vault = await FeesVault.new();
+      massetManager = await MassetManager.new();
+      feesManager = await FeesManager.new();
+      basketManagerObj = await createBasketManager(
+        massetManager,
+        [18, 18],
+        [1, 1]
+      );
+      mAsset = await createMassetToken(massetManager);
+
+      await initMassetManager(
+        massetManager,
+        basketManagerObj.basketManager.address,
+        mAsset.address,
+        vault.address,
+        standardFees
+      );
+    });
+
+    context("failed", () => {
+      it("set the massetTokenIntermediary from non-authorized account should fail", async() => {
+        const dllrTransferWithPermit = await DllrTransferWithPermit.new(mAsset.address);
+        expect(await massetManager.mAssetTokenIntermediary()).to.equal(ZERO_ADDRESS);
+        await expectRevert(massetManager.setMassetTokenIntermediary(dllrTransferWithPermit.address, {from: standardAccounts.dummy1,}), "Ownable: caller is not the owner");
+      })
+    })
+
+    context("success", () => {
+      it("should set the masset token intermediary successfully", async() => {
+        const owner = accounts[0];
+        const dllrTransferWithPermit = await DllrTransferWithPermit.new(mAsset.address);
+        expect(await massetManager.mAssetTokenIntermediary()).to.equal(ZERO_ADDRESS);
+        await massetManager.setMassetTokenIntermediary(dllrTransferWithPermit.address, {from: owner});
+      })
+    })
+  })
 });
 
 const zeroBridges = [ZERO_ADDRESS, ZERO_ADDRESS];

@@ -65,6 +65,7 @@ interface IERC20PermitWithTransfer {
  * @dev This is an intermediary contract to fix the griefing attack vulnerbility in the DLLR contract.
  */
 contract DllrTransferWithPermit is ERC20PermitUpgradeable, OwnableUpgradeable, ERC1967UpgradeUpgradeable {
+    /** MODIFIER */
     modifier requireValidRecipient(address _recipient) {
         require(
             _recipient != address(0) && _recipient != address(this),
@@ -73,11 +74,13 @@ contract DllrTransferWithPermit is ERC20PermitUpgradeable, OwnableUpgradeable, E
         _;
     }
 
+    /** EVENT */
     /**
      * @dev Emitted when transfer  Manager config is changed.
      */
     event TransferWithPermit(address _from, address _to, uint256 _amount);
 
+    /** STORAGE */
     IERC20PermitWithTransfer public dllr;
 
     function initialize(address payable _dllrTokenAddress) external initializer {

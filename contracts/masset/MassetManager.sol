@@ -99,6 +99,8 @@ contract MassetManager is
         bytes userData
     );
 
+    event MAssetTokenIntermediaryChanged(address indexed sender, address newMassetTokenIntermediary);
+
     // state
 
     bytes32 constant ERC777_RECIPIENT_INTERFACE_HASH = keccak256("ERC777TokensRecipient");
@@ -110,6 +112,8 @@ contract MassetManager is
 
     FeesVault private feesVault;
     FeesManager private feesManager;
+
+    address public mAssetTokenIntermediary;
 
     // internal
 
@@ -584,5 +588,10 @@ contract MassetManager is
      */
     function getProxyImplementation() external view returns (address) {
         return ERC1967UpgradeUpgradeable._getImplementation();
+    }
+
+    function setMassetTokenIntermediary(address _newMAssetTokenIntermediary) external onlyOwner {
+        mAssetTokenIntermediary = _newMAssetTokenIntermediary;
+        emit MAssetTokenIntermediaryChanged(msg.sender, _newMAssetTokenIntermediary);
     }
 }

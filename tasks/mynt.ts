@@ -1017,6 +1017,62 @@ task("upgrade:mocIntegration", "Upgrade implementation of mocIntegration contrac
       description: "Upgrade MocIntegration contract"
     }
 
-    _createSIP(hre, sipArgs);
+    createSIP(hre, sipArgs);
+  }
+});
+
+task("mynt:setMassetTokenIntermediary", "set mAsset token indermediary address in massetManager contract")
+.addOptionalParam("isMultisig", "flag if transaction needs to be intiated from the multisig contract")
+.addOptionalParam("isSIP", "flag if transaction needs to be initiated from the SIP")
+.setAction(async ({ isMultisig, isSIP }, hre) => {
+  const { network } = hre;
+  if (!isMultisig && !isSIP) {
+    const { isMultisigFlag, isSIPFlag } =
+      helpers.defaultValueMultisigOrSipFlag(network.tags);
+    isMultisig = isMultisigFlag;
+    isSIP = isSIPFlag;
+  }
+
+  // if isMultisig & isSIP are false, transaction will be initiated as per normal
+  helpers.injectHre(hre);
+  const {
+    ethers,
+    deployments: { get },
+    getNamedAccounts,
+  } = hre;
+
+  const dllrTransferWithPermitDeployment = await get("DllrTransferWithPermit");
+  const massetManager = await ethers.getContract("MassetManager")
+  const { deployer } = await getNamedAccounts();
+  if (isMultisig) {
+    const multisigAddress = (await get("MultisigWallet")).address;
+    const data = massetManager.interface.encodeFunctionData(
+      "setMassetTokenIntermediary",
+      [dllrTransferWithPermitDeployment.address]
+    );
+    await helpers.sendWithMultisig(
+      multisigAddress,
+      massetManager.address,
+      data,
+      deployer
+    );
+  } else if (isSIP) {
+    const signature = "setBasketManagerProxy(address)";
+    const data = massetManager.interface.encodeFunctionData(
+      "setMassetTokenIntermediary",
+      [dllrTransferWithPermitDeployment.address]
+    );
+
+    const sipArgs: ISipArgument = {
+      targets: [massetManager.address],
+      values: [0],
+      signatures: [signature],
+      data: [data],
+      description: "Set mAssetTokenIntermediary address",
+    };
+
+    createSIP(hre, sipArgs);
+  } else {
+    await massetManager.setMassetTokenIntermediary(dllrTransferWithPermitDeployment.address);
   }
 });
