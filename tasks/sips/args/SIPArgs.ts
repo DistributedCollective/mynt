@@ -50,10 +50,33 @@ const SIPSetBasketManagerProxy = async (hre): Promise<ISipArgument> => {
   return args;
 }
 
+const SIPSOV3564 = async (hre): Promise<ISipArgument> => {
+  const { ethers } = hre;
+  const DllrTransferWithPermit = await ethers.getContract("DllrTransferWithPermit");
+  const mAssetManager = await ethers.getContract("MassetManager");
+  const mocIntegrationProxy = await ethers.getContract("MocIntegration"); // MocIntegration
+  const newMocIntegrationImpl = await ethers.getContract("MocIntegration_Implementation");
+  const myntAdminProxy = await ethers.getContract("MyntAdminProxy");
+
+  const args: ISipArgument = {
+    targets: [mocIntegrationProxy.address, mAssetManager.address],
+    values: [0,0],
+    signatures: ["upgrade(address,address)", "setMassetTokenIntermediary(address)"],
+    data: [myntAdminProxy.interface.encodeFunctionData("upgrade", [
+      mocIntegrationProxy.address, newMocIntegrationImpl.address
+    ]), mAssetManager.interface.encodeFunctionData("setMassetTokenIntermediary",[DllrTransferWithPermit.address])],
+    /** @todo update SIP description */
+    description: "SIP-SOV3564: "
+  }
+
+  return args;
+}
+
 const SIPArgs = {
   SampleSIP01,
   SIPSetMassetManagerProxy,
   SIPSetBasketManagerProxy,
+  SIPSOV3564
 }
 
 export default SIPArgs;
