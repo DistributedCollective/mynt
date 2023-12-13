@@ -25,6 +25,7 @@
     "include": [
         "./scripts",
         // "./tests", @todo uncomment when tests are converted to support ethers typechain typings
+        "./tests-onchain",
         "./types",
         "./tasks",
         "./deployment/deploy",

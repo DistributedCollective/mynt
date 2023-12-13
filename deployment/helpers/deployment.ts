@@ -2,14 +2,15 @@ import hre from "hardhat";
 
 /// @dev This file requires HardhatRuntimeEnvironment `hre` variable in its parent context for functions using hre to work
 
-import Logs from "node-logs";
 import col from "cli-color";
 import { sendWithMultisig } from "../../scripts/helpers/helpers";
-import { TransparentUpgradeableProxy } from "../../types/generated";
+import {
+  MyntAdminProxy,
+  TransparentUpgradeableProxy,
+} from "../../types/generated";
 
 const {
-  deployments: { deploy, get, getOrNull, log, save },
-  getNamedAccounts,
+  deployments: { deploy, get, log, save },
   ethers,
 } = hre;
 
@@ -21,7 +22,7 @@ const upgradeWithTransparentUpgradableProxy = async (
   proxyInstanceName: string | undefined = undefined, // save proxy implementation as
   proxyAdminName = "MyntAdminProxy", // proxy admin implementation
   forceOwnerIsMultisig = false, // overrides network dependency
-  args = [],
+  args: string[] = [],
   multisigName = "MultiSigWallet"
 ) => {
   proxyInstanceName = proxyInstanceName === "" ? undefined : proxyInstanceName;
@@ -31,14 +32,13 @@ const upgradeWithTransparentUpgradableProxy = async (
   const proxyAdmin = await ethers.getContract(proxyAdminName);
 
   const proxyName = proxyInstanceName ?? proxyArtifactName; // support multiple deployments of the same artifact
-  console.log("proxyName:", proxyName);
 
   const logicName = logicInstanceName ?? logicArtifactName;
   const logicImplName = `${logicName}_Implementation`; // naming convention like in hh deployment
   const logicDeploymentTx = await deploy(logicImplName, {
     contract: logicArtifactName,
     from: deployer,
-    args,
+    args: args,
     log: true,
   });
 
@@ -46,8 +46,6 @@ const upgradeWithTransparentUpgradableProxy = async (
     proxyName
   );
   const proxyDeployment = await get(proxyName);
-  console.log("proxy.address:", proxy.address);
-  // console.log(await proxy.implementation());
   const prevImpl = await proxyAdmin.getProxyImplementation(proxy.address);
   log(`Current ${proxyName} implementation: ${prevImpl}`);
 
@@ -86,6 +84,7 @@ const upgradeWithTransparentUpgradableProxy = async (
         );
         log();
         await sendWithMultisig(
+          hre,
           multisigDeployment.address,
           proxyAdminDeployment.address,
           data,
@@ -115,22 +114,27 @@ const upgradeWithTransparentUpgradableProxy = async (
             ),
           ],
         };
-        log(col.yellowBright(sipArgs));
+        log(col.yellowBright(JSON.stringify(sipArgs)));
         log(
-          ">>> DON'T PUSH DEPLOYMENTS TO THE REPO UNTIL THE SIP IS SUCCESSFULLY EXECUTED <<<`"
+          ">>> DON'T MERGE DEPLOYMENTS TO THE MAIN (DEVELOPMENT) BRANCH UNTIL THE SIP IS SUCCESSFULLY EXECUTED <<<`"
         );
         // governance is the owner - need a SIP to register
         // TODO: implementation ; meanwhile use brownie sip_interaction scripts to create proposal
       }
     } else {
       // eslint-disable-next-line no-shadow
-      const proxy = await ethers.getContractAt(
+      const adminProxy: MyntAdminProxy = await ethers.getContractAt(
         proxyName,
         proxyDeployment.address
       );
-      await proxy.upgrade(logicDeploymentTx.address);
+      await adminProxy.upgrade(
+        proxyDeployment.address,
+        logicDeploymentTx.address
+      );
       log(
-        `>>> New implementation ${await proxy.implementation()} is set to the proxy <<<`
+        `>>> New implementation ${await adminProxy.getProxyImplementation(
+          proxyDeployment.address
+        )} is set to the proxy <<<`
       );
     }
     log();

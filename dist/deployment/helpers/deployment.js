@@ -5,9 +5,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.upgradeWithTransparentUpgradableProxy = void 0;
 const hardhat_1 = __importDefault(require("hardhat"));
+/// @dev This file requires HardhatRuntimeEnvironment `hre` variable in its parent context for functions using hre to work
 const cli_color_1 = __importDefault(require("cli-color"));
-const multisig_1 = require("scripts/helpers/multisig");
-const { deployments: { deploy, get, getOrNull, log, save }, getNamedAccounts, ethers, } = hardhat_1.default;
+const helpers_1 = require("../../scripts/helpers/helpers");
+const { deployments: { deploy, get, log, save }, ethers, } = hardhat_1.default;
 const upgradeWithTransparentUpgradableProxy = async (deployer, logicArtifactName, // logic contract artifact name
 proxyArtifactName, // proxy deployment name
 logicInstanceName = undefined, // save logic implementation as
@@ -20,19 +21,16 @@ args = [], multisigName = "MultiSigWallet") => {
     const proxyAdminDeployment = await get(proxyAdminName);
     const proxyAdmin = await ethers.getContract(proxyAdminName);
     const proxyName = proxyInstanceName ?? proxyArtifactName; // support multiple deployments of the same artifact
-    console.log("proxyName:", proxyName);
     const logicName = logicInstanceName ?? logicArtifactName;
     const logicImplName = `${logicName}_Implementation`; // naming convention like in hh deployment
     const logicDeploymentTx = await deploy(logicImplName, {
         contract: logicArtifactName,
         from: deployer,
-        args,
+        args: args,
         log: true,
     });
     const proxy = await ethers.getContract(proxyName);
     const proxyDeployment = await get(proxyName);
-    console.log("proxy.address:", proxy.address);
-    // console.log(await proxy.implementation());
     const prevImpl = await proxyAdmin.getProxyImplementation(proxy.address);
     log(`Current ${proxyName} implementation: ${prevImpl}`);
     if (logicDeploymentTx.newlyDeployed ||
@@ -60,7 +58,7 @@ args = [], multisigName = "MultiSigWallet") => {
                 ]);
                 log(`Creating multisig tx to set ${logicArtifactName} (${logicDeploymentTx.address}) as implementation for ${proxyName} (${proxyDeployment.address}...`);
                 log();
-                await (0, multisig_1.sendWithMultisig)(multisigDeployment.address, proxyAdminDeployment.address, data, deployer);
+                await (0, helpers_1.sendWithMultisig)(hardhat_1.default, multisigDeployment.address, proxyAdminDeployment.address, data, deployer);
                 log(cli_color_1.default.bgBlue(`>>> DONE. Requires Multisig (${multisigDeployment.address}) signing to execute tx <<<
                  >>> DON'T PUSH DEPLOYMENTS TO THE REPO UNTIL THE MULTISIG TX SUCCESSFULLY SIGNED & EXECUTED <<<`));
             }
@@ -75,17 +73,17 @@ args = [], multisigName = "MultiSigWallet") => {
                         ethers.utils.defaultAbiCoder.encode(["address", "address"], [proxyDeployment.address, logicDeploymentTx.address]),
                     ],
                 };
-                log(cli_color_1.default.yellowBright(sipArgs));
-                log(">>> DON'T PUSH DEPLOYMENTS TO THE REPO UNTIL THE SIP IS SUCCESSFULLY EXECUTED <<<`");
+                log(cli_color_1.default.yellowBright(JSON.stringify(sipArgs)));
+                log(">>> DON'T MERGE DEPLOYMENTS TO THE MAIN (DEVELOPMENT) BRANCH UNTIL THE SIP IS SUCCESSFULLY EXECUTED <<<`");
                 // governance is the owner - need a SIP to register
                 // TODO: implementation ; meanwhile use brownie sip_interaction scripts to create proposal
             }
         }
         else {
             // eslint-disable-next-line no-shadow
-            const proxy = await ethers.getContractAt(proxyName, proxyDeployment.address);
-            await proxy.upgrade(logicDeploymentTx.address);
-            log(`>>> New implementation ${await proxy.implementation()} is set to the proxy <<<`);
+            const adminProxy = await ethers.getContractAt(proxyName, proxyDeployment.address);
+            await adminProxy.upgrade(proxyDeployment.address, logicDeploymentTx.address);
+            log(`>>> New implementation ${await adminProxy.getProxyImplementation(proxyDeployment.address)} is set to the proxy <<<`);
         }
         log();
     }

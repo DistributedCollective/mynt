@@ -81,7 +81,6 @@ describe("MoC Integration With Intermediary Dllr", async () => {
         await basketManager.addBassets(
             [bAssetZusd.address, bAssetDoc.address],
             [1, 1],
-            [ZERO_ADDRESS, ZERO_ADDRESS],
             [0, 0],
             [1000, 1000],
             [false, false]

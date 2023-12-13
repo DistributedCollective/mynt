@@ -1,12 +1,12 @@
 import { DeployFunction } from "hardhat-deploy/types";
 import { upgradeWithTransparentUpgradableProxy } from "../helpers/deployment";
 
-const func: DeployFunction = async ({
-  deployments: { deploy, getOrNull },
-  getNamedAccounts,
-}) => {
+const func: DeployFunction = async (hre) => {
+  const {
+    deployments: { deploy, getOrNull },
+    getNamedAccounts,
+  } = hre;
   const { deployer } = await getNamedAccounts();
-
   const deploymentName = "FeesVault";
   const deployment = await getOrNull(deploymentName);
   if (deployment) {

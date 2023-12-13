@@ -1,8 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-require("./contractsInteraction");
-require("./metaAssetTokenInteraction");
-require("./upgradeContract");
-require("./transferOwnership");
-require("./sips/createSIP");
+require("./mynt");
+require("./sips");
+// import "./multisig"; // hh config imports sovrynsmartcontracts multisig tasks
 //# sourceMappingURL=index.js.map

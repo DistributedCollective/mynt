@@ -12,12 +12,11 @@ const func: DeployFunction = async ({
   const { deployer } = await getNamedAccounts();
   let bAssets;
   let factors = [1, 1];
-  let bridges = [constants.AddressZero, constants.AddressZero];
   let mins = [0, 0];
   let maxs = [1000, 1000]; // need to set to what MAX_VALUE defined in BasketManager contract
   let pausedFlags = [false, false];
 
-  if (["rskTestnet", "rskForkedTestnet"].includes(networkName)) {
+  if (["rskTestnet", "rskSovrynTestnet", "rskForkedTestnet"].includes(networkName)) {
     // @todo add forked nets to hh config
     bAssets = [
       "0x6b41566353d6c7b8c2a7931d498f11489dacac29", // ZUSD Testnet
@@ -43,7 +42,6 @@ const func: DeployFunction = async ({
         bAssetsNames,
         bAssets,
         factors,
-        bridges,
         mins,
         maxs,
         pausedFlags,
@@ -64,10 +62,9 @@ const func: DeployFunction = async ({
     .filter((el) => el !== undefined);
 
   if (bassetsToExclude.length !== 0) {
-    [bAssets, factors, bridges, mins, maxs, pausedFlags] = [
+    [bAssets, factors, mins, maxs, pausedFlags] = [
       bAssets,
       factors,
-      bridges,
       mins,
       maxs,
       pausedFlags,
@@ -83,7 +80,6 @@ const func: DeployFunction = async ({
       "addBassets",
       bAssets,
       factors,
-      bridges,
       mins,
       maxs,
       pausedFlags
@@ -97,5 +93,9 @@ const func: DeployFunction = async ({
 func.tags = ["AddBassetsInBasketManager"];
 func.dependencies = ["DeployMockBAssets"];
 func.runAtTheEnd = true;
+func.skip = async (hre) => {
+  return true;
+};
+func.id = "1";
 
 export default func;
