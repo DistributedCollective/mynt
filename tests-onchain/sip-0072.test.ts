@@ -23,7 +23,7 @@ const {
 const MAX_DURATION = ethers.BigNumber.from(24 * 60 * 60).mul(1092);
 const ONE_RBTC = ethers.utils.parseEther("1.0");
 
-describe("SIP-0064 onchain test", () => {
+describe("SIP-0072 onchain test", () => {
   const getImpersonatedSignerFromJsonRpcProvider = async (
     addressToImpersonate
   ) => {
@@ -111,7 +111,7 @@ describe("SIP-0064 onchain test", () => {
     await snapshot.restore();
   };
 
-  it("SIP-0064 is executable", async () => {
+  it("SIP-0072 is executable", async () => {
     if (!hre.network.tags["forked"]) return;
     const {
       deployer,
@@ -181,7 +181,7 @@ describe("SIP-0064 onchain test", () => {
     // CREATE PROPOSAL AND VERIFY
     const proposalIdBeforeSIP = await governorOwner.proposalCount();
     await hre.run("mynt-sips:create", {
-      argsFunc: "sip0064",
+      argsFunc: "sip0072",
     });
     const proposalId = await governorOwner.latestProposalIds(deployer);
     expect(
