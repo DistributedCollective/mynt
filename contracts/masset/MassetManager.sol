@@ -63,7 +63,10 @@ contract MassetManager is
         uint256 bassetQuantity
     );
 
-    event MassetTokenIntermediaryChanged(address indexed sender, address newMassetTokenIntermediary);
+    event MassetTokenIntermediaryChanged(
+        address indexed sender,
+        address newMassetTokenIntermediary
+    );
 
     // state
 
