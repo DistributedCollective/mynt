@@ -80,7 +80,7 @@ const SIPSetBasketManagerProxy = async (hre): Promise<ISipArgument> => {
   return args;
 };
 
-const sip0064 = async (
+const sip0072 = async (
   hre: HardhatRuntimeEnvironment
 ): Promise<ISipArgument> => {
   // Replace BasketManagerV3, MassetManager, FeesManager
@@ -159,7 +159,7 @@ const sip0064 = async (
       signatures: signatures,
       data: datas,
       description:
-        "SIP-0064: Remove Bridge Functions from Mynt, Details: https://github.com/DistributedCollective/SIPS/blob/3a3051a/SIP-0064.md, sha256: f3992c60dd7fce078e3afcd3d1687d61c852f62e01deabb67daaac83dcbd0dbd",
+        "SIP-0072: Remove Bridge Functions from Mynt, Details: https://github.com/DistributedCollective/SIPS/blob/a453ba9/SIP-0072.md, sha256: 9b1817dff2cbb52d04a5c20df6f8122b994b91f4b017a33df0934fe6ff699ad4",
     },
     governorName: "GovernorOwner",
   };
@@ -196,8 +196,8 @@ const sipArgs = {
   SampleSIP01,
   SIPSetMassetManagerProxy,
   SIPSetBasketManagerProxy,
-  sip0064,
-  SIPSOV3564
+  SIPSOV3564,
+  sip0072,
 };
 
 export default sipArgs;
