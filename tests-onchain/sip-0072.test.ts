@@ -1,4 +1,7 @@
-// const { expect } = require("chai");
+// first run a local forked mainnet node in a separate terminal window:
+//     npx hardhat node --fork https://mainnet-dev.sovryn.app/rpc --no-deploy
+// now run the test:
+//     npx hardhat test tests-onchain/sip-0072.test.ts --network rskForkedMainnet
 const chai = require("chai");
 const { expect } = chai;
 
@@ -104,7 +107,7 @@ describe("SIP-0072 onchain test", () => {
   });
   let snapshot: SnapshotRestorer;
   before(async () => {
-    await reset("https://mainnet-dev.sovryn.app/rpc", 5387748);
+    await reset("https://mainnet-dev.sovryn.app/rpc", 5911035);
     snapshot = await takeSnapshot();
   });
   async () => {
@@ -123,20 +126,20 @@ describe("SIP-0072 onchain test", () => {
     } = await setupTest();
     // loadFixtureAfterEach = true;
     // CREATE PROPOSAL
-    console.log("deploying new contracts...");
-    await deployments.fixture(
-      [
-        "BasketManager",
-        "MasssetManager",
-        "FeesManager",
-        "FeesVault",
-        "MocIntegration",
-      ],
-      {
-        keepExistingDeployments: true,
-      }
-    );
-    console.log("DONE deploying new contracts...");
+    //console.log("deploying new contracts...");
+    // await deployments.fixture(
+    //   [
+    //     "BasketManager",
+    //     "MassetManager",
+    //     "FeesManager",
+    //     "FeesVault",
+    //     "MocIntegration",
+    //   ],
+    //   {
+    //     keepExistingDeployments: true,
+    //   }
+    // );
+    //console.log("DONE deploying new contracts...");
     const sov = await ethers.getContract("SOV", timelockOwnerSigner);
     const whaleAmount = (await sov.totalSupply()).mul(ethers.BigNumber.from(5));
     await sov.mint(deployerSigner.address, whaleAmount);
