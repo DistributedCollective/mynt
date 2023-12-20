@@ -74,7 +74,10 @@ const testnetAccounts: any = process.env.TESTNET_DEPLOYER_PRIVATE_KEY
     ]
   : [];
 const mainnetAccounts: any = process.env.MAINNET_DEPLOYER_PRIVATE_KEY
-  ? [process.env.MAINNET_DEPLOYER_PRIVATE_KEY]
+  ? [
+      process.env.MAINNET_DEPLOYER_PRIVATE_KEY,
+      process.env.PROPOSAL_CREATOR_PRIVATE_KEY,
+    ]
   : [];
 
 const config: HardhatUserConfig = {
