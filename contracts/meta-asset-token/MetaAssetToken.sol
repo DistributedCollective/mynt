@@ -31,7 +31,7 @@ contract MetaAssetToken is ERC20Permit, Ownable {
     /**
      * @dev Emitted when transfer  Manager config is changed.
      */
-    event TransferWithPermit(address indexed _from, address indexed _to, uint256 _amount);
+    event TransferWithPermit(address _from, address _to, uint256 _amount);
 
     // state
 
