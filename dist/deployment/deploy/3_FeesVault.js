@@ -1,7 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const deployment_1 = require("../helpers/deployment");
-const func = async ({ deployments: { deploy, getOrNull }, getNamedAccounts, }) => {
+const func = async (hre) => {
+    const { deployments: { deploy, getOrNull }, getNamedAccounts, } = hre;
     const { deployer } = await getNamedAccounts();
     const deploymentName = "FeesVault";
     const deployment = await getOrNull(deploymentName);

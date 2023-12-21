@@ -9,7 +9,6 @@ import { StandardAccounts } from "@utils/standardAccounts";
 import {
   BasketManagerV3Instance,
   MassetManagerInstance,
-  MockBridgeInstance,
   MockERC20Instance,
   FeesVaultInstance,
   FeesManagerInstance,
@@ -24,7 +23,6 @@ const BasketManagerV3 = artifacts.require("BasketManagerV3");
 const MassetManager = artifacts.require("MassetManager");
 const MetaAssetToken = artifacts.require("MetaAssetToken");
 const MockERC20 = artifacts.require("MockERC20");
-const MockBridge = artifacts.require("MockBridge");
 const FeesVault = artifacts.require("FeesVault");
 const FeesManager = artifacts.require("FeesManager");
 
@@ -32,16 +30,12 @@ let standardAccounts: StandardAccounts;
 
 type Fees = {
   deposit: BN;
-  depositBridge: BN;
   withdrawal: BN;
-  withdrawalBridge: BN;
 };
 
 const standardFees: Fees = {
   deposit: new BN(100),
-  depositBridge: new BN(200),
   withdrawal: new BN(300),
-  withdrawalBridge: new BN(400),
 };
 
 contract("MassetManager", async (accounts) => {
@@ -50,7 +44,6 @@ contract("MassetManager", async (accounts) => {
   let mAsset: MetaAssetTokenInstance;
   let vault: FeesVaultInstance;
   let mockTokenDummy: MockERC20Instance;
-  let mockBridge: MockBridgeInstance;
 
   standardAccounts = new StandardAccounts(accounts);
 
@@ -75,8 +68,7 @@ contract("MassetManager", async (accounts) => {
       it("when given a valid basket manager", async () => {
         await massetManager.initialize(
           basketManagerObj.basketManager.address,
-          mAsset.address,
-          false
+          mAsset.address
         );
 
         let version = await massetManager.getVersion();
@@ -103,7 +95,7 @@ contract("MassetManager", async (accounts) => {
     context("should fail", async () => {
       it("when basket manager missing", async () => {
         await expectRevert(
-          massetManager.initialize(ZERO_ADDRESS, mAsset.address, false),
+          massetManager.initialize(ZERO_ADDRESS, mAsset.address),
           "VM Exception while processing transaction: reverted with reason string 'invalid basket manager'"
         );
       });
@@ -111,8 +103,7 @@ contract("MassetManager", async (accounts) => {
         await expectRevert(
           massetManager.initialize(
             basketManagerObj.basketManager.address,
-            ZERO_ADDRESS,
-            false
+            ZERO_ADDRESS
           ),
           "VM Exception while processing transaction: reverted with reason string 'invalid mAssetToken'"
         );
@@ -120,14 +111,12 @@ contract("MassetManager", async (accounts) => {
       it("when already initialized", async () => {
         await massetManager.initialize(
           basketManagerObj.basketManager.address,
-          mAsset.address,
-          false
+          mAsset.address
         );
         await expectRevert(
           massetManager.initialize(
             basketManagerObj.basketManager.address,
-            mAsset.address,
-            false
+            mAsset.address
           ),
           "VM Exception while processing transaction: reverted with reason string 'Initializable: contract is already initialized'"
         );
@@ -610,7 +599,9 @@ contract("MassetManager", async (accounts) => {
             basketManagerObj.mockToken1.address,
             tokens(10),
             ZERO_ADDRESS,
-            { from: standardAccounts.dummy1 }
+            {
+              from: standardAccounts.dummy1,
+            }
           ),
           "VM Exception while processing transaction: reverted with reason string 'must be a valid recipient'"
         );
@@ -656,467 +647,6 @@ contract("MassetManager", async (accounts) => {
 
         const vaultBalance = await mAsset.balanceOf(vault.address);
         expect(vaultBalance).bignumber.to.eq(mintFee.add(withdrawalFee));
-      });
-    });
-  });
-
-  describe("redeemToBridge", async () => {
-    const mintAmount = tokens(1);
-    const mintFee = mintAmount.mul(standardFees.deposit).div(FEE_PRECISION);
-    const mintedMassets = mintAmount.sub(mintFee);
-
-    beforeEach(async () => {
-      vault = await FeesVault.new();
-      massetManager = await MassetManager.new();
-      mAsset = await createMassetToken(massetManager);
-      mockBridge = await MockBridge.new();
-
-      basketManagerObj = await createBasketManager(
-        massetManager,
-        [18, 18],
-        [1, 1],
-        [mockBridge.address, mockBridge.address]
-      );
-
-      await initMassetManager(
-        massetManager,
-        basketManagerObj.basketManager.address,
-        mAsset.address,
-        vault.address,
-        standardFees,
-        {
-          from: standardAccounts.default,
-        }
-      );
-      await setTokenProxies(mAsset, massetManager);
-
-      await basketManagerObj.mockToken1.approve(
-        massetManager.address,
-        mintAmount,
-        {
-          from: standardAccounts.dummy1,
-        }
-      );
-      await massetManager.mint(
-        basketManagerObj.mockToken1.address,
-        mintAmount,
-        {
-          from: standardAccounts.dummy1,
-        }
-      );
-      await mAsset.approve(massetManager.address, mintAmount, {
-        from: standardAccounts.dummy1,
-      });
-    });
-
-    context("should fail", () => {
-      it("when bridge is not valid", async () => {
-        await basketManagerObj.basketManager.setBridge(
-          basketManagerObj.mockToken1.address,
-          ZERO_ADDRESS,
-          {
-            from: standardAccounts.default,
-          }
-        );
-
-        await expectRevert(
-          massetManager.methods["redeemToBridge(address,uint256,address)"](
-            basketManagerObj.mockToken1.address,
-            mintedMassets,
-            standardAccounts.dummy2,
-            { from: standardAccounts.dummy1 }
-          ),
-          "VM Exception while processing transaction: reverted with reason string 'invalid bridge'"
-        );
-      });
-    });
-
-    context("should succeed", () => {
-      it("if all params are valid", async () => {
-        const withdrawalFee = mintedMassets
-          .mul(standardFees.withdrawalBridge)
-          .div(FEE_PRECISION);
-
-        await massetManager.methods["redeemToBridge(address,uint256,address)"](
-          basketManagerObj.mockToken1.address,
-          mintedMassets,
-          standardAccounts.dummy2,
-          { from: standardAccounts.dummy1 }
-        );
-
-        const bridgeBalance = await getBalance(
-          basketManagerObj.mockToken1,
-          mockBridge.address
-        );
-        expect(bridgeBalance).to.bignumber.eq(
-          mintedMassets.sub(withdrawalFee),
-          "should transfer bassets to bridge"
-        );
-
-        const vaultBalance = await mAsset.balanceOf(vault.address);
-        expect(vaultBalance).bignumber.to.eq(mintFee.add(withdrawalFee));
-      });
-    });
-  });
-
-  describe("onTokensMinted", async () => {
-    beforeEach(async () => {
-      vault = await FeesVault.new();
-      massetManager = await MassetManager.new();
-      mAsset = await createMassetToken(massetManager);
-      mockBridge = await MockBridge.new();
-
-      basketManagerObj = await createBasketManager(
-        massetManager,
-        [18, 18],
-        [1, 1],
-        [mockBridge.address, mockBridge.address]
-      );
-
-      await initMassetManager(
-        massetManager,
-        basketManagerObj.basketManager.address,
-        mAsset.address,
-        vault.address,
-        standardFees
-      );
-      await setTokenProxies(mAsset, massetManager);
-    });
-
-    context("should fail", async () => {
-      it("when it's not called by bridge", async () => {
-        await expectRevert(
-          massetManager.onTokensMinted(
-            tokens(1),
-            basketManagerObj.mockToken1.address,
-            web3.eth.abi.encodeParameters(["bytes"], [standardAccounts.dummy1]),
-            { from: standardAccounts.default }
-          ),
-          "VM Exception while processing transaction: reverted with reason string 'only bridge may call'"
-        );
-      });
-
-      it("when recipient address is invalid", async () => {
-        await expectRevert(
-          mockBridge.callOnTokensMinted(
-            massetManager.address,
-            tokens(1),
-            basketManagerObj.mockToken1.address,
-            ZERO_ADDRESS,
-            {
-              from: standardAccounts.default,
-            }
-          ),
-          "VM Exception while processing transaction: reverted with reason string 'Converter: Error decoding extraData'"
-        );
-      });
-
-      it("when amount is zero", async () => {
-        await expectRevert(
-          mockBridge.callOnTokensMinted(
-            massetManager.address,
-            tokens(0),
-            basketManagerObj.mockToken1.address,
-            standardAccounts.dummy1,
-            {
-              from: standardAccounts.default,
-            }
-          ),
-          "VM Exception while processing transaction: reverted with reason string 'amount must be > 0'"
-        );
-      });
-
-      it("when basset is invalid", async () => {
-        await expectRevert(
-          mockBridge.callOnTokensMinted(
-            massetManager.address,
-            tokens(1),
-            standardAccounts.other,
-            standardAccounts.dummy1,
-            {
-              from: standardAccounts.default,
-            }
-          ),
-          "VM Exception while processing transaction: reverted with reason string 'invalid basset'"
-        );
-      });
-
-      it("when basket is out of balance", async () => {
-        await basketManagerObj.basketManager.setRange(
-          basketManagerObj.mockToken1.address,
-          0,
-          10,
-          {
-            from: standardAccounts.default,
-          }
-        );
-
-        await expectRevert(
-          mockBridge.callOnTokensMinted(
-            massetManager.address,
-            tokens(10000),
-            basketManagerObj.mockToken1.address,
-            standardAccounts.dummy1,
-            { from: standardAccounts.default }
-          ),
-          "VM Exception while processing transaction: reverted with reason string 'basket out of balance'"
-        );
-      });
-    });
-
-    context("should succeed", async () => {
-      it("whit all valid params", async () => {
-        const amount = tokens(1);
-        const expectedFee = amount
-          .mul(standardFees.depositBridge)
-          .div(FEE_PRECISION);
-        const expectedMassetQuantity = amount.sub(expectedFee);
-
-        const recipient = standardAccounts.dummy1;
-
-        const recepit = await mockBridge.callOnTokensMinted(
-          massetManager.address,
-          amount,
-          basketManagerObj.mockToken1.address,
-          recipient,
-          { from: standardAccounts.default }
-        );
-
-        await expectEvent.inTransaction(
-          recepit.tx,
-          MassetManager,
-          "Minted",
-          {
-            minter: mockBridge.address,
-            recipient,
-            massetQuantity: expectedMassetQuantity,
-            bAsset: basketManagerObj.mockToken1.address,
-            bassetQuantity: amount,
-          },
-          {}
-        );
-
-        const balance = await mAsset.balanceOf(recipient);
-        expect(balance).bignumber.to.eq(
-          expectedMassetQuantity,
-          "should mint proper amount of tokens to recipient"
-        );
-
-        const vaultBalance = await mAsset.balanceOf(vault.address);
-        expect(vaultBalance).bignumber.to.eq(
-          expectedFee,
-          "should mint proper amount of tokens to recipient"
-        );
-      });
-    });
-  });
-
-  describe("redeemByBridge", async () => {
-    const fees = {
-      ...standardFees,
-      withdrawalBridge: new BN(0),
-    };
-
-    beforeEach(async () => {
-      vault = await FeesVault.new();
-      massetManager = await MassetManager.new();
-      mAsset = await createMassetToken(massetManager);
-      mockBridge = await MockBridge.new();
-
-      basketManagerObj = await createBasketManager(
-        massetManager,
-        [18, 18],
-        [1, 1],
-        [mockBridge.address, mockBridge.address]
-      );
-
-      await initMassetManager(
-        massetManager,
-        basketManagerObj.basketManager.address,
-        mAsset.address,
-        vault.address,
-        fees
-      );
-      await setTokenProxies(mAsset, massetManager);
-    });
-
-    context("should fail", async () => {
-      it("when it's not called by bridge", async () => {
-        await expectRevert(
-          massetManager.redeemByBridge(
-            basketManagerObj.mockToken1.address,
-            tokens(1),
-            standardAccounts.dummy1,
-            {
-              from: standardAccounts.default,
-            }
-          ),
-          "VM Exception while processing transaction: reverted with reason string 'must be called by bridge'"
-        );
-      });
-
-      it("when recipient address is invalid", async () => {
-        await expectRevert(
-          mockBridge.callRedeemByBridge(
-            massetManager.address,
-            basketManagerObj.mockToken1.address,
-            tokens(1),
-            ZERO_ADDRESS,
-            {
-              from: standardAccounts.default,
-            }
-          ),
-          "VM Exception while processing transaction: reverted with reason string 'must be a valid recipient'"
-        );
-      });
-
-      it("when amount is zero", async () => {
-        await expectRevert(
-          mockBridge.callRedeemByBridge(
-            massetManager.address,
-            basketManagerObj.mockToken1.address,
-            tokens(0),
-            standardAccounts.dummy1,
-            {
-              from: standardAccounts.default,
-            }
-          ),
-          "VM Exception while processing transaction: reverted with reason string 'mAsset quantity must be greater than 0'"
-        );
-      });
-
-      it("when basset is invalid", async () => {
-        await expectRevert(
-          mockBridge.callRedeemByBridge(
-            massetManager.address,
-            standardAccounts.other,
-            tokens(1),
-            standardAccounts.dummy1,
-            {
-              from: standardAccounts.default,
-            }
-          ),
-          "VM Exception while processing transaction: reverted with reason string 'invalid basset'"
-        );
-      });
-
-      it("when basket is out of balance", async () => {
-        await basketManagerObj.basketManager.setRange(
-          basketManagerObj.mockToken1.address,
-          0,
-          10,
-          {
-            from: standardAccounts.default,
-          }
-        );
-
-        await expectRevert(
-          mockBridge.callRedeemByBridge(
-            massetManager.address,
-            basketManagerObj.mockToken1.address,
-            tokens(10000),
-            standardAccounts.dummy1,
-            { from: standardAccounts.default }
-          ),
-          "VM Exception while processing transaction: reverted with reason string 'basset balance is not sufficient'"
-        );
-      });
-    });
-
-    context("should succeed", async () => {
-      it("whit all valid params", async () => {
-        const recipient = standardAccounts.dummy1;
-
-        // ----- make a deposit to get some massets -----
-
-        const initialToken1Balance =
-          await basketManagerObj.mockToken1.balanceOf(recipient);
-        await basketManagerObj.mockToken1.approve(
-          massetManager.address,
-          initialToken1Balance,
-          {
-            from: recipient,
-          }
-        );
-        await massetManager.mint(
-          basketManagerObj.mockToken1.address,
-          initialToken1Balance,
-          {
-            from: recipient,
-          }
-        );
-
-        const expectedMintFee = initialToken1Balance
-          .mul(fees.deposit)
-          .div(FEE_PRECISION);
-
-        const bassetBalanceAfterMint =
-          await basketManagerObj.mockToken1.balanceOf(recipient);
-        const massetBalanceAfterMint = await mAsset.balanceOf(recipient);
-
-        // ----- withdraw tokens using bridge -----
-
-        const amount = tokens(1);
-        const expectedFee = amount
-          .mul(fees.withdrawalBridge)
-          .div(FEE_PRECISION);
-        const expectedBassetQuantity = amount.sub(expectedFee);
-
-        const recepit = await mockBridge.callRedeemByBridge(
-          massetManager.address,
-          basketManagerObj.mockToken1.address,
-          amount,
-          recipient,
-          { from: standardAccounts.default }
-        );
-
-        await expectEvent.inTransaction(
-          recepit.tx,
-          MassetManager,
-          "Redeemed",
-          {
-            redeemer: recipient,
-            recipient,
-            massetQuantity: amount,
-            bAsset: basketManagerObj.mockToken1.address,
-            bassetQuantity: expectedBassetQuantity,
-          },
-          {}
-        );
-
-        const massetBalance = await mAsset.balanceOf(recipient);
-        expect(massetBalance).bignumber.to.eq(
-          massetBalanceAfterMint.sub(amount),
-          "should take proper amount of tokens from recipient"
-        );
-
-        const bassetBalance = await basketManagerObj.mockToken1.balanceOf(
-          recipient
-        );
-        expect(bassetBalance).bignumber.to.eq(
-          bassetBalanceAfterMint.add(expectedBassetQuantity),
-          "should give proper amount of bassets to recipient"
-        );
-
-        const bridgeMassetBalance = await mAsset.balanceOf(mockBridge.address);
-        expect(bridgeMassetBalance).bignumber.to.eq(
-          ZERO,
-          "should not take any massets from bridge"
-        );
-
-        const bridgeBassetBalance = await basketManagerObj.mockToken1.balanceOf(
-          mockBridge.address
-        );
-        expect(bridgeBassetBalance).bignumber.to.eq(
-          ZERO,
-          "bridge should not get any bassets"
-        );
-
-        const vaultBalance = await mAsset.balanceOf(vault.address);
-        expect(vaultBalance).bignumber.to.eq(
-          expectedMintFee.add(expectedFee),
-          "should use proper fee (withdrawBridgeFee)"
-        );
       });
     });
   });
@@ -1230,8 +760,6 @@ contract("MassetManager", async (accounts) => {
   });
 });
 
-const zeroBridges = [ZERO_ADDRESS, ZERO_ADDRESS];
-
 async function initMassetManager(
   massetManager: MassetManagerInstance,
   basketManagerAddress: string,
@@ -1242,19 +770,9 @@ async function initMassetManager(
 ): Promise<void> {
   const feesManager = await FeesManager.new();
 
-  await feesManager.initialize(
-    fees.deposit,
-    fees.depositBridge,
-    fees.withdrawal,
-    fees.withdrawalBridge
-  );
+  await feesManager.initialize(fees.deposit, fees.withdrawal);
 
-  await massetManager.initialize(
-    basketManagerAddress,
-    tokenAddress,
-    false,
-    txDetails
-  );
+  await massetManager.initialize(basketManagerAddress, tokenAddress, txDetails);
 
   await massetManager.upgradeToV3(
     basketManagerAddress,
@@ -1268,8 +786,7 @@ async function initMassetManager(
 async function createBasketManager(
   massetManager: MassetManagerInstance,
   decimals: Array<number>,
-  factors: Array<number | BN>,
-  bridges = zeroBridges
+  factors: Array<number | BN>
 ): Promise<BasketManagerObj> {
   const mockToken1 = await MockERC20.new(
     "",
@@ -1300,15 +817,9 @@ async function createBasketManager(
   await basketManager.initialize(massetManager.address, {
     from: standardAccounts.default,
   });
-  await basketManager.addBassets(
-    bassets,
-    factors,
-    bridges,
-    mins,
-    maxs,
-    pauses,
-    { from: standardAccounts.default }
-  );
+  await basketManager.addBassets(bassets, factors, mins, maxs, pauses, {
+    from: standardAccounts.default,
+  });
 
   return {
     mockToken1,

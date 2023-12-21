@@ -1,70 +1,134 @@
 /* eslint-disable no-console */
 import { task, types } from "hardhat/config";
 import Logs from "node-logs";
-import SIPArgs, { ISipArgument } from "./sips/args/SIPArgs";
+import sipArgsList, { ISipArgument } from "./sips/args/SIPArgs";
 import {
   parseEthersLogToValue,
   sendWithMultisig,
-} from "scripts/helpers/helpers";
-import { delay, logTimer } from "scripts/helpers/utils";
+} from "../scripts/helpers/helpers";
+import { delay, logTimer } from "../scripts/helpers/utils";
 
 const logger = new Logs().showInConsole(true);
 
-export const createSIP = async (hre, sipArgs: ISipArgument) => {
-  const {
-    ethers,
-    deployments: { get },
-  } = hre;
-  const Governor = await get("GovernorOwner");
-  const governor = await ethers.getContractAt(Governor.abi, Governor.address);
-
-  logger.info("=== Creating SIP ===");
-  logger.info(`Governor Address:    ${governor.address}`);
-  logger.info(`Targets:              ${sipArgs.targets}`);
-  logger.info(`Values:              ${sipArgs.values}`);
-  logger.info(`Signatures:           ${sipArgs.signatures}`);
-  logger.info(`Data:                ${sipArgs.data}`);
-  logger.info(`Description:         ${sipArgs.description}`);
-  logger.info(`============================================================='`);
-
-  const tx = await governor.propose(
-    sipArgs.targets,
-    sipArgs.values,
-    sipArgs.signatures,
-    sipArgs.data,
-    sipArgs.description
-  );
-  const receipt = await tx.wait();
-
-  const eventData = governor.interface.parseLog(receipt.logs[0]).args;
-
-  logger.success("=== SIP has been created ===");
-  logger.success(`Governor Address:     ${governor.address}`);
-  logger.success(`Proposal ID:          ${eventData.id.toString()}`);
-  logger.success(`Porposer:             ${eventData.proposer}`);
-  logger.success(`Targets:              ${eventData.targets}`);
-  logger.success(`Values:               ${eventData.values}`);
-  logger.success(`Signatures:           ${eventData.signatures}`);
-  logger.success(`Data:                 ${eventData.calldatas}`);
-  logger.success(`Description:          ${eventData.description}`);
-  logger.success(`Start Block:          ${eventData.startBlock}`);
-  logger.success(`End Block:            ${eventData.endBlock}`);
-  logger.success(
-    `============================================================='`
-  );
-};
-
-task("createSIP", "Create SIP to Sovryn Governance")
+task("mynt-sips:create", "Create SIP to Sovryn Governance")
   .addParam(
-    "argsModuleName",
-    "module name that is located in tasks/sips//args folder which and returning the sip arguments"
+    "argsFunc",
+    "Function name from tasks/sips/args/sipArgs.ts which returns the sip arguments"
   )
-  .setAction(async ({ argsModuleName }, hre) => {
-    const sipArgs: ISipArgument = await SIPArgs[argsModuleName](hre);
-    await createSIP(hre, sipArgs);
+  .addOptionalParam(
+    "deployer",
+    "Deployer address in the accounts list",
+    "deployer"
+  )
+  .setAction(async ({ argsFunc, deployer }, hre) => {
+    const { governorName, args: sipArgs }: ISipArgument = await sipArgsList[
+      argsFunc
+    ](hre);
+    const {
+      ethers,
+      deployments: { get },
+    } = hre;
+
+    const signerAcc = ethers.utils.isAddress(deployer)
+      ? deployer
+      : (await hre.getNamedAccounts())[deployer];
+
+    const deployerSigner = await ethers.getSigner(
+      ethers.utils.isAddress(signerAcc)
+        ? signerAcc
+        : (
+            await ethers.getSigners()
+          )[0].address
+    );
+
+    const governorDeployment = await get(governorName);
+    const governor = await ethers.getContract(governorName, deployerSigner);
+
+    logger.info("=== Creating SIP ===");
+    logger.info(`Governor Address:    ${governorDeployment.address}`);
+    logger.info(`Targets:             ${sipArgs.targets}`);
+    logger.info(`Values:              ${sipArgs.values}`);
+    logger.info(`Signatures:          ${sipArgs.signatures}`);
+    logger.info(`Data:                ${sipArgs.data}`);
+    logger.info(`Description:         ${sipArgs.description}`);
+    logger.info(
+      `============================================================='`
+    );
+
+    const tx = await governor.propose(
+      sipArgs.targets,
+      sipArgs.values,
+      sipArgs.signatures,
+      sipArgs.data,
+      sipArgs.description
+    );
+    const receipt = await tx.wait();
+
+    const eventData = governor.interface.parseLog(receipt.logs[0]).args;
+
+    logger.success("=== SIP has been created ===");
+    logger.success(`Governor Address:     ${governor.address}`);
+    logger.success(`Proposal ID:          ${eventData.id.toString()}`);
+    logger.success(`Porposer:             ${eventData.proposer}`);
+    logger.success(`Targets:              ${eventData.targets}`);
+    logger.success(`Values:               ${eventData.values}`);
+    logger.success(`Signatures:           ${eventData.signatures}`);
+    logger.success(`Data:                 ${eventData.calldatas}`);
+    logger.success(`Description:          ${eventData.description}`);
+    logger.success(`Start Block:          ${eventData.startBlock}`);
+    logger.success(`End Block:            ${eventData.endBlock}`);
+    logger.success(
+      `============================================================='`
+    );
   });
 
-task("sips:queue", "Queue proposal in the Governor Owner contract")
+task("mynt-sips:populate", "Create SIP Proposal Transaction")
+  .addParam(
+    "argsFunc",
+    "Function name from tasks/sips/args/sipArgs.ts which returns the sip arguments"
+  )
+  .setAction(async ({ argsFunc }, hre) => {
+    const { governorName, args: sipArgs }: ISipArgument = await sipArgsList[
+      argsFunc
+    ](hre);
+    const {
+      ethers,
+      deployments: { get },
+    } = hre;
+
+    const governorDeployment = await get(governorName);
+    const governor = await ethers.getContract(governorName);
+
+    logger.info("=== Creating SIP ===");
+    logger.info(`Governor Address:    ${governorDeployment.address}`);
+    logger.info(`Targets:             ${sipArgs.targets}`);
+    logger.info(`Values:              ${sipArgs.values}`);
+    logger.info(`Signatures:          ${sipArgs.signatures}`);
+    logger.info(`Data:                ${sipArgs.data}`);
+    logger.info(`Description:         ${sipArgs.description}`);
+    logger.info(
+      `============================================================='`
+    );
+
+    const tx = await governor.populateTransaction.propose(
+      sipArgs.targets,
+      sipArgs.values,
+      sipArgs.signatures,
+      sipArgs.data,
+      sipArgs.description,
+      { gasLimit: 6500000, gasPrice: 66e6 }
+    );
+
+    delete tx.from;
+    logger.warning(
+      "==================== populated tx start ===================="
+    );
+    logger.info(tx);
+    logger.warning("==================== populated tx end   =================");
+    return tx;
+  });
+
+task("mynt-sips:queue", "Queue proposal in the Governor Owner contract")
   .addParam("proposal", "Proposal Id", undefined, types.string)
   .addParam(
     "governor",
@@ -88,7 +152,7 @@ task("sips:queue", "Queue proposal in the Governor Owner contract")
     }
   });
 
-task("sips:execute", "Execute proposal in a Governor contract")
+task("mynt-sips:execute", "Execute proposal in a Governor contract")
   .addParam("proposal", "Proposal Id", undefined, types.string)
   .addParam(
     "governor",
@@ -119,7 +183,7 @@ task("sips:execute", "Execute proposal in a Governor contract")
     }
   });
 
-task("sips:cancel", "Queue proposal in the Governor Owner contract")
+task("mynt-sips:cancel", "Queue proposal in the Governor Owner contract")
   .addParam("proposal", "Proposal Id", undefined, types.string)
   .addParam(
     "governor",
@@ -145,11 +209,17 @@ task("sips:cancel", "Queue proposal in the Governor Owner contract")
       (await get(governor)).abi
     );
     const data = governorInterface.encodeFunctionData("cancel", [proposal]);
-    await sendWithMultisig(msAddress, governorContract.address, data, signer);
+    await sendWithMultisig(
+      hre,
+      msAddress,
+      governorContract.address,
+      data,
+      signer
+    );
   });
 
 task(
-  "sips:vote-for",
+  "mynt-sips:vote-for",
   "Vote for or against a proposal in the Governor Owner contract"
 )
   .addParam("proposal", "Proposal Id", undefined, types.string)
@@ -182,7 +252,7 @@ task(
     );
   });
 
-task("sips:queue-timer", "Queue SIP for execution with timer")
+task("mynt-sips:queue-timer", "Queue SIP for execution with timer")
   .addParam("proposal", "Proposal Id", undefined, types.string)
   .addParam(
     "governor",
@@ -234,7 +304,7 @@ task("sips:queue-timer", "Queue SIP for execution with timer")
     );
   });
 
-task("sips:execute-timer", "Execute SIP with countdown")
+task("mynt-sips:execute-timer", "Execute SIP with countdown")
   .addParam("proposal", "Proposal Id", undefined, types.string)
   .addParam(
     "governor",

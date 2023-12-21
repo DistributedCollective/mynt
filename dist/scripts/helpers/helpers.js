@@ -3,26 +3,22 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.transferOwnership = exports.deployWithCustomProxy = exports.defaultValueMultisigOrSipFlag = exports.injectHre = exports.createProposal = exports.isMultisigOwner = exports.multisigRevokeConfirmation = exports.multisigRemoveOwner = exports.multisigAddOwner = exports.multisigCheckTx = exports.multisigExecuteTx = exports.signWithMultisig = exports.sendWithMultisig = exports.getParsedEventLogFromReceipt = exports.getEthersLog = exports.parseEthersLogToValue = exports.parseEthersLog = exports.getTxLog = void 0;
-const utils_1 = require("./utils");
-Object.defineProperty(exports, "injectHre", { enumerable: true, get: function () { return utils_1.injectHre; } });
+exports.transferOwnership = exports.deployWithCustomProxy = exports.defaultValueMultisigOrSipFlag = exports.createProposal = exports.isMultisigOwner = exports.multisigRevokeConfirmation = exports.multisigRemoveOwner = exports.multisigAddOwner = exports.multisigCheckTx = exports.multisigExecuteTx = exports.signWithMultisig = exports.sendWithMultisig = exports.getParsedEventLogFromReceipt = exports.getEthersLog = exports.parseEthersLogToValue = exports.parseEthersLog = exports.getTxLog = void 0;
 const node_logs_1 = __importDefault(require("node-logs"));
 const logger = new node_logs_1.default().showInConsole(true);
-let hre;
-let ethers;
-const sendWithMultisig = async (multisigAddress, contractAddress, data, sender, value = 0) => {
-    const multisig = await ethers.getContractAt("MultiSigWallet", multisigAddress);
+const sendWithMultisig = async (hre, multisigAddress, contractAddress, data, sender, value = 0) => {
+    const { ethers } = hre;
     const signer = await ethers.getSigner(sender);
-    const receipt = await (await multisig
-        .connect(signer)
-        .submitTransaction(contractAddress, value, data)).wait();
+    const multisig = await ethers.getContractAt("MultiSigWallet", multisigAddress, signer);
+    const receipt = await (await multisig.submitTransaction(contractAddress, value, data)).wait();
     const abi = ["event Submission(uint256 indexed transactionId)"];
     const iface = new ethers.utils.Interface(abi);
     const parsedEvent = await getParsedEventLogFromReceipt(receipt, iface, "Submission");
-    await multisigCheckTx(parsedEvent.transactionId.value.toNumber(), multisig.address);
+    await multisigCheckTx(hre, parsedEvent.transactionId.value.toNumber(), multisig.address);
 };
 exports.sendWithMultisig = sendWithMultisig;
-const signWithMultisig = async (multisigAddress, txId, sender) => {
+const signWithMultisig = async (hre, multisigAddress, txId, sender) => {
+    const { ethers } = hre;
     console.log("Signing multisig txId:", txId);
     const multisig = await ethers.getContractAt("MultiSigWallet", multisigAddress);
     const signer = await ethers.getSigner(sender);
@@ -32,18 +28,18 @@ const signWithMultisig = async (multisigAddress, txId, sender) => {
     await multisigCheckTx(txId, multisig.address);
 };
 exports.signWithMultisig = signWithMultisig;
-const multisigAddOwner = async (addAddress, sender) => {
+const multisigAddOwner = async (hre, addAddress, sender) => {
     const { ethers, getNamedAccounts, deployments: { get }, } = hre;
     const multisigDeployment = await get("MultiSigWallet");
     let multisigInterface = new ethers.utils.Interface(multisigDeployment.abi);
     let data = multisigInterface.encodeFunctionData("addOwner", [addAddress]);
     ///@todo check if the deployer is one of ms owners
     console.log(`creating multisig tx to add new owner ${addAddress}...`);
-    await sendWithMultisig(multisigDeployment.address, multisigDeployment.address, data, sender);
+    await sendWithMultisig(hre, multisigDeployment.address, multisigDeployment.address, data, sender);
     logger.info(`>>> DONE. Requires Multisig (${multisigDeployment.address}) signing to execute tx <<<`);
 };
 exports.multisigAddOwner = multisigAddOwner;
-const multisigRemoveOwner = async (removeAddress, sender) => {
+const multisigRemoveOwner = async (hre, removeAddress, sender) => {
     const { ethers, getNamedAccounts, deployments: { get }, } = hre;
     const multisigDeployment = await get("MultiSigWallet");
     let multisigInterface = new ethers.utils.Interface(multisigDeployment.abi);
@@ -51,11 +47,11 @@ const multisigRemoveOwner = async (removeAddress, sender) => {
         removeAddress,
     ]);
     console.log(`creating multisig tx to remove owner ${removeAddress}...`);
-    await sendWithMultisig(multisigDeployment.address, multisigDeployment.address, data, sender);
+    await sendWithMultisig(hre, multisigDeployment.address, multisigDeployment.address, data, sender);
     logger.info(`>>> DONE. Requires Multisig (${multisigDeployment.address}) signing to execute tx <<<`);
 };
 exports.multisigRemoveOwner = multisigRemoveOwner;
-const multisigExecuteTx = async (txId, sender, multisigAddress = ethers.constants.AddressZero) => {
+const multisigExecuteTx = async (hre, txId, sender, multisigAddress = hre.ethers.constants.AddressZero) => {
     const { ethers, deployments: { get }, } = hre;
     const signer = await ethers.getSigner(sender);
     const multisig = await ethers.getContractAt("MultiSigWallet", multisigAddress == ethers.constants.AddressZero
@@ -90,22 +86,22 @@ const multisigExecuteTx = async (txId, sender, multisigAddress = ethers.constant
     logger.warn("===============================================================================");
 };
 exports.multisigExecuteTx = multisigExecuteTx;
-const multisigCheckTx = async (txId, multisigAddress = ethers.constants.AddressZero) => {
-    const { deployments: { get }, } = hre;
-    const multisig = await ethers.getContractAt("MultiSigWallet", multisigAddress === ethers.constants.AddressZero
+const multisigCheckTx = async (hre, txId, multisigAddress = undefined) => {
+    const { ethers, deployments: { get }, } = hre;
+    const multisig = await ethers.getContractAt("MultiSigWallet", multisigAddress === undefined
         ? (await get("MultiSigWallet")).address
         : multisigAddress);
     const transaction = await multisig.transactions(txId);
     console.log("TX { ID: ", txId, ", Data: ", transaction.data, ", Value: ", transaction.value.toString(), ", Destination: ", transaction.destination, ", Confirmations: ", (await multisig.getConfirmationCount(txId)).toNumber(), ", Executed:", transaction.executed, ", Confirmed by:", await multisig.getConfirmations(txId), "}");
 };
 exports.multisigCheckTx = multisigCheckTx;
-const isMultisigOwner = async (multisigAddress, checkAddress) => {
+const isMultisigOwner = async (hre, multisigAddress, checkAddress) => {
     const { ethers } = hre;
     const multisig = await ethers.getContractAt("MultiSigWallet", multisigAddress);
     return await multisig.isOwner(checkAddress);
 };
 exports.isMultisigOwner = isMultisigOwner;
-const multisigRevokeConfirmation = async (txId, sender, multisigAddress = ethers.constants.AddressZero) => {
+const multisigRevokeConfirmation = async (hre, txId, sender, multisigAddress = hre.ethers.constants.AddressZero) => {
     const { ethers, deployments: { get }, } = hre;
     const signer = await ethers.getSigner(sender);
     const multisig = await ethers.getContractAt("MultiSigWallet", multisigAddress == ethers.constants.AddressZero
@@ -172,7 +168,7 @@ const getParsedEventLogFromReceipt = async (receipt, iface, eventName) => {
     return parseEthersLog(parsedLog);
 };
 exports.getParsedEventLogFromReceipt = getParsedEventLogFromReceipt;
-const createProposal = async (governorAddress, targets, values, signatures, callDatas, description, signer) => {
+const createProposal = async (hre, governorAddress, targets, values, signatures, callDatas, description, signer) => {
     // governorDeployment = (await get("GovernorAlpha")).address;
     console.log(`=============================================================
     Governor Address:    ${governorAddress}
@@ -182,6 +178,7 @@ const createProposal = async (governorAddress, targets, values, signatures, call
     Data:                ${callDatas}
     Description:         ${description}
     =============================================================`);
+    const { ethers } = hre;
     const gov = await ethers.getContractAt("GovernorAlpha", governorAddress);
     const tx = await (await gov
         .connect(signer)
@@ -204,7 +201,7 @@ const defaultValueMultisigOrSipFlag = (networkTags) => {
     return { isMultisigFlag, isSIPFlag };
 };
 exports.defaultValueMultisigOrSipFlag = defaultValueMultisigOrSipFlag;
-const deployWithCustomProxy = async (deployer, logicName, proxyName, isOwnerMultisig = false, multisigName = "MultiSigWallet", proxyOwner = "", args = [], proxyArgs = []) => {
+const deployWithCustomProxy = async (hre, deployer, logicName, proxyName, isOwnerMultisig = false, multisigName = "MultiSigWallet", proxyOwner = "", args = [], proxyArgs = []) => {
     const { deployments: { deploy, get, getOrNull, log, save: deploymentsSave }, ethers, } = hre;
     const proxyDeployedName = logicName + "_Proxy";
     const logicDeployedName = logicName + "_Implementation";
@@ -252,7 +249,7 @@ const deployWithCustomProxy = async (deployer, logicName, proxyName, isOwnerMult
             ]);
             log(`Creating multisig tx to set ${logicDeployedName} (${tx.address}) as implementation for ${logicDeployedName} (${proxyDeployment.address}...`);
             log();
-            await sendWithMultisig(multisigDeployment.address, proxy.address, data, deployer);
+            await sendWithMultisig(hre, multisigDeployment.address, proxy.address, data, deployer);
             log(`>>> DONE. Requires Multisig (${multisigDeployment.address}) signing to execute tx <<<
                  >>> DON'T PUSH/MERGE ${logicName} TO THE DEVELOPMENT BRANCH REPO UNTIL THE MULTISIG TX SUCCESSFULLY SIGNED & EXECUTED <<<`);
         }
@@ -290,7 +287,7 @@ const transferOwnership = async (hre, contractAddress, newOwner, isMultisig = fa
         const data = ownable.interface.encodeFunctionData("transferOwnership", [
             newOwner,
         ]);
-        await sendWithMultisig(multisigAddress, contractAddress, data, deployer);
+        await sendWithMultisig(hre, multisigAddress, contractAddress, data, deployer);
     }
     else {
         await (await ownable.transferOwnership(newOwner)).wait();

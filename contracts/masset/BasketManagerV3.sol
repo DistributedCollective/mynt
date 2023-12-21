@@ -11,7 +11,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/ERC1967/ERC1967UpgradeUpgradea
  * @dev Contract is responsible for mAsset and bAsset exchange process and
  * managing basket with bAsset tokens.
  * Allows to add and/or remove bAsset, calculate balances, converts tokens quantity
- * to adjust precisions or set/get parameters: bridge, factor, range and paused.
+ * to adjust precisions or set/get parameters: factor, range and paused.
  */
 
 contract BasketManagerV3 is OwnableUpgradeable, ERC1967UpgradeUpgradeable {
@@ -39,13 +39,6 @@ contract BasketManagerV3 is OwnableUpgradeable, ERC1967UpgradeUpgradeable {
     event FactorChanged(address basset, int256 factor);
 
     /**
-     * @dev Event emitted when bridge is changed.
-     * @param basset Address of the bAsset contract.
-     * @param bridge Address of bridge.
-     */
-    event BridgeChanged(address basset, address bridge);
-
-    /**
      * @dev Event emitted when range is changed.
      * @param basset    Address of the bAsset contract.
      * @param min       Minimal value of range.
@@ -67,7 +60,7 @@ contract BasketManagerV3 is OwnableUpgradeable, ERC1967UpgradeUpgradeable {
     address massetManager;
     address[] private bassetsArray;
     mapping(address => int256) private factorMap;
-    mapping(address => address) private bridgeMap;
+    mapping(address => address) private DEPRECATED_bridgeMap;
     mapping(address => uint256) private minMap;
     mapping(address => uint256) private maxMap;
     mapping(address => bool) private pausedMap;
@@ -259,10 +252,6 @@ contract BasketManagerV3 is OwnableUpgradeable, ERC1967UpgradeUpgradeable {
         return factorMap[_basset];
     }
 
-    function getBridge(address _basset) public view validBasset(_basset) returns (address) {
-        return bridgeMap[_basset];
-    }
-
     function getRange(
         address _basset
     ) public view validBasset(_basset) returns (uint256 min, uint256 max) {
@@ -280,7 +269,6 @@ contract BasketManagerV3 is OwnableUpgradeable, ERC1967UpgradeUpgradeable {
      * @dev Adds a new bAsset.
      * @param _basset       Address of bAsset.
      * @param _factor       Factor amount.
-     * @param _bridge       Address of bridge.
      * @param _min          Minimum ratio in basket.
      * @param _max          Maximum ratio in basket.
      * @param _paused       Flag to determine if basset should be paused.
@@ -288,7 +276,6 @@ contract BasketManagerV3 is OwnableUpgradeable, ERC1967UpgradeUpgradeable {
     function addBasset(
         address _basset,
         int256 _factor,
-        address _bridge,
         uint256 _min,
         uint256 _max,
         bool _paused
@@ -301,7 +288,6 @@ contract BasketManagerV3 is OwnableUpgradeable, ERC1967UpgradeUpgradeable {
 
         setFactor(_basset, _factor);
         setRange(_basset, _min, _max);
-        setBridge(_basset, _bridge);
         setPaused(_basset, _paused);
 
         emit BassetAdded(_basset);
@@ -314,7 +300,6 @@ contract BasketManagerV3 is OwnableUpgradeable, ERC1967UpgradeUpgradeable {
     function addBassets(
         address[] memory _bassets,
         int256[] memory _factors,
-        address[] memory _bridges,
         uint256[] memory _mins,
         uint256[] memory _maxs,
         bool[] memory _pausedFlags
@@ -322,7 +307,6 @@ contract BasketManagerV3 is OwnableUpgradeable, ERC1967UpgradeUpgradeable {
         uint256 length = _bassets.length;
         require(
             _factors.length == length &&
-                _bridges.length == length &&
                 _mins.length == length &&
                 _maxs.length == length &&
                 _pausedFlags.length == length,
@@ -330,7 +314,7 @@ contract BasketManagerV3 is OwnableUpgradeable, ERC1967UpgradeUpgradeable {
         );
 
         for (uint256 i = 0; i < length; i++) {
-            addBasset(_bassets[i], _factors[i], _bridges[i], _mins[i], _maxs[i], _pausedFlags[i]);
+            addBasset(_bassets[i], _factors[i], _mins[i], _maxs[i], _pausedFlags[i]);
         }
     }
 
@@ -372,12 +356,6 @@ contract BasketManagerV3 is OwnableUpgradeable, ERC1967UpgradeUpgradeable {
         factorMap[_basset] = _factor;
 
         emit FactorChanged(_basset, _factor);
-    }
-
-    function setBridge(address _basset, address _bridge) public validBasset(_basset) onlyOwner {
-        bridgeMap[_basset] = _bridge;
-
-        emit BridgeChanged(_basset, _bridge);
     }
 
     function setPaused(address _basset, bool _flag) public validBasset(_basset) onlyOwner {

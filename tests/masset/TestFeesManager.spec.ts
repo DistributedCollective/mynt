@@ -14,17 +14,13 @@ const FeesManager = artifacts.require("FeesManager");
 let standardAccounts: StandardAccounts;
 
 type Fees = {
-    deposit: BN;
-    depositBridge: BN;
-    withdrawal: BN;
-    withdrawalBridge: BN;
+  deposit: BN;
+  withdrawal: BN;
 };
 
 const standardFees: Fees = {
   deposit: new BN(100),
-  depositBridge: new BN(200),
   withdrawal: new BN(300),
-  withdrawalBridge: new BN(400),
 };
 
 contract("FeesManager", async (accounts) => {
@@ -41,24 +37,17 @@ contract("FeesManager", async (accounts) => {
 
     context("should succeed", async () => {
       it("when all params are valid", async () => {
-        await feesManager.initialize(1, 2, 3, 4);
-
+        await feesManager.initialize(1, 3);
         expect(await feesManager.getDepositFee()).bignumber.to.eq(new BN(1));
-        expect(await feesManager.getDepositBridgeFee()).bignumber.to.eq(
-          new BN(2)
-        );
         expect(await feesManager.getWithdrawalFee()).bignumber.to.eq(new BN(3));
-        expect(await feesManager.getWithdrawalBridgeFee()).bignumber.to.eq(
-          new BN(4)
-        );
       });
     });
 
     context("should fail", async () => {
       it("when already initialized", async () => {
-        await feesManager.initialize(1, 2, 3, 4);
+        await feesManager.initialize(1, 3);
         await expectRevert(
-          feesManager.initialize(5, 6, 7, 8),
+          feesManager.initialize(1, 4),
           "VM Exception while processing transaction: reverted with reason string 'Initializable: contract is already initialized'"
         );
       });
@@ -72,7 +61,7 @@ contract("FeesManager", async (accounts) => {
       admin = standardAccounts.governor;
 
       feesManager = await FeesManager.new({ from: admin });
-      await feesManager.initialize(0, 0, 0, 0, { from: admin });
+      await feesManager.initialize(0, 0, { from: admin });
     });
 
     context("should fail", async () => {
@@ -85,17 +74,7 @@ contract("FeesManager", async (accounts) => {
           revertMessage
         );
         await expectRevert(
-          feesManager.setDepositBridgeFee(2, { from: standardAccounts.other }),
-          revertMessage
-        );
-        await expectRevert(
           feesManager.setWithdrawalFee(2, { from: standardAccounts.other }),
-          revertMessage
-        );
-        await expectRevert(
-          feesManager.setWithdrawalBridgeFee(2, {
-            from: standardAccounts.other,
-          }),
           revertMessage
         );
       });
@@ -112,15 +91,7 @@ contract("FeesManager", async (accounts) => {
           revertMessage
         );
         await expectRevert(
-          feesManager.setDepositBridgeFee(invalidAmount, { from: admin }),
-          revertMessage
-        );
-        await expectRevert(
           feesManager.setWithdrawalFee(invalidAmount, { from: admin }),
-          revertMessage
-        );
-        await expectRevert(
-          feesManager.setWithdrawalBridgeFee(invalidAmount, { from: admin }),
           revertMessage
         );
       });
@@ -137,13 +108,6 @@ contract("FeesManager", async (accounts) => {
           depositFee: standardFees.deposit,
         });
 
-        tx = await feesManager.setDepositBridgeFee(standardFees.depositBridge, {
-          from: admin,
-        });
-        await expectEvent(tx.receipt, "DepositBridgeFeeChanged", {
-          depositBridgeFee: standardFees.depositBridge,
-        });
-
         tx = await feesManager.setWithdrawalFee(standardFees.withdrawal, {
           from: admin,
         });
@@ -151,40 +115,20 @@ contract("FeesManager", async (accounts) => {
           withdrawalFee: standardFees.withdrawal,
         });
 
-        tx = await feesManager.setWithdrawalBridgeFee(
-          standardFees.withdrawalBridge,
-          { from: admin }
-        );
-        await expectEvent(tx.receipt, "WithdrawalBridgeFeeChanged", {
-          withdrawalBridgeFee: standardFees.withdrawalBridge,
-        });
-
         expect(await feesManager.getDepositFee()).bignumber.to.eq(
           standardFees.deposit
         );
-        expect(await feesManager.getDepositBridgeFee()).bignumber.to.eq(
-          standardFees.depositBridge
-        );
         expect(await feesManager.getWithdrawalFee()).bignumber.to.eq(
           standardFees.withdrawal
-        );
-        expect(await feesManager.getWithdrawalBridgeFee()).bignumber.to.eq(
-          standardFees.withdrawalBridge
         );
       });
 
       it("when amount is zero", async () => {
         await feesManager.setDepositFee(0, { from: admin });
-        await feesManager.setDepositBridgeFee(0, { from: admin });
         await feesManager.setWithdrawalFee(0, { from: admin });
-        await feesManager.setWithdrawalBridgeFee(0, { from: admin });
 
         expect(await feesManager.getDepositFee()).bignumber.to.eq(ZERO);
-        expect(await feesManager.getDepositBridgeFee()).bignumber.to.eq(ZERO);
         expect(await feesManager.getWithdrawalFee()).bignumber.to.eq(ZERO);
-        expect(await feesManager.getWithdrawalBridgeFee()).bignumber.to.eq(
-          ZERO
-        );
       });
     });
   });
@@ -194,9 +138,7 @@ contract("FeesManager", async (accounts) => {
       feesManager = await FeesManager.new();
       await feesManager.initialize(
         standardFees.deposit,
-        standardFees.depositBridge,
-        standardFees.withdrawal,
-        standardFees.withdrawalBridge
+        standardFees.withdrawal
       );
     });
 
@@ -206,17 +148,10 @@ contract("FeesManager", async (accounts) => {
       expect(await feesManager.calculateDepositFee(amount)).bignumber.to.eq(
         "10000"
       );
-      expect(
-        await feesManager.calculateDepositBridgeFee(amount)
-      ).bignumber.to.eq("20000");
-
       amount = 999;
       expect(await feesManager.calculateDepositFee(amount)).bignumber.to.eq(
         "9"
       );
-      expect(
-        await feesManager.calculateDepositBridgeFee(amount)
-      ).bignumber.to.eq("19");
     });
 
     it("calculates fee corretly for redeem", async () => {
@@ -225,17 +160,10 @@ contract("FeesManager", async (accounts) => {
       expect(await feesManager.calculateRedeemFee(amount)).bignumber.to.eq(
         "30000"
       );
-      expect(
-        await feesManager.calculateRedeemBridgeFee(amount)
-      ).bignumber.to.eq("40000");
-
       amount = 999;
       expect(await feesManager.calculateRedeemFee(amount)).bignumber.to.eq(
         "29"
       );
-      expect(
-        await feesManager.calculateRedeemBridgeFee(amount)
-      ).bignumber.to.eq("39");
     });
   });
 });

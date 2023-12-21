@@ -11,11 +11,15 @@ import {
   impersonateAccount,
   stopImpersonatingAccount,
 } from "@nomicfoundation/hardhat-network-helpers";
-import * as helpers from "../scripts/helpers/helpers";
-import { createSIP } from "./sips";
+import {
+  sendWithMultisig,
+  defaultValueMultisigOrSipFlag,
+} from "../scripts/helpers/helpers";
 import { ISipArgument } from "./sips/args/SIPArgs";
-import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { transferOwnership } from "../scripts/helpers/helpers";
+
+import Logs from "node-logs";
+const logger = new Logs().showInConsole(true);
 
 /// ------ REPLACE bAsset ----- ///
 task("mynt:replace-basset", "Replace bAsset")
@@ -59,7 +63,6 @@ task("mynt:replace-basset", "Replace bAsset")
       false,
     ]);
 
-    helpers.injectHre(hre);
     const { deployer } = await getNamedAccounts();
 
     const networkName = getNetworkName();
@@ -69,14 +72,16 @@ task("mynt:replace-basset", "Replace bAsset")
       const sender = deployer;
 
       console.log(`removing basset multisig tx:`);
-      await helpers.sendWithMultisig(
+      await sendWithMultisig(
+        hre,
         multisigAddress,
         contractAddress,
         dataRemove,
         sender
       );
       console.log(`adding basset multisig tx:`);
-      await helpers.sendWithMultisig(
+      await sendWithMultisig(
+        hre,
         multisigAddress,
         contractAddress,
         dataAdd,
@@ -90,15 +95,17 @@ task("mynt:replace-basset", "Replace bAsset")
           : "removeBasset(address)";
         const signatureAdd =
           "addBasset(address,int256,address,uint256,uint256,bool)";
-        const sipArgs: ISipArgument = {
+        const sipArgs: ISipArgument["args"] = {
           targets: [contractAddress, contractAddress],
           values: [0, 0],
           signatures: [signatureRemove, signatureAdd],
           data: [dataRemove, dataAdd],
-          description: "Replace Basset",
+          description: "",
         };
 
-        createSIP(hre, sipArgs);
+        logger.warn(">>> CREATE A SIP WITH THIS ARGS: <<<");
+        logger.info(sipArgs);
+        logger.warn("====================================");
       } else {
         // @todo forked mainnet to replace bAsset - impersonate accounts: TimelockOwner, GvernorOwner, whale accounts
         //   - create proposal (impersonate a whale account)
@@ -172,7 +179,6 @@ task("mynt:transfer-ownership", "Transfer contracts ownership")
       })
     );
 
-    helpers.injectHre(hre);
     const { deployer } = await getNamedAccounts();
     const ownableABI = [
       "function transferOwnership(address newOwner)",
@@ -193,7 +199,8 @@ task("mynt:transfer-ownership", "Transfer contracts ownership")
       await Promise.all(
         contractsAddresses.map(async (contractAddress) => {
           console.log(`processing ${contractAddress}:`);
-          await helpers.sendWithMultisig(
+          await sendWithMultisig(
+            hre,
             multisigAddress,
             contractAddress,
             data,
@@ -384,13 +391,13 @@ task("mynt:set-massetManagerProxy", "Set massetManagerProxy")
       // if isMultisig & isSIP are false, assign based on network tags.
       const { network } = hre;
       if (!isMultisig && !isSIP) {
-        const { isMultisigFlag, isSIPFlag } =
-          helpers.defaultValueMultisigOrSipFlag(network.tags);
+        const { isMultisigFlag, isSIPFlag } = defaultValueMultisigOrSipFlag(
+          network.tags
+        );
         isMultisig = isMultisigFlag;
         isSIP = isSIPFlag;
       }
 
-      helpers.injectHre(hre);
       const {
         ethers,
         deployments: { get },
@@ -403,12 +410,13 @@ task("mynt:set-massetManagerProxy", "Set massetManagerProxy")
       const { deployer } = await getNamedAccounts();
 
       if (isMultisig) {
-        const multisigAddress = (await get("MultisigWallet")).address;
+        const multisigAddress = (await get("MultiSigWallet")).address;
         const data = MetaAssetToken.interface.encodeFunctionData(
           "setMassetManagerProxy",
           [newMassetManagerProxy]
         );
-        await helpers.sendWithMultisig(
+        await sendWithMultisig(
+          hre,
           multisigAddress,
           MetaAssetToken.address,
           data,
@@ -421,15 +429,17 @@ task("mynt:set-massetManagerProxy", "Set massetManagerProxy")
           [newMassetManagerProxy]
         );
 
-        const sipArgs: ISipArgument = {
+        const sipArgs: ISipArgument["args"] = {
           targets: [contractAddress],
           values: [0],
           signatures: [signature],
           data: [data],
-          description: "Set massetManagerProxy address",
+          description: "",
         };
 
-        createSIP(hre, sipArgs);
+        logger.warn(">>> CREATE A SIP WITH THIS ARGS: <<<");
+        logger.info(sipArgs);
+        logger.warn("====================================");
       } else {
         await MetaAssetToken.setMassetManagerProxy(newMassetManagerProxy);
       }
@@ -466,14 +476,15 @@ task("mynt:set-basketManagerProxy", "Set basketManagerProxy")
     ) => {
       const { network } = hre;
       if (!isMultisig && !isSIP) {
-        const { isMultisigFlag, isSIPFlag } =
-          helpers.defaultValueMultisigOrSipFlag(network.tags);
+        const { isMultisigFlag, isSIPFlag } = defaultValueMultisigOrSipFlag(
+          network.tags
+        );
         isMultisig = isMultisigFlag;
         isSIP = isSIPFlag;
       }
 
       // if isMultisig & isSIP are false, transaction will be initiated as per normal
-      helpers.injectHre(hre);
+
       const {
         ethers,
         deployments: { get },
@@ -485,12 +496,13 @@ task("mynt:set-basketManagerProxy", "Set basketManagerProxy")
       );
       const { deployer } = await getNamedAccounts();
       if (isMultisig) {
-        const multisigAddress = (await get("MultisigWallet")).address;
+        const multisigAddress = (await get("MultiSigWallet")).address;
         const data = MetaAssetToken.interface.encodeFunctionData(
           "setBasketManagerProxy",
           [newBasketManagerProxy]
         );
-        await helpers.sendWithMultisig(
+        await sendWithMultisig(
+          hre,
           multisigAddress,
           MetaAssetToken.address,
           data,
@@ -503,15 +515,16 @@ task("mynt:set-basketManagerProxy", "Set basketManagerProxy")
           [newBasketManagerProxy]
         );
 
-        const sipArgs: ISipArgument = {
+        const sipArgs: ISipArgument["args"] = {
           targets: [contractAddress],
           values: [0],
           signatures: [signature],
           data: [data],
           description: "Set basketManagerProxy address",
         };
-
-        createSIP(hre, sipArgs);
+        logger.warn(">>> CREATE A SIP WITH THIS ARGS: <<<");
+        logger.info(sipArgs);
+        logger.warn("====================================");
       } else {
         await MetaAssetToken.setBasketManagerProxy(newBasketManagerProxy);
       }
@@ -745,7 +758,6 @@ task(
     "flag if transaction needs to be initiated from the SIP"
   )
   .setAction(async ({ isMultisig, isSIP }, hre) => {
-    helpers.injectHre(hre);
     const {
       ethers,
       deployments: { get },
@@ -764,13 +776,14 @@ task(
     );
 
     if (isMultisig) {
-      const multisigAddress = (await get("MultisigWallet")).address;
+      const multisigAddress = (await get("MultiSigWallet")).address;
       const dataUpgrade = myntAdminProxy.interface.encodeFunctionData(
         "upgrade",
         [massetManagerProxy.address, newMassetManagerImpl.address]
       );
 
-      await helpers.sendWithMultisig(
+      await sendWithMultisig(
+        hre,
         multisigAddress,
         myntAdminProxy.address,
         dataUpgrade,
@@ -783,15 +796,16 @@ task(
         [massetManagerProxy.address, newMassetManagerImpl.address]
       );
 
-      const sipArgs: ISipArgument = {
+      const sipArgs: ISipArgument["args"] = {
         targets: [massetManagerProxy.address],
         values: [0],
         signatures: [signatureUpgrade],
         data: [dataUpgrade],
         description: "Upgrade masset manager contract",
       };
-
-      createSIP(hre, sipArgs);
+      logger.warn(">>> CREATE A SIP WITH THIS ARGS: <<<");
+      logger.info(sipArgs);
+      logger.warn("====================================");
     }
   });
 
@@ -805,7 +819,6 @@ task("mynt:upgrade:feesVault", "Upgrade implementation of feesVault contract")
     "flag if transaction needs to be initiated from the SIP"
   )
   .setAction(async ({ isMultisig, isSIP }, hre) => {
-    helpers.injectHre(hre);
     const {
       ethers,
       deployments: { get },
@@ -822,13 +835,14 @@ task("mynt:upgrade:feesVault", "Upgrade implementation of feesVault contract")
     );
 
     if (isMultisig) {
-      const multisigAddress = (await get("MultisigWallet")).address;
+      const multisigAddress = (await get("MultiSigWallet")).address;
       const dataUpgrade = myntAdminProxy.interface.encodeFunctionData(
         "upgrade",
         [feesVaultProxy.address, newFeesVaultImpl.address]
       );
 
-      await helpers.sendWithMultisig(
+      await sendWithMultisig(
+        hre,
         multisigAddress,
         myntAdminProxy.address,
         dataUpgrade,
@@ -841,15 +855,16 @@ task("mynt:upgrade:feesVault", "Upgrade implementation of feesVault contract")
         [feesVaultProxy.address, newFeesVaultImpl.address]
       );
 
-      const sipArgs: ISipArgument = {
+      const sipArgs: ISipArgument["args"] = {
         targets: [feesVaultProxy.address],
         values: [0],
         signatures: [signatureUpgrade],
         data: [dataUpgrade],
         description: "Upgrade fees vault contract",
       };
-
-      createSIP(hre, sipArgs);
+      logger.warn(">>> CREATE A SIP WITH THIS ARGS: <<<");
+      logger.info(sipArgs);
+      logger.warn("====================================");
     }
   });
 
@@ -866,7 +881,6 @@ task(
     "flag if transaction needs to be initiated from the SIP"
   )
   .setAction(async ({ isMultisig, isSIP }, hre) => {
-    helpers.injectHre(hre);
     const {
       ethers,
       deployments: { get },
@@ -883,13 +897,14 @@ task(
     );
 
     if (isMultisig) {
-      const multisigAddress = (await get("MultisigWallet")).address;
+      const multisigAddress = (await get("MultiSigWallet")).address;
       const dataUpgrade = myntAdminProxy.interface.encodeFunctionData(
         "upgrade",
         [feesManagerProxy.address, newFeesManagerImpl.address]
       );
 
-      await helpers.sendWithMultisig(
+      await sendWithMultisig(
+        hre,
         multisigAddress,
         myntAdminProxy.address,
         dataUpgrade,
@@ -902,15 +917,16 @@ task(
         [feesManagerProxy.address, newFeesManagerImpl.address]
       );
 
-      const sipArgs: ISipArgument = {
+      const sipArgs: ISipArgument["args"] = {
         targets: [feesManagerProxy.address],
         values: [0],
         signatures: [signatureUpgrade],
         data: [dataUpgrade],
         description: "Upgrade fees manager contract",
       };
-
-      createSIP(hre, sipArgs);
+      logger.warn(">>> CREATE A SIP WITH THIS ARGS: <<<");
+      logger.info(sipArgs);
+      logger.warn("====================================");
     }
   });
 
@@ -927,7 +943,6 @@ task(
     "flag if transaction needs to be initiated from the SIP"
   )
   .setAction(async ({ isMultisig, isSIP }, hre) => {
-    helpers.injectHre(hre);
     const {
       ethers,
       deployments: { get },
@@ -946,13 +961,14 @@ task(
     );
 
     if (isMultisig) {
-      const multisigAddress = (await get("MultisigWallet")).address;
+      const multisigAddress = (await get("MultiSigWallet")).address;
       const dataUpgrade = myntAdminProxy.interface.encodeFunctionData(
         "upgrade",
         [basketManagerProxy.address, newBasketManagerImpl.address]
       );
 
-      await helpers.sendWithMultisig(
+      await sendWithMultisig(
+        hre,
         multisigAddress,
         myntAdminProxy.address,
         dataUpgrade,
@@ -965,14 +981,15 @@ task(
         [basketManagerProxy.address, newBasketManagerImpl.address]
       );
 
-      const sipArgs: ISipArgument = {
+      const sipArgs: ISipArgument["args"] = {
         targets: [basketManagerProxy.address],
         values: [0],
         signatures: [signatureUpgrade],
         data: [dataUpgrade],
         description: "Upgrade fees vault contract",
       };
-
-      createSIP(hre, sipArgs);
+      logger.warn(">>> CREATE A SIP WITH THIS ARGS: <<<");
+      logger.info(sipArgs);
+      logger.warn("====================================");
     }
   });

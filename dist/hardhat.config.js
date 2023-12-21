@@ -41,18 +41,6 @@ require("@openzeppelin/hardhat-upgrades");
 require("@nomiclabs/hardhat-solhint");
 require("./tasks");
 require("node_modules/sovrynsmartcontracts/hardhat/tasks/multisig");
-(0, config_1.extendEnvironment)((hre) => {
-    const config = hre.network.config;
-    if (config?.url && hre.network.tags["forked"]) {
-        hre.ethers.provider = new hre.ethers.providers.JsonRpcProvider(config.url);
-    }
-});
-(0, config_1.extendEnvironment)((hre) => {
-    const config = hre.network.config;
-    if (config?.url) {
-        hre.ethers.provider = new hre.ethers.providers.JsonRpcProvider(config.url);
-    }
-});
 /*
  * Test hardhat forking with patched hardhat
  *
@@ -91,15 +79,25 @@ const testnetAccounts = process.env.TESTNET_DEPLOYER_PRIVATE_KEY
     ? [
         process.env.TESTNET_DEPLOYER_PRIVATE_KEY,
         process.env.TESTNET_SIGNER_PRIVATE_KEY,
+        process.env.TESTNET_SIGNER_PRIVATE_KEY_2,
     ]
     : [];
 const mainnetAccounts = process.env.MAINNET_DEPLOYER_PRIVATE_KEY
-    ? [process.env.MAINNET_DEPLOYER_PRIVATE_KEY]
+    ? [
+        process.env.MAINNET_DEPLOYER_PRIVATE_KEY,
+        process.env.PROPOSAL_CREATOR_PRIVATE_KEY,
+    ]
     : [];
 const config = {
     namedAccounts: {
         deployer: {
             default: 0,
+        },
+        signer: {
+            default: 1,
+        },
+        signerShared: {
+            default: 2,
         },
     },
     networks: {
@@ -118,6 +116,9 @@ const config = {
             initialBaseFeePerGas: 0,
             gas: 6800000,
             gasPrice: 660000010, // ~66GWei,
+        },
+        localhost: {
+            timeout: 1e6,
         },
         rskDev: {
             from: "0xcd2a3d9f938e13cd947ec05abc7fe734df8dd826",
@@ -156,7 +157,7 @@ const config = {
             url: "https://mainnet-dev.sovryn.app/rpc ",
             gasPrice: 66000010,
             blockGasLimit: 6800000,
-            timeout: 1e9,
+            timeout: 1e6,
             tags: ["mainnet"],
         },
         rskMainnet: {
@@ -165,17 +166,18 @@ const config = {
             url: "https://public-node.rsk.co/",
             gasPrice: 66000010,
             blockGasLimit: 6800000,
-            timeout: 1e9,
+            timeout: 1e6,
             tags: ["mainnet"],
         },
         rskForkedMainnet: {
             // npx hardhat node --fork https://mainnet-dev.sovryn.app/rpc --no-deploy --fork-block-number 4929553
             chainId: 31337,
-            accounts: mainnetAccounts,
+            accounts: mainnetAccounts.length !== 0 ? mainnetAccounts : "remote",
             url: "http://127.0.0.1:8545",
             gas: 6800000,
             gasPrice: 660000010,
             tags: ["mainnet", "forked"],
+            timeout: 1e6,
         },
         coverage: {
             url: "http://127.0.0.1:7546",
@@ -281,20 +283,20 @@ const config = {
             rskSovrynTestnet: ["external/deployments/rskTestnet"],
             rskTestnet: [
                 "external/deployments/rskTestnet",
-                "deployments/rskSovrynTestnet",
+                "deployment/deployments/rskSovrynTestnet",
             ],
             rskForkedTestnet: [
                 "external/deployments/rskTestnet",
-                "deployments/rskSovrynTestnet",
+                "deployment/deployments/rskSovrynTestnet",
             ],
             rskSovrynMainnet: ["external/deployments/rskMainnet"],
             rskMainnet: [
                 "external/deployments/rskMainnet",
-                "deployments/rskSovrynMainnet",
+                "deployment/deployments/rskSovrynMainnet",
             ],
             rskForkedMainnet: [
                 "external/deployments/rskMainnet",
-                "deployments/rskSovrynMainnet",
+                "deployment/deployments/rskSovrynMainnet",
             ],
         },
     },
