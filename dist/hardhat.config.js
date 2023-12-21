@@ -41,18 +41,6 @@ require("@openzeppelin/hardhat-upgrades");
 require("@nomiclabs/hardhat-solhint");
 require("./tasks");
 require("node_modules/sovrynsmartcontracts/hardhat/tasks/multisig");
-(0, config_1.extendEnvironment)((hre) => {
-    const config = hre.network.config;
-    if (config?.url && hre.network.tags["forked"]) {
-        hre.ethers.provider = new hre.ethers.providers.JsonRpcProvider(config.url);
-    }
-});
-(0, config_1.extendEnvironment)((hre) => {
-    const config = hre.network.config;
-    if (config?.url) {
-        hre.ethers.provider = new hre.ethers.providers.JsonRpcProvider(config.url);
-    }
-});
 /*
  * Test hardhat forking with patched hardhat
  *
@@ -95,7 +83,10 @@ const testnetAccounts = process.env.TESTNET_DEPLOYER_PRIVATE_KEY
     ]
     : [];
 const mainnetAccounts = process.env.MAINNET_DEPLOYER_PRIVATE_KEY
-    ? [process.env.MAINNET_DEPLOYER_PRIVATE_KEY]
+    ? [
+        process.env.MAINNET_DEPLOYER_PRIVATE_KEY,
+        process.env.PROPOSAL_CREATOR_PRIVATE_KEY,
+    ]
     : [];
 const config = {
     namedAccounts: {

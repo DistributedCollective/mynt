@@ -3,7 +3,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-// const { expect } = require("chai");
+// first run a local forked mainnet node in a separate terminal window:
+//     npx hardhat node --fork https://mainnet-dev.sovryn.app/rpc --no-deploy
+// now run the test:
+//     npx hardhat test tests-onchain/sip-0072.test.ts --network rskForkedMainnet
 const chai = require("chai");
 const { expect } = chai;
 const hardhat_network_helpers_1 = require("@nomicfoundation/hardhat-network-helpers");
@@ -11,7 +14,7 @@ const hardhat_1 = __importDefault(require("hardhat"));
 const { ethers, deployments, deployments: { createFixture }, } = hardhat_1.default;
 const MAX_DURATION = ethers.BigNumber.from(24 * 60 * 60).mul(1092);
 const ONE_RBTC = ethers.utils.parseEther("1.0");
-describe("SIP-0064 onchain test", () => {
+describe("SIP-0072 onchain test", () => {
     const getImpersonatedSignerFromJsonRpcProvider = async (addressToImpersonate) => {
         //await impersonateAccount(addressToImpersonate);
         //await ethers.provider.send("hardhat_impersonateAccount", [addressToImpersonate]);
@@ -63,29 +66,32 @@ describe("SIP-0064 onchain test", () => {
     });
     let snapshot;
     before(async () => {
-        await (0, hardhat_network_helpers_1.reset)("https://mainnet-dev.sovryn.app/rpc", 5387748);
+        await (0, hardhat_network_helpers_1.reset)("https://mainnet-dev.sovryn.app/rpc", 5911035);
         snapshot = await (0, hardhat_network_helpers_1.takeSnapshot)();
     });
     async () => {
         await snapshot.restore();
     };
-    it("SIP-0064 is executable", async () => {
+    it("SIP-0072 is executable", async () => {
         if (!hardhat_1.default.network.tags["forked"])
             return;
         const { deployer, deployerSigner, stakingProxy, governorOwner, timelockOwnerSigner, multisigSigner, } = await setupTest();
         // loadFixtureAfterEach = true;
         // CREATE PROPOSAL
-        console.log("deploying new contracts...");
-        await deployments.fixture([
-            "BasketManager",
-            "MasssetManager",
-            "FeesManager",
-            "FeesVault",
-            "MocIntegration",
-        ], {
-            keepExistingDeployments: true,
-        });
-        console.log("DONE deploying new contracts...");
+        //console.log("deploying new contracts...");
+        // await deployments.fixture(
+        //   [
+        //     "BasketManager",
+        //     "MassetManager",
+        //     "FeesManager",
+        //     "FeesVault",
+        //     "MocIntegration",
+        //   ],
+        //   {
+        //     keepExistingDeployments: true,
+        //   }
+        // );
+        //console.log("DONE deploying new contracts...");
         const sov = await ethers.getContract("SOV", timelockOwnerSigner);
         const whaleAmount = (await sov.totalSupply()).mul(ethers.BigNumber.from(5));
         await sov.mint(deployerSigner.address, whaleAmount);
@@ -119,7 +125,7 @@ describe("SIP-0064 onchain test", () => {
         // CREATE PROPOSAL AND VERIFY
         const proposalIdBeforeSIP = await governorOwner.proposalCount();
         await hardhat_1.default.run("mynt-sips:create", {
-            argsFunc: "sip0064",
+            argsFunc: "sip0072",
         });
         const proposalId = await governorOwner.latestProposalIds(deployer);
         expect(proposalId.toNumber(), "Proposal was not created. Check the SIP creation is not commented out.").equals(proposalIdBeforeSIP.toNumber() + 1);
@@ -160,4 +166,4 @@ describe("SIP-0064 onchain test", () => {
         expect(await myntAdminProxy.getProxyImplementation(miProxyDeployment.address)).to.equal(miDeployment.implementation);
     });
 });
-//# sourceMappingURL=sip-0064.test.js.map
+//# sourceMappingURL=sip-0072.test.js.map

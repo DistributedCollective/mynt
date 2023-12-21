@@ -15,6 +15,7 @@ const logger = new node_logs_1.default().showInConsole(true);
         "BasketManagerV3",
         "FeesManager",
         "MocIntegration",
+        "FeesVault",
         // "MyntAdminProxy",
     ];
     const contractsAddresses = await Promise.all(contractsList.map(async (contract) => {
