@@ -77,7 +77,6 @@ deployment/deployments/localhost/
 deployment/deployments/rskDev
 deployment/deployments/rskForkedTestnet
 deployment/deployments/rskForkedMainnet
-
 .openzeppelin
 
 tmp/
