@@ -1,3 +1,4 @@
+/** This is the moc deployment file that is integrated with DLLRTransferWithPermit */
 import { ethers, network } from "hardhat";
 import { DeployFunction } from "hardhat-deploy/types";
 import { upgradeWithTransparentUpgradableProxy } from "../helpers/deployment";
@@ -24,7 +25,7 @@ const func: DeployFunction = async ({ deployments, getNamedAccounts }) => {
 
   const dllrTransferWithPermitAddress = (await get("DllrTransferWithPermit")).address;
 
-  const deploymentName = "MocIntegrationWithIntermediaryDllr";
+  const deploymentName = "MocIntegrationV2";
   const deployment = await getOrNull(deploymentName);
   if (deployment) {
     await upgradeWithTransparentUpgradableProxy(
@@ -59,7 +60,7 @@ const func: DeployFunction = async ({ deployments, getNamedAccounts }) => {
   }
 };
 
-func.tags = ["MocIntegrationWithIntermediaryDllr"];
+func.tags = ["MocIntegrationV2"];
 func.dependencies = [
   "DLLR",
   "DllrTransferWithPermit",

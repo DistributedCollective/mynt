@@ -998,7 +998,6 @@ task("upgrade:mocIntegration", "Upgrade implementation of mocIntegration contrac
 .addOptionalParam("isMultisig", "flag if transaction needs to be intiated from the multisig contract")
 .addOptionalParam("isSIP", "flag if transaction needs to be initiated from the SIP")
 .setAction(async ({ isMultisig, isSIP }, hre) => {
-  helpers.injectHre(hre);
   const { ethers, deployments: { get }, getNamedAccounts } = hre;
   const { deployer } = await getNamedAccounts();
   const myntAdminProxy = await ethers.getContract("MyntAdminProxy");
@@ -1014,7 +1013,8 @@ task("upgrade:mocIntegration", "Upgrade implementation of mocIntegration contrac
       mocIntegrationProxy.address, newMocIntegrationImpl.address
     ]);
 
-    await helpers.sendWithMultisig(
+    await sendWithMultisig(
+      hre,
       multisigAddress,
       myntAdminProxy.address,
       dataUpgrade,
@@ -1026,7 +1026,7 @@ task("upgrade:mocIntegration", "Upgrade implementation of mocIntegration contrac
       mocIntegrationProxy.address, newMocIntegrationImpl.address
     ]);
 
-    const sipArgs: ISipArgument = {
+    const sipArgs: ISipArgument["args"] = {
       targets: [mocIntegrationProxy.address],
       values: [0],
       signatures: [signatureUpgrade],
@@ -1034,24 +1034,25 @@ task("upgrade:mocIntegration", "Upgrade implementation of mocIntegration contrac
       description: "Upgrade MocIntegration contract"
     }
 
-    createSIP(hre, sipArgs);
+    logger.warn(">>> CREATE A SIP WITH THIS ARGS: <<<");
+    logger.info(sipArgs);
+    logger.warn("====================================");
   }
 });
 
-task("mynt:setMassetTokenIntermediary", "set mAsset token indermediary address in massetManager contract")
+task("mynt:setMassetTokenTransferWithPermit", "set mAsset token transfer with permit address in massetManager contract")
 .addOptionalParam("isMultisig", "flag if transaction needs to be intiated from the multisig contract")
 .addOptionalParam("isSIP", "flag if transaction needs to be initiated from the SIP")
 .setAction(async ({ isMultisig, isSIP }, hre) => {
   const { network } = hre;
   if (!isMultisig && !isSIP) {
     const { isMultisigFlag, isSIPFlag } =
-      helpers.defaultValueMultisigOrSipFlag(network.tags);
+      defaultValueMultisigOrSipFlag(network.tags);
     isMultisig = isMultisigFlag;
     isSIP = isSIPFlag;
   }
 
   // if isMultisig & isSIP are false, transaction will be initiated as per normal
-  helpers.injectHre(hre);
   const {
     ethers,
     deployments: { get },
@@ -1064,10 +1065,11 @@ task("mynt:setMassetTokenIntermediary", "set mAsset token indermediary address i
   if (isMultisig) {
     const multisigAddress = (await get("MultisigWallet")).address;
     const data = massetManager.interface.encodeFunctionData(
-      "setMassetTokenIntermediary",
+      "setMassetTokenTransferWithPermit",
       [dllrTransferWithPermitDeployment.address]
     );
-    await helpers.sendWithMultisig(
+    await sendWithMultisig(
+      hre,
       multisigAddress,
       massetManager.address,
       data,
@@ -1076,20 +1078,22 @@ task("mynt:setMassetTokenIntermediary", "set mAsset token indermediary address i
   } else if (isSIP) {
     const signature = "setBasketManagerProxy(address)";
     const data = massetManager.interface.encodeFunctionData(
-      "setMassetTokenIntermediary",
+      "setMassetTokenTransferWithPermit",
       [dllrTransferWithPermitDeployment.address]
     );
 
-    const sipArgs: ISipArgument = {
+    const sipArgs: ISipArgument["args"] = {
       targets: [massetManager.address],
       values: [0],
       signatures: [signature],
       data: [data],
-      description: "Set mAssetTokenIntermediary address",
+      description: "Set mAssetTokenTransferWithPermit address",
     };
 
-    createSIP(hre, sipArgs);
+    logger.warn(">>> CREATE A SIP WITH THIS ARGS: <<<");
+    logger.info(sipArgs);
+    logger.warn("====================================");
   } else {
-    await massetManager.setMassetTokenIntermediary(dllrTransferWithPermitDeployment.address);
+    await massetManager.setMassetTokenTransferWithPermit(dllrTransferWithPermitDeployment.address);
   }
 });

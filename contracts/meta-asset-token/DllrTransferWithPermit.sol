@@ -62,18 +62,14 @@ interface IERC20PermitWithTransfer {
 }
 
 /**
- * @dev This is an intermediary contract to fix the griefing attack vulnerbility in the DLLR contract.
+ * @dev This is an intermediary contract to fix the griefing attack vulnerability in the DLLR contract when using transfer withPermit function.
  */
-contract DllrTransferWithPermit is
-    ERC20PermitUpgradeable,
-    OwnableUpgradeable,
-    ERC1967UpgradeUpgradeable
-{
+contract DllrTransferWithPermit is OwnableUpgradeable, ERC1967UpgradeUpgradeable {
     /** MODIFIER */
     modifier requireValidRecipient(address _recipient) {
         require(
-            _recipient != address(0) && _recipient != address(this),
-            "DLLR: Invalid address. Cannot transfer DLLR to the null address."
+            _recipient != address(0) && _recipient != address(this) && _recipient != address(dllr),
+            "DLLR: Invalid address. Cannot transfer DLLR to the null address, DLLR or this contract."
         );
         _;
     }
@@ -87,13 +83,32 @@ contract DllrTransferWithPermit is
     /** STORAGE */
     IERC20PermitWithTransfer public dllr;
 
+    /**
+     * @dev contract initializer.
+     *
+     * @param _dllrTokenAddress actual DLLR Token contract address.
+     */
     function initialize(address payable _dllrTokenAddress) external initializer {
-        __ERC20Permit_init("Sovryn Dollar");
-        __ERC20_init("Sovryn Dollar", "DLLR");
         dllr = IERC20PermitWithTransfer(_dllrTokenAddress);
         __Ownable_init();
     }
 
+    /**
+     *
+     * @dev This is the intermediary function of transferWithPermit (permit + transferFro) to the actual DLLR token contract address.
+     *
+     * @notice destination cannot be:
+     * - zero (0x0) address.
+     * - actual dllr contract address.
+     *
+     * @param _from Owner of the token.
+     * @param _to Recipient of the token.
+     * @param _amount The amount of the token that will be transferred.
+     * @param _deadline Expiration time of the signature.
+     * @param _v Last 1 byte of ECDSA signature.
+     * @param _r First 32 bytes of ECDSA signature.
+     * @param _s 32 bytes after _r in ECDSA signature.
+     */
     function transferWithPermit(
         address _from,
         address _to,

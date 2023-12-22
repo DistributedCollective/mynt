@@ -63,6 +63,11 @@ contract("DllrTransferWithPermit", async (accounts) => {
   let basketManagerProxy: string;
   let basketManagerImplementation: string;
 
+  const ownerWallet = Wallet.generate();
+  const spenderWallet = Wallet.generate();
+  const ownerPermit = ownerWallet.getAddressString();
+  const spender = spenderWallet.getAddressString();
+
   beforeEach("before all", async () => {
     admin = owner;
 
@@ -107,215 +112,29 @@ contract("DllrTransferWithPermit", async (accounts) => {
       accounts[9],
       { from: owner }
     );
-  });
 
-  describe("deployment", async () => {
-    it("should have correct name", async () => {
-      expect(await token.name()).to.equal(tokenName);
+    chainId = await token.getChainId();
+
+    // funding spender wallet
+    const funder = await ethers.provider.getSigner(owner);
+    await funder.sendTransaction({
+      to: spender,
+      value: toWei("10"),
     });
 
-    it("should have correct symbol", async () => {
-      expect(await token.symbol()).to.equal(tokenSymbol);
-    });
-
-    it("should have correct decimal", async () => {
-      expect((await token.decimals())).to.equal(decimals);
-    });
-  });
-
-  describe("permit", async () => {
-    const ownerWallet = Wallet.generate();
-    const spenderWallet = Wallet.generate();
-    const ownerPermit = ownerWallet.getAddressString();
-    const spender = spenderWallet.getAddressString();
-
-    before(async () => {
-      chainId = (await token.getChainId()).toString();
-    });
-
-    context("should failed if", async () => {
-      it("invalid signature", async () => {
-        const deadline = MAX_UINT256.toString();
-
-        const firstValue = toWei("100");
-        const firstNonce = await token.nonces(ownerPermit);
-        const firstData = buildData(
-          chainId,
-          token.address,
-          ownerPermit,
-          spender,
-          firstValue.toString(),
-          firstNonce.toString(),
-          deadline
-        ) as any;
-;
-        const firstSignature = signTypedMessage(ownerWallet.getPrivateKey(), {
-          data: firstData,
-        });
-
-        const { v } = fromRpcSig(firstSignature);
-        const { r, s }: any = fromRpcSig(firstSignature);
-
-        // incorrect amount
-        await expectRevert(
-          token.permit(ownerPermit, spender, toWei("500"), deadline, v, r, s),
-          "ERC20Permit: invalid signature"
-        );
-      });
-
-      it("signature expired", async () => {
-        const deadline = new BN(1).toString();
-
-        const firstValue = toWei("100");
-        const firstNonce = await token.nonces(ownerPermit);
-
-        const firstData = buildData(
-          chainId,
-          token.address,
-          ownerPermit,
-          spender,
-          firstValue.toString(),
-          firstNonce.toString(),
-          deadline
-        ) as any;
-        const firstSignature = signTypedMessage(ownerWallet.getPrivateKey(), {
-          data: firstData,
-        });
-
-        const { v } = fromRpcSig(firstSignature);
-        const { r, s }: any = fromRpcSig(firstSignature);
-
-        // incorrect amount
-        await expectRevert(
-          token.permit(ownerPermit, spender, firstValue, deadline, v, r, s),
-          "ERC20Permit: expired deadline"
-        );
-      });
-    });
-
-    context("success permit check", async () => {
-      it("has the correct DOMAIN_SEPARATOR", async () => {
-        const DOMAIN_SEPARATOR = await domainSeparator(
-          name,
-          version,
-          chainId,
-          token.address
-        );
-        assert.equal(
-          await token.DOMAIN_SEPARATOR(),
-          DOMAIN_SEPARATOR,
-          "eip721: domain separator"
-        );
-      });
-
-      it("can set allowance through permit", async () => {
-        const deadline = MAX_UINT256.toString();
-
-        const firstValue = toWei("100");
-        const firstNonce = await token.nonces(ownerPermit);
-
-        const firstData = buildData(
-          chainId,
-          token.address,
-          ownerPermit,
-          spender,
-          firstValue.toString(),
-          firstNonce.toString(),
-          deadline
-        ) as any;
-        const firstSignature = signTypedMessage(ownerWallet.getPrivateKey(), {
-          data: firstData,
-        });
-
-        const firstECDSASig = fromRpcSig(firstSignature);
-        const firstReceipt = await token.permit(
-          ownerPermit,
-          spender,
-          firstValue.toString(),
-          deadline,
-          firstECDSASig.v,
-          firstECDSASig.r as any,
-          firstECDSASig.s as any
-        );
-
-        expectEvent(firstReceipt, "Approval", {
-          owner: toChecksumAddress(ownerPermit),
-          spender: toChecksumAddress(spender),
-          value: firstValue.toString(),
-        });
-        expect(
-          (await token.allowance(ownerPermit, spender)).toString()
-        ).to.equal(firstValue.toString());
-        expect((await token.nonces(ownerPermit)).toString()).to.equal("1");
-
-        const secondValue = toWei("500");
-        const secondNonce = await token.nonces(ownerPermit);
-
-        const secondData = buildData(
-          chainId,
-          token.address,
-          ownerPermit,
-          spender,
-          secondValue.toString(),
-          secondNonce.toString(),
-          deadline
-        ) as any;
-        const secondSignature = signTypedMessage(ownerWallet.getPrivateKey(), {
-          data: secondData,
-        });
-
-        const secondECDSASig = fromRpcSig(secondSignature);
-
-        const secondReceipt = await token.permit(
-          ownerPermit,
-          spender,
-          secondValue.toString(),
-          deadline,
-          secondECDSASig.v,
-          secondECDSASig.r as any,
-          secondECDSASig.s as any
-        );
-
-        expectEvent(secondReceipt, "Approval", {
-          owner: toChecksumAddress(ownerPermit),
-          spender: toChecksumAddress(spender),
-          value: secondValue.toString(),
-        });
-        expect(
-          (await token.allowance(ownerPermit, spender)).toString()
-        ).to.equal(secondValue.toString());
-        expect((await token.nonces(ownerPermit)).toString()).to.equal("2");
-      });
+    // funding massetManagerProxy address
+    await funder.sendTransaction({
+      to: massetManagerProxy,
+      value: toWei("10"),
     });
   });
 
-  describe("transferWithPermit", async () => {
-    const ownerWallet = Wallet.generate();
-    const spenderWallet = Wallet.generate();
-    const ownerPermit = ownerWallet.getAddressString();
-    const spender = spenderWallet.getAddressString();
-
-    before(async () => {
-      chainId = await token.getChainId();
-      // funding spender wallet
-      const funder = await ethers.provider.getSigner(owner);
-      await funder.sendTransaction({
-        to: spender,
-        value: toWei("10"),
-      });
-
-      // funding massetManagerProxy address
-      await funder.sendTransaction({
-        to: massetManagerProxy,
-        value: toWei("10"),
-      });
-    });
-
-    context("transferWithPermit should fail", async () => {
+  describe("transferWithPermit", () => {
+    context("transferWithPermit should fail", () => {
       it("when signature expired", async () => {
         const deadline = new BN(1).toString();
         const amount = toWei("100");
-        const nonce = await token.nonces(ownerPermit);
+        const nonce = await dllr.nonces(ownerPermit);
         const data = buildData(
           chainId,
           token.address,
@@ -347,7 +166,7 @@ contract("DllrTransferWithPermit", async (accounts) => {
       it("when recipient is zero address", async () => {
         const deadline = MAX_UINT256.toString();
         const amount = toWei("100");
-        const nonce = await token.nonces(ownerPermit);
+        const nonce = await dllr.nonces(ownerPermit);
         const data = buildData(
           chainId,
           token.address,
@@ -383,7 +202,50 @@ contract("DllrTransferWithPermit", async (accounts) => {
             r,
             s
           ),
-          "DLLR: Invalid address. Cannot transfer DLLR to the null address."
+          "DLLR: Invalid address. Cannot transfer DLLR to the null address, DLLR or this contract."
+        );
+      });
+
+      it("when recipient is the actual DLLR address", async () => {
+        const deadline = MAX_UINT256.toString();
+        const amount = toWei("100");
+        const nonce = await dllr.nonces(ownerPermit);
+        const data = buildData(
+          chainId,
+          token.address,
+          ownerPermit,
+          spender,
+          amount.toString(),
+          nonce.toString(),
+          deadline
+        ) as any;
+        const signature = signTypedMessage(ownerWallet.getPrivateKey(), {
+          data,
+        });
+        const { v } = fromRpcSig(signature);
+        const { r, s }: any = fromRpcSig(signature);
+
+        await network.provider.request({
+          method: "hardhat_impersonateAccount",
+          params: [spender],
+        });
+        const account = await ethers.provider.getSigner(spender);
+        const tokenInstance = await ethers.getContractAt(
+          "MetaAssetToken",
+          token.address,
+          account
+        );
+        await expectRevert(
+          tokenInstance.transferWithPermit(
+            ownerPermit,
+            dllr.address,
+            amount,
+            deadline,
+            v,
+            r,
+            s
+          ),
+          "DLLR: Invalid address. Cannot transfer DLLR to the null address, DLLR or this contract."
         );
       });
 
@@ -411,7 +273,7 @@ contract("DllrTransferWithPermit", async (accounts) => {
           params: [spender],
         });
 
-        /** The transferWithPermit will be performed from token contract, which is the DLLR intermediary contract */
+        /** The transferWithPermit will be performed from token contract, which is the DllrTransferWithPermit contract */
         const account = await ethers.provider.getSigner(spender);
         const tokenInstance = await ethers.getContractAt(
           "DllrTransferWithPermit",
@@ -433,7 +295,7 @@ contract("DllrTransferWithPermit", async (accounts) => {
       });
     });
 
-    context("should succeed", async () => {
+    context("should succeed", () => {
       it("transferFrom to valid recipient should reflect to the DLLR balance", async () => {
         const oldAssetProxyAddress = massetManagerProxy;
         const deadline = MAX_UINT256.toString();
@@ -482,7 +344,7 @@ contract("DllrTransferWithPermit", async (accounts) => {
           token.address,
           account
         );
-        /** The transferWithPermit will be performed from token contract, which is the DLLR intermediary contract */
+        /** The transferWithPermit will be performed from token contract, which is the DllrTransferWithPermit contract */
         await tokenInstance.transferWithPermit(
           ownerPermit,
           user,
@@ -508,36 +370,15 @@ contract("DllrTransferWithPermit", async (accounts) => {
     });
   });
 
-  describe("transfer to DLLR Intermediary", async () => {
-    const ownerWallet = Wallet.generate();
-    const spenderWallet = Wallet.generate();
-    const ownerPermit = ownerWallet.getAddressString();
-    const spender = spenderWallet.getAddressString();
-
-    before(async () => {
-      chainId = await token.getChainId();
-      // funding spender wallet
-      const funder = await ethers.provider.getSigner(owner);
-      await funder.sendTransaction({
-        to: spender,
-        value: toWei("10"),
-      });
-
-      // funding massetManagerProxy address
-      await funder.sendTransaction({
-        to: massetManagerProxy,
-        value: toWei("10"),
-      });
-    });
-
-    context("should succeed", async () => {
-      it("transferWithPermit should be working as per normal using DLLR intermediary", async () => {
+  describe("transfer to DllrTransferWithPermit", () => {
+    context("should succeed", () => {
+      it("transferWithPermit should be working as per normal using DllrTransferWithPermit", async () => {
         const oldAssetProxyAddress = massetManagerProxy;
         const deadline = MAX_UINT256.toString();
         const initialOwnerBalance = toWei("1000000");
         const amount = toWei("100");
         const nonce = await dllr.nonces(ownerPermit);
-        /** For signature, the verifying contract still needs to be DLLR, and the spender is the DLLR intermediary token contract, since it will be the one who will execute the transferWithPermit */
+        /** For signature, the verifying contract still needs to be DLLR, and the spender is the DllrTransferWithPermit token contract, since it will be the one who will execute the transferWithPermit */
         const data = buildData(
           chainId,
           dllr.address,
@@ -574,7 +415,7 @@ contract("DllrTransferWithPermit", async (accounts) => {
         expect(userInitialBalance.toString()).to.equal("0");
         expect(spenderInitialAllowance.toString()).to.equal("0");
 
-        /** The transferWithPermit will be performed from token contract, which is the DLLR intermediary contract */
+        /** The transferWithPermit will be performed from token contract, which is the DllrTransferWithPermit contract */
         await token.transferWithPermit(
           ownerPermit,
           user,
@@ -604,7 +445,7 @@ contract("DllrTransferWithPermit", async (accounts) => {
         const initialOwnerBalance = toWei("1000000");
         const amount = toWei("100");
         const nonce = await dllr.nonces(ownerPermit);
-        /** For signature, the verifying contract still needs to be DLLR, and the spender is the DLLR intermediary token contract, since it will be the one who will execute the transferWithPermit */
+        /** For signature, the verifying contract still needs to be DLLR, and the spender is the DllrTransferWithPermit token contract, since it will be the one who will execute the transferWithPermit */
         const data = buildData(
           chainId,
           dllr.address,

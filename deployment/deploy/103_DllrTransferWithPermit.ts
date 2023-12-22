@@ -3,6 +3,7 @@ import { DLLR, MassetManager } from "types/generated";
 import { masset } from "types/generated/artifacts/contracts";
 import { ethers, network } from "hardhat";
 import { transferOwnership } from "../../scripts/helpers/helpers";
+import { upgradeWithTransparentUpgradableProxy } from "../helpers/deployment";
 
 const func: DeployFunction = async (hre) => {
     const {
@@ -10,30 +11,43 @@ const func: DeployFunction = async (hre) => {
     getNamedAccounts,
     } = hre;
 
-  const { deploy, get, log } = deployments;
+  const { deploy, get, log, getOrNull } = deployments;
   const { deployer } = await getNamedAccounts();
   const deployedDllr = await deployments.get("DLLR");
   let targetOwner = "";
 
-  await deploy("DllrTransferWithPermit", {
-    contract: "DllrTransferWithPermit",
-    proxy: {
-      owner: deployer,
-      proxyContract: "OpenZeppelinTransparentProxy",
-      viaAdminContract: {
-        name: "MyntAdminProxy",
-        artifact: "MyntAdminProxy",
-      },
-      execute: {
-        init: {
-          methodName: "initialize",
-          args: [deployedDllr.address],
+  const deploymentName = "DllrTransferWithPermit";
+  const deployment = await getOrNull(deploymentName);
+
+  if (deployment) {
+    await upgradeWithTransparentUpgradableProxy(
+      deployer,
+      deploymentName,
+      "TransparentUpgradeableProxy",
+      undefined,
+      `${deploymentName}_Proxy`
+    );
+  } else{
+    await deploy("DllrTransferWithPermit", {
+      contract: "DllrTransferWithPermit",
+      proxy: {
+        owner: deployer,
+        proxyContract: "OpenZeppelinTransparentProxy",
+        viaAdminContract: {
+          name: "MyntAdminProxy",
+          artifact: "MyntAdminProxy",
+        },
+        execute: {
+          init: {
+            methodName: "initialize",
+            args: [deployedDllr.address],
+          },
         },
       },
-    },
-    from: deployer,
-    log: true,
-  });
+      from: deployer,
+      log: true,
+    });
+  }
 
   if (network.tags.testnet) {
     targetOwner = (await get("MultisigWallet")).address;

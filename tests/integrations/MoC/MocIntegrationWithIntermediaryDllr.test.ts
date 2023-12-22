@@ -18,7 +18,7 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { setBalance } from "@nomicfoundation/hardhat-network-helpers"; // https://hardhat.org/hardhat-network-helpers/docs/reference
 import { ZERO_ADDRESS } from "@utils/constants";
 
-describe("MoC Integration With Intermediary Dllr", async () => {
+describe("MoC Integration With DllrTransferWithPermit", async () => {
     // let mocFake: FakeContract<IMocMintRedeemDoc>;
     let moc: MocMock;
     let mocIntegration: MocIntegration;
@@ -51,7 +51,7 @@ describe("MoC Integration With Intermediary Dllr", async () => {
             "MassetManager",
             "BasketManager",
             "DllrTransferWithPermit",
-            "MocIntegrationWithIntermediaryDllr"
+            "MocIntegrationV2"
         ]);
 
         [, alice] = accounts;
@@ -63,7 +63,7 @@ describe("MoC Integration With Intermediary Dllr", async () => {
         dllrTransferWithPermit = (await ethers.getContract("DllrTransferWithPermit")) as DllrTransferWithPermit;
         massetManager = (await ethers.getContract("MassetManager")) as MassetManager;
         basketManager = (await ethers.getContract("BasketManagerV3")) as BasketManagerV3;
-        mocIntegration = (await ethers.getContract("MocIntegrationWithIntermediaryDllr")) as MocIntegration;
+        mocIntegration = (await ethers.getContract("MocIntegrationV2")) as MocIntegration;
 
         // bAssetDoc = (await ethers.getContract("DoC")) as MockERC20;
         bAssetDoc = await ethers.getContractAt("MockERC20", await mocIntegration.doc());

@@ -760,7 +760,7 @@ contract("MassetManager", async (accounts) => {
     });
   });
 
-  describe("setMassetTokenIntermediary", async() => {
+  describe("setMassetTokenTransferWithPermit", async() => {
     let feesManager: FeesManagerInstance;
     beforeEach(async () => {
       vault = await FeesVault.new();
@@ -783,19 +783,19 @@ contract("MassetManager", async (accounts) => {
     });
 
     context("failed", () => {
-      it("set the massetTokenIntermediary from non-authorized account should fail", async() => {
+      it("set the massetTokenTransferWithPermit from non-authorized account should fail", async() => {
         const dllrTransferWithPermit = await DllrTransferWithPermit.new(mAsset.address);
-        expect(await massetManager.mAssetTokenIntermediary()).to.equal(ZERO_ADDRESS);
-        await expectRevert(massetManager.setMassetTokenIntermediary(dllrTransferWithPermit.address, {from: standardAccounts.dummy1,}), "Ownable: caller is not the owner");
+        expect(await massetManager.mAssetTokenTransferWithPermit()).to.equal(ZERO_ADDRESS);
+        await expectRevert(massetManager.setMassetTokenTransferWithPermit(dllrTransferWithPermit.address, {from: standardAccounts.dummy1,}), "Ownable: caller is not the owner");
       })
     })
 
     context("success", () => {
-      it("should set the masset token intermediary successfully", async() => {
+      it("should set the masset token transferWithPermit successfully", async() => {
         const owner = accounts[0];
         const dllrTransferWithPermit = await DllrTransferWithPermit.new(mAsset.address);
-        expect(await massetManager.mAssetTokenIntermediary()).to.equal(ZERO_ADDRESS);
-        await massetManager.setMassetTokenIntermediary(dllrTransferWithPermit.address, {from: owner});
+        expect(await massetManager.mAssetTokenTransferWithPermit()).to.equal(ZERO_ADDRESS);
+        await massetManager.setMassetTokenTransferWithPermit(dllrTransferWithPermit.address, {from: owner});
       })
     })
   })

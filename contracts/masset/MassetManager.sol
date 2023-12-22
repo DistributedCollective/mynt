@@ -63,9 +63,17 @@ contract MassetManager is
         uint256 bassetQuantity
     );
 
-    event MassetTokenIntermediaryChanged(
+    /**
+     * @dev Emitted when mAssetTokenTransferWithPermit is updated.
+     *
+     * @param sender address of sender.
+     * @param oldMassetTokenTransferWithPermit old mAssetTokenTransferWithPermit address.
+     * @param newMassetTokenTransferWithPermit new mAssetTokenTransferWithPermit address.
+     */
+    event MassetTokenTransferWithPermitChanged(
         address indexed sender,
-        address newMassetTokenIntermediary
+        address oldMassetTokenTransferWithPermit,
+        address newMassetTokenTransferWithPermit
     );
 
     // state
@@ -78,7 +86,7 @@ contract MassetManager is
     FeesVault private feesVault;
     FeesManager private feesManager;
 
-    address public mAssetTokenIntermediary;
+    address public mAssetTokenTransferWithPermit;
 
     // public
 
@@ -359,8 +367,19 @@ contract MassetManager is
         return ERC1967UpgradeUpgradeable._getImplementation();
     }
 
-    function setMassetTokenIntermediary(address _newMAssetTokenIntermediary) external onlyOwner {
-        mAssetTokenIntermediary = _newMAssetTokenIntermediary;
-        emit MassetTokenIntermediaryChanged(msg.sender, _newMAssetTokenIntermediary);
+    /**
+     * @dev set mAssetTokenTransferWithPermit contract address
+     *
+     * @param _newMAssetTokenTransferWithPermit new massetTokenTransferWithPermit contract address
+     */
+    function setMassetTokenTransferWithPermit(
+        address _newMAssetTokenTransferWithPermit
+    ) external onlyOwner {
+        emit MassetTokenTransferWithPermitChanged(
+            msg.sender,
+            mAssetTokenTransferWithPermit,
+            _newMAssetTokenTransferWithPermit
+        );
+        mAssetTokenTransferWithPermit = _newMAssetTokenTransferWithPermit;
     }
 }
