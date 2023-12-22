@@ -62,7 +62,7 @@ const SIPSetBasketManagerProxy = async (hre) => {
     };
     return args;
 };
-const sip0064 = async (hre) => {
+const sip0072 = async (hre) => {
     // Replace BasketManagerV3, MassetManager, FeesManager
     const { ethers, deployments: { get }, network, } = hre;
     const proxyAdmin = await ethers.getContract("MyntAdminProxy");
@@ -106,7 +106,7 @@ const sip0064 = async (hre) => {
             values: Array(deploymentProxies.length).fill(0),
             signatures: signatures,
             data: datas,
-            description: "SIP-0064: Remove Bridge Functions from Mynt, Details: https://github.com/DistributedCollective/SIPS/blob/3a3051a/SIP-0064.md, sha256: f3992c60dd7fce078e3afcd3d1687d61c852f62e01deabb67daaac83dcbd0dbd",
+            description: "SIP-0072: Remove Bridge Functions from Mynt, Details: https://github.com/DistributedCollective/SIPS/blob/a453ba9/SIP-0072.md, sha256: 9b1817dff2cbb52d04a5c20df6f8122b994b91f4b017a33df0934fe6ff699ad4",
         },
         governorName: "GovernorOwner",
     };
@@ -116,7 +116,7 @@ const sipArgs = {
     SampleSIP01,
     SIPSetMassetManagerProxy,
     SIPSetBasketManagerProxy,
-    sip0064,
+    sip0072,
 };
 exports.default = sipArgs;
 //# sourceMappingURL=SIPArgs.js.map

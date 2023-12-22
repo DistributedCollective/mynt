@@ -83,7 +83,10 @@ const testnetAccounts = process.env.TESTNET_DEPLOYER_PRIVATE_KEY
     ]
     : [];
 const mainnetAccounts = process.env.MAINNET_DEPLOYER_PRIVATE_KEY
-    ? [process.env.MAINNET_DEPLOYER_PRIVATE_KEY]
+    ? [
+        process.env.MAINNET_DEPLOYER_PRIVATE_KEY,
+        process.env.PROPOSAL_CREATOR_PRIVATE_KEY,
+    ]
     : [];
 const config = {
     namedAccounts: {
