@@ -14,6 +14,7 @@ import {
 import {
   sendWithMultisig,
   defaultValueMultisigOrSipFlag,
+  getAuthorizedDeployerKey,
 } from "../scripts/helpers/helpers";
 import { ISipArgument } from "./sips/args/SIPArgs";
 import { transferOwnership } from "../scripts/helpers/helpers";
@@ -994,65 +995,8 @@ task(
     }
   });
 
-task("upgrade:mocIntegration", "Upgrade implementation of mocIntegration contract")
-.addOptionalParam("isMultisig", "flag if transaction needs to be intiated from the multisig contract")
-.addOptionalParam("isSIP", "flag if transaction needs to be initiated from the SIP")
-.setAction(async ({ isMultisig, isSIP }, hre) => {
-  const { ethers, deployments: { get }, getNamedAccounts } = hre;
-  const { deployer } = await getNamedAccounts();
-  const myntAdminProxy = await ethers.getContract("MyntAdminProxy");
-  const mocIntegrationProxy = await ethers.getContract("MocIntegration"); // MocIntegration
-
-  const MocIntegrationFactory = await ethers.getContractFactory("MocIntegration");
-  const newMocIntegrationImpl = await MocIntegrationFactory.deploy();
-  console.log(`Upgrading mocIntegration implementation to ${newMocIntegrationImpl.address}`)
-
-  if(isMultisig) {
-    const multisigAddress = (await get("MultisigWallet")).address;
-    const dataUpgrade = myntAdminProxy.interface.encodeFunctionData("upgrade", [
-      mocIntegrationProxy.address, newMocIntegrationImpl.address
-    ]);
-
-    await sendWithMultisig(
-      hre,
-      multisigAddress,
-      myntAdminProxy.address,
-      dataUpgrade,
-      deployer
-    );
-  } else if(isSIP) {
-    const signatureUpgrade = "upgrade(address,address)";
-    const dataUpgrade = myntAdminProxy.interface.encodeFunctionData("upgrade", [
-      mocIntegrationProxy.address, newMocIntegrationImpl.address
-    ]);
-
-    const sipArgs: ISipArgument["args"] = {
-      targets: [mocIntegrationProxy.address],
-      values: [0],
-      signatures: [signatureUpgrade],
-      data: [dataUpgrade],
-      description: "Upgrade MocIntegration contract"
-    }
-
-    logger.warn(">>> CREATE A SIP WITH THIS ARGS: <<<");
-    logger.info(sipArgs);
-    logger.warn("====================================");
-  }
-});
-
 task("mynt:setMassetTokenTransferWithPermit", "set mAsset token transfer with permit address in massetManager contract")
-.addOptionalParam("isMultisig", "flag if transaction needs to be intiated from the multisig contract")
-.addOptionalParam("isSIP", "flag if transaction needs to be initiated from the SIP")
-.setAction(async ({ isMultisig, isSIP }, hre) => {
-  const { network } = hre;
-  if (!isMultisig && !isSIP) {
-    const { isMultisigFlag, isSIPFlag } =
-      defaultValueMultisigOrSipFlag(network.tags);
-    isMultisig = isMultisigFlag;
-    isSIP = isSIPFlag;
-  }
-
-  // if isMultisig & isSIP are false, transaction will be initiated as per normal
+.setAction(async ({}, hre) => {
   const {
     ethers,
     deployments: { get },
@@ -1062,7 +1006,14 @@ task("mynt:setMassetTokenTransferWithPermit", "set mAsset token transfer with pe
   const dllrTransferWithPermitDeployment = await get("DllrTransferWithPermit");
   const massetManager = await ethers.getContract("MassetManager")
   const { deployer } = await getNamedAccounts();
-  if (isMultisig) {
+  const owner = await massetManager.owner();
+
+  const deployerKey = await getAuthorizedDeployerKey();
+  const multisigDeployment = await get(deployerKey["multisig"]);
+  const timelockOwnerDeployment = await get(deployerKey["sip"]["timelockOwner"]);
+  const timelockAdminDeployment = await get(deployerKey["sip"]["timelockAdmin"]);
+
+  if (owner.toLowerCase() == multisigDeployment.address.toLowerCase()) {
     const multisigAddress = (await get("MultisigWallet")).address;
     const data = massetManager.interface.encodeFunctionData(
       "setMassetTokenTransferWithPermit",
@@ -1075,7 +1026,7 @@ task("mynt:setMassetTokenTransferWithPermit", "set mAsset token transfer with pe
       data,
       deployer
     );
-  } else if (isSIP) {
+  } else if (owner.toLowerCase() == timelockOwnerDeployment.address.toLowerCase() || owner.toLowerCase() == timelockAdminDeployment.address.toLowerCase()) {
     const signature = "setBasketManagerProxy(address)";
     const data = massetManager.interface.encodeFunctionData(
       "setMassetTokenTransferWithPermit",

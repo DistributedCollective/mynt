@@ -86,7 +86,7 @@ contract MassetManager is
     FeesVault private feesVault;
     FeesManager private feesManager;
 
-    address public mAssetTokenTransferWithPermit;
+    address private mAssetTokenTransferWithPermit;
 
     // public
 
@@ -304,24 +304,58 @@ contract MassetManager is
 
     // Getters
 
+    /**
+     * @dev getter for feesVault
+     *
+     * @return feesVault address
+     */
     function getFeesVault() external view returns (address) {
         return address(feesVault);
     }
 
+    /**
+     * @dev getter for feesManager
+     *
+     * @return feesManager address
+     */
     function getFeesManager() external view returns (address) {
         return address(feesManager);
     }
 
+    /**
+     * @dev getter for version
+     *
+     * @return version
+     */
     function getVersion() external view returns (string memory) {
         return version;
     }
 
+    /**
+     * @dev getter for mAssetToken
+     *
+     * @return mAssetToken address
+     */
     function getToken() external view returns (address) {
         return address(mAssetToken);
     }
 
+    /**
+     * @dev getter for basketManager
+     *
+     * @return basketManager address
+     */
     function getBasketManager() external view returns (address) {
         return address(basketManager);
+    }
+
+    /**
+     * @dev getter for mAssetTokenTransferWithPermit
+     *
+     * @return mAssetTokenTransferWithPermit address
+     */
+    function getMAssetTokenTransferWithPermitAddress() external view returns(address) {
+        return mAssetTokenTransferWithPermit;
     }
 
     // v3 migration

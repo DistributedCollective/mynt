@@ -785,7 +785,7 @@ contract("MassetManager", async (accounts) => {
     context("failed", () => {
       it("set the massetTokenTransferWithPermit from non-authorized account should fail", async() => {
         const dllrTransferWithPermit = await DllrTransferWithPermit.new(mAsset.address);
-        expect(await massetManager.mAssetTokenTransferWithPermit()).to.equal(ZERO_ADDRESS);
+        expect(await massetManager.getMAssetTokenTransferWithPermitAddress()).to.equal(ZERO_ADDRESS);
         await expectRevert(massetManager.setMassetTokenTransferWithPermit(dllrTransferWithPermit.address, {from: standardAccounts.dummy1,}), "Ownable: caller is not the owner");
       })
     })
@@ -794,7 +794,7 @@ contract("MassetManager", async (accounts) => {
       it("should set the masset token transferWithPermit successfully", async() => {
         const owner = accounts[0];
         const dllrTransferWithPermit = await DllrTransferWithPermit.new(mAsset.address);
-        expect(await massetManager.mAssetTokenTransferWithPermit()).to.equal(ZERO_ADDRESS);
+        expect(await massetManager.getMAssetTokenTransferWithPermitAddress()).to.equal(ZERO_ADDRESS);
         await massetManager.setMassetTokenTransferWithPermit(dllrTransferWithPermit.address, {from: owner});
       })
     })

@@ -81,15 +81,21 @@ contract DllrTransferWithPermit is OwnableUpgradeable, ERC1967UpgradeUpgradeable
     event TransferWithPermit(address _from, address _to, uint256 _amount);
 
     /** STORAGE */
-    IERC20PermitWithTransfer public dllr;
+    IERC20PermitWithTransfer public immutable dllr;
 
     /**
-     * @dev contract initializer.
+     * constructor
      *
      * @param _dllrTokenAddress actual DLLR Token contract address.
      */
-    function initialize(address payable _dllrTokenAddress) external initializer {
+    constructor(address payable _dllrTokenAddress) {
         dllr = IERC20PermitWithTransfer(_dllrTokenAddress);
+    }
+
+    /**
+     * @dev contract initializer.
+     */
+    function initialize() external initializer {
         __Ownable_init();
     }
 

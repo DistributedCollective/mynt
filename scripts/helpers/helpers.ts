@@ -518,6 +518,16 @@ const transferOwnership = async (
   }
 };
 
+const getAuthorizedDeployerKey = async() => {
+  return {
+      multisig: "MultiSigWallet",
+      sip: {
+        timelockOwner: "TimelockOwner",
+        timelockAdmin: "TimelockAdmin"
+      }
+    }
+}
+
 export {
   getTxLog,
   parseEthersLog,
@@ -536,4 +546,5 @@ export {
   defaultValueMultisigOrSipFlag,
   deployWithCustomProxy,
   transferOwnership,
+  getAuthorizedDeployerKey
 };

@@ -102,8 +102,8 @@ contract("DllrTransferWithPermit", async (accounts) => {
       from: owner,
     });
 
-    token = await DllrTransferWithPermit.new();
-    await token.initialize(dllr.address, { from: owner });
+    token = await DllrTransferWithPermit.new(dllr.address);
+    await token.initialize({ from: owner });
 
     mockToken = await MockMetaAssetToken.new(
       tokenName,

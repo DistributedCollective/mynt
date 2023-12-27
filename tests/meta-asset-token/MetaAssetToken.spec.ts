@@ -735,7 +735,7 @@ contract("MetaAssetToken", async (accounts) => {
         );
       });
 
-      it("transferFrom with invalid nonce", async () => {
+      it("permit should not be performed if Owner already have the allowance", async () => {
         const oldAssetProxyAddress = massetManagerProxy;
         const deadline = MAX_UINT256;
         const initialOwnerBalance = toWei("1000000");
@@ -784,26 +784,27 @@ contract("MetaAssetToken", async (accounts) => {
           account
         );
 
-        await tokenInstance.permit(
+        await tokenInstance.permit(ownerPermit, spender, amount, deadline.toString(), v, r, s)
+        await tokenInstance.transferWithPermit(
           ownerPermit,
-          spender,
+          user,
           amount,
           deadline.toString(),
           v,
           r,
           s
         );
-        await expectRevert(
-          tokenInstance.transferWithPermit(
-            ownerPermit,
-            user,
-            amount,
-            deadline.toString(),
-            v,
-            r,
-            s
-          ),
-          "ERC20Permit: invalid signature"
+        
+        const userLatestBalance = await token.balanceOf(user);
+        const ownerLatestBalance = await token.balanceOf(ownerPermit);
+        const spenderLatestAllowance = await token.allowance(
+          ownerPermit,
+          spender
+        );
+        expect(userLatestBalance.toString()).to.equal(amount);
+        expect(spenderLatestAllowance.toString()).to.equal("0");
+        expect(ownerLatestBalance.toString()).to.equal(
+          ownerInitialBalance.sub(new BN(amount)).toString()
         );
       });
     });

@@ -30,6 +30,7 @@ const func: DeployFunction = async (hre) => {
   } else{
     await deploy("DllrTransferWithPermit", {
       contract: "DllrTransferWithPermit",
+      args: [deployedDllr.address],
       proxy: {
         owner: deployer,
         proxyContract: "OpenZeppelinTransparentProxy",
@@ -40,7 +41,7 @@ const func: DeployFunction = async (hre) => {
         execute: {
           init: {
             methodName: "initialize",
-            args: [deployedDllr.address],
+            args: [],
           },
         },
       },
