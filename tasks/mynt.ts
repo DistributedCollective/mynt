@@ -1024,18 +1024,21 @@ task("mynt:setMassetTokenTransferWithPermit", "set mAsset token transfer with pe
       deployer
     );
   } else if (await isSip(hre, owner)) {
-    const signature = "setBasketManagerProxy(address)";
+    const signature = "setMassetTokenTransferWithPermit(address)";
     const data = massetManager.interface.encodeFunctionData(
       "setMassetTokenTransferWithPermit",
       [dllrTransferWithPermitDeployment.address]
     );
 
-    const sipArgs: ISipArgument["args"] = {
-      targets: [massetManager.address],
-      values: [0],
-      signatures: [signature],
-      data: [data],
-      description: "Set mAssetTokenTransferWithPermit address",
+    const sipArgs: ISipArgument = {
+      args: {
+        targets: [massetManager.address],
+        values: [0],
+        signatures: [signature],
+        data: [data],
+        description: "Set mAssetTokenTransferWithPermit address",
+      },
+      governorName: "GovernorOwner"
     };
 
     logger.warn(">>> CREATE A SIP WITH THIS ARGS: <<<");
