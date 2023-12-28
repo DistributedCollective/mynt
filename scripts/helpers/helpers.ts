@@ -518,7 +518,7 @@ const transferOwnership = async (
   }
 };
 
-const getAuthorizedDeployerKey = async() => {
+const getAuthorizedDeployerKey = () => {
   return {
       multisig: "MultiSigWallet",
       sip: {
@@ -526,6 +526,30 @@ const getAuthorizedDeployerKey = async() => {
         timelockAdmin: "TimelockAdmin"
       }
     }
+}
+
+const isMultisig = async (hre, ownerAddress) => {
+  const {
+    deployments: { get },
+  } = hre;
+  const deployerKey = getAuthorizedDeployerKey();
+  const multisigDeployment = await get(deployerKey["multisig"]);
+  if(ownerAddress.toLowerCase() == multisigDeployment.address.toLowerCase()) return true;
+
+  return false;
+}
+
+const isSip = async (hre, ownerAddress) => {
+  const {
+    deployments: { get },
+  } = hre;
+  const deployerKey = getAuthorizedDeployerKey();
+  const timelockOwnerDeployment = await get(deployerKey["sip"]["timelockOwner"]);
+  const timelockAdminDeployment = await get(deployerKey["sip"]["timelockAdmin"]);
+
+  if (ownerAddress.toLowerCase() == timelockOwnerDeployment.address.toLowerCase() || ownerAddress.toLowerCase() == timelockAdminDeployment.address.toLowerCase()) return true;
+
+  return false;
 }
 
 export {
@@ -546,5 +570,7 @@ export {
   defaultValueMultisigOrSipFlag,
   deployWithCustomProxy,
   transferOwnership,
-  getAuthorizedDeployerKey
+  getAuthorizedDeployerKey,
+  isMultisig,
+  isSip
 };

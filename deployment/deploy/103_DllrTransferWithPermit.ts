@@ -48,25 +48,25 @@ const func: DeployFunction = async (hre) => {
       from: deployer,
       log: true,
     });
+
+    if (network.tags.testnet) {
+      targetOwner = (await get("MultisigWallet")).address;
+    } else if (network.tags.mainnet) {
+      targetOwner = (await get("TimelockOwner")).address;
+    } else {
+      // For local network, not necessary to transfer the ownership to other account
+      // targetOwner =  ""; // dummy address -- need to be changed
+    }
+  
+    if (!targetOwner) return;
+  
+    /** Transferring non proxy contract ownership */
+    // DLLR
+    log(`=== Transferring DllrTransferWithPermit ownership to: ${targetOwner} ===`);
+    const DllrTransferWithPermit = await ethers.getContract("DllrTransferWithPermit");
+    transferOwnership(hre, DllrTransferWithPermit.address, targetOwner);
+    log(`DllrTransferWithPermit ownership is transferred to: ${await DllrTransferWithPermit.owner()}`);
   }
-
-  if (network.tags.testnet) {
-    targetOwner = (await get("MultisigWallet")).address;
-  } else if (network.tags.mainnet) {
-    targetOwner = (await get("TimelockOwner")).address;
-  } else {
-    // For local network, not necessary to transfer the ownership to other account
-    // targetOwner =  ""; // dummy address -- need to be changed
-  }
-
-  if (!targetOwner) return;
-
-  /** Transferring non proxy contract ownership */
-  // DLLR
-  log(`=== Transferring DllrTransferWithPermit ownership to: ${targetOwner} ===`);
-  const DllrTransferWithPermit = await ethers.getContract("DllrTransferWithPermit");
-  transferOwnership(hre, DllrTransferWithPermit.address, targetOwner);
-  log(`DllrTransferWithPermit ownership is transferred to: ${await DllrTransferWithPermit.owner()}`);
 };
 
 func.tags = ["DllrTransferWithPermit"];

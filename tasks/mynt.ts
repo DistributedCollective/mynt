@@ -15,6 +15,8 @@ import {
   sendWithMultisig,
   defaultValueMultisigOrSipFlag,
   getAuthorizedDeployerKey,
+  isMultisig,
+  isSip,
 } from "../scripts/helpers/helpers";
 import { ISipArgument } from "./sips/args/SIPArgs";
 import { transferOwnership } from "../scripts/helpers/helpers";
@@ -1008,12 +1010,7 @@ task("mynt:setMassetTokenTransferWithPermit", "set mAsset token transfer with pe
   const { deployer } = await getNamedAccounts();
   const owner = await massetManager.owner();
 
-  const deployerKey = await getAuthorizedDeployerKey();
-  const multisigDeployment = await get(deployerKey["multisig"]);
-  const timelockOwnerDeployment = await get(deployerKey["sip"]["timelockOwner"]);
-  const timelockAdminDeployment = await get(deployerKey["sip"]["timelockAdmin"]);
-
-  if (owner.toLowerCase() == multisigDeployment.address.toLowerCase()) {
+  if (await isMultisig(hre, owner)) {
     const multisigAddress = (await get("MultisigWallet")).address;
     const data = massetManager.interface.encodeFunctionData(
       "setMassetTokenTransferWithPermit",
@@ -1026,7 +1023,7 @@ task("mynt:setMassetTokenTransferWithPermit", "set mAsset token transfer with pe
       data,
       deployer
     );
-  } else if (owner.toLowerCase() == timelockOwnerDeployment.address.toLowerCase() || owner.toLowerCase() == timelockAdminDeployment.address.toLowerCase()) {
+  } else if (await isSip(hre, owner)) {
     const signature = "setBasketManagerProxy(address)";
     const data = massetManager.interface.encodeFunctionData(
       "setMassetTokenTransferWithPermit",
