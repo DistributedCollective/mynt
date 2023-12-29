@@ -116,6 +116,13 @@ interface IMassetManager {
     function getBasketManager() external view returns (address);
 
     /**
+     * @dev Get the mAssetTokenTransferWithPermit
+     *
+     * @return mAssetTokenTransferWithPermit contract address
+     */
+    function getMAssetTokenTransferWithPermitAddress() external view returns (address);
+
+    /**
      * @dev get the implementation logic address referring to ERC1967 standard.
      *
      * @return logic implementation address.

@@ -51,7 +51,7 @@ describe("MoC Integration With DllrTransferWithPermit", async () => {
             "MassetManager",
             "BasketManager",
             "DllrTransferWithPermit",
-            "MocIntegrationV2"
+            "MocIntegration"
         ]);
 
         [, alice] = accounts;
@@ -63,11 +63,14 @@ describe("MoC Integration With DllrTransferWithPermit", async () => {
         dllrTransferWithPermit = (await ethers.getContract("DllrTransferWithPermit")) as DllrTransferWithPermit;
         massetManager = (await ethers.getContract("MassetManager")) as MassetManager;
         basketManager = (await ethers.getContract("BasketManagerV3")) as BasketManagerV3;
-        mocIntegration = (await ethers.getContract("MocIntegrationV2")) as MocIntegration;
+        mocIntegration = (await ethers.getContract("MocIntegration")) as MocIntegration;
 
         // bAssetDoc = (await ethers.getContract("DoC")) as MockERC20;
         bAssetDoc = await ethers.getContractAt("MockERC20", await mocIntegration.doc());
         moc = (await ethers.getContractAt("MocMock", await mocIntegration.moc())) as MocMock;
+
+        /** Here we setup the DllrTransferWithPermit in mAssetManager, so that MocIntegration contract will use the DllrTransferWithPermit */
+        await massetManager.setMassetTokenTransferWithPermit(dllrTransferWithPermit.address);
 
         const erc20Factory = await ethers.getContractFactory("MockERC20");
         bAssetZusd = (await erc20Factory.deploy(
