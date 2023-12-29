@@ -103,6 +103,15 @@ interface IMassetManager {
         address _recipient
     ) external returns (uint256 massetRedeemed);
 
+    /**
+     * @dev set mAssetTokenTransferWithPermit contract address
+     *
+     * @param _newMAssetTokenTransferWithPermit new massetTokenTransferWithPermit contract address
+     */
+    function setMassetTokenTransferWithPermit(
+        address _newMAssetTokenTransferWithPermit
+    ) external;
+
     // Getters
 
     function getFeesVault() external view returns (address);

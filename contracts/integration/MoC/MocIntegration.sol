@@ -70,11 +70,9 @@ contract MocIntegration is OwnableUpgradeable, ERC1967UpgradeUpgradeable {
         uint256 _dllrAmount,
         PermitParams calldata _permitParams
     ) external {
-        IDLLR dllrTransferWithPermit = IDLLR(massetManager.getMAssetTokenTransferWithPermitAddress());
-        IDLLR tokenTransferWithPermit = address(dllrTransferWithPermit) != address(0) ? dllrTransferWithPermit : dllr;
         // transfer _dllrAmount to this contract by permit (EIP-2612)
         address thisAddress = address(this);
-        tokenTransferWithPermit.transferWithPermit(
+        dllr.transferWithPermit(
             msg.sender,
             thisAddress,
             _dllrAmount,
