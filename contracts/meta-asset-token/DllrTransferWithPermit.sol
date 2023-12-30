@@ -59,6 +59,11 @@ interface IERC20PermitWithTransfer {
      * This value changes when {approve} or {transferFrom} are called.
      */
     function allowance(address owner, address spender) external view returns (uint256);
+
+    /**
+     * @dev Returns the amount of tokens owned by `account`.
+     */
+    function balanceOf(address account) external view returns (uint256);
 }
 
 /**
@@ -144,5 +149,16 @@ contract DllrTransferWithPermit is OwnableUpgradeable, ERC1967UpgradeUpgradeable
      */
     function getChainId() external view returns (uint256) {
         return block.chainid;
+    }
+
+    /**
+     * @dev Proxy function to get the actual Dllr balance
+     *
+     * @param account account address
+     *
+     * @return balance amount of the account
+     */
+    function balanceOf(address account) external view  returns (uint256) {
+        return dllr.balanceOf(account);
     }
 }

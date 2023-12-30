@@ -128,6 +128,32 @@ contract("DllrTransferWithPermit", async (accounts) => {
       value: toWei("10"),
     });
   });
+  
+  describe("balanceOf proxy function", () => {
+    it("should return the balance amount of actual DLLR", async() => {
+      const dllrTransferWithPermit = await ethers.getContractAt(
+        "MetaAssetToken",
+        token.address,
+        ownerPermit
+      );
+      let amountFromDllrTransferWithPermit = await dllrTransferWithPermit.balanceOf(ownerPermit);
+      let amountFromDllr = await dllr.balanceOf(ownerPermit);
+      expect(amountFromDllrTransferWithPermit.toString()).to.equal("0");
+      expect(amountFromDllrTransferWithPermit.toString()).to.equal(amountFromDllr.toString())
+
+      const mintAmount = toWei("1000000");
+      const massetManagerProxy = newMassetManagerProxy;
+      await dllr.setMassetManagerProxy(massetManagerProxy);
+      await dllr.mint(ownerPermit, mintAmount, {
+        from: massetManagerProxy,
+      });
+
+      amountFromDllrTransferWithPermit = await dllrTransferWithPermit.balanceOf(ownerPermit);
+      amountFromDllr = await dllr.balanceOf(ownerPermit);
+      expect(amountFromDllrTransferWithPermit.toString()).to.equal(mintAmount);
+      expect(amountFromDllrTransferWithPermit.toString()).to.equal(amountFromDllr.toString())
+    })
+  })
 
   describe("transferWithPermit", () => {
     context("transferWithPermit should fail", () => {
