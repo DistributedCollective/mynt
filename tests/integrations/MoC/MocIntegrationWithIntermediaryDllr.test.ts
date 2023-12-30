@@ -6,7 +6,7 @@ import hre, { deployments, expect } from "hardhat"; // expect => https://hardhat
 // import { FakeContract, smock } from "@defi-wonderland/smock";
 import {
     DLLR,
-    DllrTransferWithPermit,
+    MyntTokenTransferWithPermit,
     MassetManager,
     MocIntegration,
     BasketManagerV3,
@@ -25,7 +25,7 @@ describe("MoC Integration With DllrTransferWithPermit", async () => {
     let alice: SignerWithAddress;
     let accounts: SignerWithAddress[];
     let dllr: DLLR;
-    let dllrTransferWithPermit: DllrTransferWithPermit;
+    let dllrTransferWithPermit: MyntTokenTransferWithPermit;
     let massetManager: MassetManager;
     let basketManager: BasketManagerV3;
     let bAssetZusd: MockERC20;
@@ -60,7 +60,7 @@ describe("MoC Integration With DllrTransferWithPermit", async () => {
         // moc = (await mocFactory.deploy()) as MocMock;
 
         dllr = (await ethers.getContract("DLLR")) as DLLR;
-        dllrTransferWithPermit = (await ethers.getContract("DllrTransferWithPermit")) as DllrTransferWithPermit;
+        dllrTransferWithPermit = (await ethers.getContract("DllrTransferWithPermit")) as MyntTokenTransferWithPermit;
         massetManager = (await ethers.getContract("MassetManager")) as MassetManager;
         basketManager = (await ethers.getContract("BasketManagerV3")) as BasketManagerV3;
         mocIntegration = (await ethers.getContract("MocIntegrationV2")) as MocIntegration;

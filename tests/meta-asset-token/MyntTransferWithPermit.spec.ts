@@ -2,8 +2,7 @@ import { expectRevert, expectEvent } from "@openzeppelin/test-helpers";
 import { toWei, toChecksumAddress } from "web3-utils";
 import {
   MockMetaAssetTokenInstance,
-  MetaAssetTokenInstance,
-  DllrTransferWithPermitInstance,
+  MetaAssetTokenInstance
 } from "types/generated";
 import { MAX_UINT256, ZERO_ADDRESS } from "@utils/constants";
 import Wallet from "ethereumjs-wallet";
@@ -21,7 +20,7 @@ import {
 const MetaAssetToken = artifacts.require("MetaAssetToken");
 const MockMetaAssetToken = artifacts.require("MockMetaAssetToken");
 const MockApprovalReceiver = artifacts.require("MockApprovalReceiver");
-const DllrTransferWithPermit = artifacts.require("DllrTransferWithPermit");
+const MyntTokenTransferWithPermit = artifacts.require("MyntTokenTransferWithPermit");
 const NOT_OWNER_EXCEPTION =
   "VM Exception while processing transaction: reverted with reason string 'Ownable: caller is not the owner";
 
@@ -50,7 +49,7 @@ const buildData = (
   message: { owner: from, spender, value: amount, nonce, deadline },
 });
 
-contract("DllrTransferWithPermit", async (accounts) => {
+contract("MyntTokenTransferWithPermit", async (accounts) => {
   const [owner, user, newMassetManagerProxy] = accounts;
 
   let dllr: MetaAssetTokenInstance;
@@ -102,7 +101,7 @@ contract("DllrTransferWithPermit", async (accounts) => {
       from: owner,
     });
 
-    token = await DllrTransferWithPermit.new(dllr.address);
+    token = await MyntTokenTransferWithPermit.new(dllr.address);
     await token.initialize({ from: owner });
 
     mockToken = await MockMetaAssetToken.new(
@@ -131,15 +130,15 @@ contract("DllrTransferWithPermit", async (accounts) => {
   
   describe("balanceOf proxy function", () => {
     it("should return the balance amount of actual DLLR", async() => {
-      const dllrTransferWithPermit = await ethers.getContractAt(
+      const myntTokenTransferWithPermit = await ethers.getContractAt(
         "MetaAssetToken",
         token.address,
         ownerPermit
       );
-      let amountFromDllrTransferWithPermit = await dllrTransferWithPermit.balanceOf(ownerPermit);
+      let amountFromMyntTokenTransferWithPermit = await myntTokenTransferWithPermit.balanceOf(ownerPermit);
       let amountFromDllr = await dllr.balanceOf(ownerPermit);
-      expect(amountFromDllrTransferWithPermit.toString()).to.equal("0");
-      expect(amountFromDllrTransferWithPermit.toString()).to.equal(amountFromDllr.toString())
+      expect(amountFromMyntTokenTransferWithPermit.toString()).to.equal("0");
+      expect(amountFromMyntTokenTransferWithPermit.toString()).to.equal(amountFromDllr.toString())
 
       const mintAmount = toWei("1000000");
       const massetManagerProxy = newMassetManagerProxy;
@@ -148,10 +147,10 @@ contract("DllrTransferWithPermit", async (accounts) => {
         from: massetManagerProxy,
       });
 
-      amountFromDllrTransferWithPermit = await dllrTransferWithPermit.balanceOf(ownerPermit);
+      amountFromMyntTokenTransferWithPermit = await myntTokenTransferWithPermit.balanceOf(ownerPermit);
       amountFromDllr = await dllr.balanceOf(ownerPermit);
-      expect(amountFromDllrTransferWithPermit.toString()).to.equal(mintAmount);
-      expect(amountFromDllrTransferWithPermit.toString()).to.equal(amountFromDllr.toString())
+      expect(amountFromMyntTokenTransferWithPermit.toString()).to.equal(mintAmount);
+      expect(amountFromMyntTokenTransferWithPermit.toString()).to.equal(amountFromDllr.toString())
     })
   })
 
@@ -228,7 +227,7 @@ contract("DllrTransferWithPermit", async (accounts) => {
             r,
             s
           ),
-          "DLLR: Invalid address. Cannot transfer DLLR to the null address, DLLR or this contract."
+          "Invalid address. Cannot transfer to the null address, myntToken or this contract."
         );
       });
 
@@ -271,7 +270,7 @@ contract("DllrTransferWithPermit", async (accounts) => {
             r,
             s
           ),
-          "DLLR: Invalid address. Cannot transfer DLLR to the null address, DLLR or this contract."
+          "Invalid address. Cannot transfer to the null address, myntToken or this contract."
         );
       });
 
@@ -299,10 +298,10 @@ contract("DllrTransferWithPermit", async (accounts) => {
           params: [spender],
         });
 
-        /** The transferWithPermit will be performed from token contract, which is the DllrTransferWithPermit contract */
+        /** The transferWithPermit will be performed from token contract, which is the MyntTokenTransferWithPermit contract */
         const account = await ethers.provider.getSigner(spender);
         const tokenInstance = await ethers.getContractAt(
-          "DllrTransferWithPermit",
+          "MyntTokenTransferWithPermit",
           token.address,
           account
         );
@@ -370,7 +369,7 @@ contract("DllrTransferWithPermit", async (accounts) => {
           token.address,
           account
         );
-        /** The transferWithPermit will be performed from token contract, which is the DllrTransferWithPermit contract */
+        /** The transferWithPermit will be performed from token contract, which is the MyntTransferWithPermit contract */
         await tokenInstance.transferWithPermit(
           ownerPermit,
           user,
@@ -396,15 +395,15 @@ contract("DllrTransferWithPermit", async (accounts) => {
     });
   });
 
-  describe("transfer to DllrTransferWithPermit", () => {
+  describe("transfer to MyntTransferWithPermit", () => {
     context("should succeed", () => {
-      it("transferWithPermit should be working as per normal using DllrTransferWithPermit", async () => {
+      it("transferWithPermit should be working as per normal using MyntTransferWithPermit", async () => {
         const oldAssetProxyAddress = massetManagerProxy;
         const deadline = MAX_UINT256.toString();
         const initialOwnerBalance = toWei("1000000");
         const amount = toWei("100");
         const nonce = await dllr.nonces(ownerPermit);
-        /** For signature, the verifying contract still needs to be DLLR, and the spender is the DllrTransferWithPermit token contract, since it will be the one who will execute the transferWithPermit */
+        /** For signature, the verifying contract still needs to be DLLR, and the spender is the MyntTransferWithPermit token contract, since it will be the one who will execute the transferWithPermit */
         const data = buildData(
           chainId,
           dllr.address,
@@ -441,7 +440,7 @@ contract("DllrTransferWithPermit", async (accounts) => {
         expect(userInitialBalance.toString()).to.equal("0");
         expect(spenderInitialAllowance.toString()).to.equal("0");
 
-        /** The transferWithPermit will be performed from token contract, which is the DllrTransferWithPermit contract */
+        /** The transferWithPermit will be performed from token contract, which is the MyntTransferWithPermit contract */
         await token.transferWithPermit(
           ownerPermit,
           user,
@@ -471,7 +470,7 @@ contract("DllrTransferWithPermit", async (accounts) => {
         const initialOwnerBalance = toWei("1000000");
         const amount = toWei("100");
         const nonce = await dllr.nonces(ownerPermit);
-        /** For signature, the verifying contract still needs to be DLLR, and the spender is the DllrTransferWithPermit token contract, since it will be the one who will execute the transferWithPermit */
+        /** For signature, the verifying contract still needs to be DLLR, and the spender is the MyntTransferWithPermit token contract, since it will be the one who will execute the transferWithPermit */
         const data = buildData(
           chainId,
           dllr.address,
@@ -509,7 +508,7 @@ contract("DllrTransferWithPermit", async (accounts) => {
         expect(spenderInitialAllowance.toString()).to.equal("0");
 
         const account = await ethers.provider.getSigner(spender);
-        const dllrTransferWithPermit = await ethers.getContractAt(
+        const myntTransferWithPermit = await ethers.getContractAt(
           "MetaAssetToken",
           token.address,
           account
@@ -526,7 +525,7 @@ contract("DllrTransferWithPermit", async (accounts) => {
           s
         );
         /** The transferWithPermit from token contract, will not reverted because it won't execute the permit anymore */
-        await dllrTransferWithPermit.transferWithPermit(
+        await myntTransferWithPermit.transferWithPermit(
           ownerPermit,
           user,
           amount,

@@ -7,7 +7,7 @@ import { IMocMintRedeemDoc } from "./IMoC.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "../../meta-asset-token/DLLR.sol";
 import "../../interfaces/IMassetManager.sol";
-import { IDllrTransferWithPermit, PermitParams } from "../../interfaces/IDllrTransferWithPermit.sol";
+import { IMyntTokenTransferWithPermit, PermitParams } from "../../interfaces/IMyntTokenTransferWithPermit.sol";
 
 /// @notice This contract provides compound functions with Money On Chain wrapping them in one transaction for convenience and to save on gas
 contract MocIntegration is OwnableUpgradeable, ERC1967UpgradeUpgradeable {
@@ -15,7 +15,7 @@ contract MocIntegration is OwnableUpgradeable, ERC1967UpgradeUpgradeable {
     IMocMintRedeemDoc public immutable moc;
     // IERC20@[DoC token]
     IERC20 public immutable doc;
-    IDllrTransferWithPermit public immutable dllrTransferWithPermit;
+    IMyntTokenTransferWithPermit public immutable myntTokenTransferWithPermit;
     IMassetManager public immutable massetManager;
 
     address public mocVendorAccount;
@@ -26,20 +26,20 @@ contract MocIntegration is OwnableUpgradeable, ERC1967UpgradeUpgradeable {
     /**
      * @param _moc MoC main contract address
      * @param _doc DoC contract address
-     * @param _dllrTransferWithPermit DLLR contract address
+     * @param _myntTokenTransferWithPermit DLLR contract address
      * @param _massetManager MassetManager contract address
      */
-    constructor(address _moc, address _doc, address _dllrTransferWithPermit, address _massetManager) {
+    constructor(address _moc, address _doc, address _myntTokenTransferWithPermit, address _massetManager) {
         require(
             _moc != address(0) &&
                 _doc != address(0) &&
-                _dllrTransferWithPermit != address(0) &&
+                _myntTokenTransferWithPermit != address(0) &&
                 _massetManager != address(0),
             "MocIntegration:: no null addresses allowed"
         );
         moc = IMocMintRedeemDoc(_moc);
         doc = IERC20(_doc);
-        dllrTransferWithPermit = IDllrTransferWithPermit(_dllrTransferWithPermit);
+        myntTokenTransferWithPermit = IMyntTokenTransferWithPermit(_myntTokenTransferWithPermit);
         massetManager = IMassetManager(_massetManager);
     }
 
@@ -72,7 +72,7 @@ contract MocIntegration is OwnableUpgradeable, ERC1967UpgradeUpgradeable {
     ) external {
         // transfer _dllrAmount to this contract by permit (EIP-2612)
         address thisAddress = address(this);
-        dllrTransferWithPermit.transferWithPermit(
+        myntTokenTransferWithPermit.transferWithPermit(
             msg.sender,
             thisAddress,
             _dllrAmount,

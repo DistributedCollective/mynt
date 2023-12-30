@@ -29,7 +29,7 @@ const func: DeployFunction = async (hre) => {
     );
   } else{
     await deploy("DllrTransferWithPermit", {
-      contract: "DllrTransferWithPermit",
+      contract: "MyntTokenTransferWithPermit",
       args: [deployedDllr.address],
       proxy: {
         owner: deployer,

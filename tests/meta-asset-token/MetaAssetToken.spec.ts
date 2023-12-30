@@ -21,7 +21,7 @@ import {
 const MetaAssetToken = artifacts.require("MetaAssetToken");
 const MockMetaAssetToken = artifacts.require("MockMetaAssetToken");
 const MockApprovalReceiver = artifacts.require("MockApprovalReceiver");
-const DllrTransferWithPermit = artifacts.require("DllrTransferWithPermit");
+const DllrTransferWithPermit = artifacts.require("MyntTokenTransferWithPermit");
 const NOT_OWNER_EXCEPTION =
   "VM Exception while processing transaction: reverted with reason string 'Ownable: caller is not the owner";
 

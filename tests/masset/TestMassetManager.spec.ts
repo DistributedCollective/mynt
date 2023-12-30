@@ -25,7 +25,7 @@ const MetaAssetToken = artifacts.require("MetaAssetToken");
 const MockERC20 = artifacts.require("MockERC20");
 const FeesVault = artifacts.require("FeesVault");
 const FeesManager = artifacts.require("FeesManager");
-const DllrTransferWithPermit = artifacts.require("DllrTransferWithPermit");
+const MyntTokenTransferWithPermit = artifacts.require("MyntTokenTransferWithPermit");
 
 let standardAccounts: StandardAccounts;
 
@@ -784,18 +784,18 @@ contract("MassetManager", async (accounts) => {
 
     context("failed", () => {
       it("set the massetTokenTransferWithPermit from non-authorized account should fail", async() => {
-        const dllrTransferWithPermit = await DllrTransferWithPermit.new(mAsset.address);
+        const myntTokenTransferWithPermit = await MyntTokenTransferWithPermit.new(mAsset.address);
         expect(await massetManager.getMAssetTokenTransferWithPermitAddress()).to.equal(ZERO_ADDRESS);
-        await expectRevert(massetManager.setMassetTokenTransferWithPermit(dllrTransferWithPermit.address, {from: standardAccounts.dummy1,}), "Ownable: caller is not the owner");
+        await expectRevert(massetManager.setMassetTokenTransferWithPermit(myntTokenTransferWithPermit.address, {from: standardAccounts.dummy1,}), "Ownable: caller is not the owner");
       })
     })
 
     context("success", () => {
       it("should set the masset token transferWithPermit successfully", async() => {
         const owner = accounts[0];
-        const dllrTransferWithPermit = await DllrTransferWithPermit.new(mAsset.address);
+        const myntTokenTransferWithPermit = await MyntTokenTransferWithPermit.new(mAsset.address);
         expect(await massetManager.getMAssetTokenTransferWithPermitAddress()).to.equal(ZERO_ADDRESS);
-        await massetManager.setMassetTokenTransferWithPermit(dllrTransferWithPermit.address, {from: owner});
+        await massetManager.setMassetTokenTransferWithPermit(myntTokenTransferWithPermit.address, {from: owner});
       })
     })
   })

@@ -12,9 +12,9 @@ struct PermitParams {
 }
 
 /**
- * @title DllrTransferWithPermit interface
+ * @title MyntTokenTransferWithPermit interface
  */
-interface IDllrTransferWithPermit {
+interface IMyntTokenTransferWithPermit {
     /** EVENT */
 
     /**
@@ -56,14 +56,6 @@ interface IDllrTransferWithPermit {
      *
      */
     function getChainId() external view returns (uint256);
-
-    /**
-     * @dev getter for the actual dllr contract address
-     *
-     * @return actual dllr contract address
-     *
-     */
-    function dllr() external view returns (address);
 
     /**
      * @dev Proxy function to get the actual Dllr balance

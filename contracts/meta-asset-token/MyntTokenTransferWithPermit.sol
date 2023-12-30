@@ -67,14 +67,14 @@ interface IERC20PermitWithTransfer {
 }
 
 /**
- * @dev This is an intermediary contract to fix the griefing attack vulnerability in the DLLR contract when using transfer withPermit function.
+ * @dev This is an intermediary contract to fix the griefing attack vulnerability in the MYNT contract that is not upgradeable, e.g: DLLR, when using transfer withPermit function.
  */
-contract DllrTransferWithPermit is OwnableUpgradeable, ERC1967UpgradeUpgradeable {
+contract MyntTokenTransferWithPermit is OwnableUpgradeable, ERC1967UpgradeUpgradeable {
     /** MODIFIER */
     modifier requireValidRecipient(address _recipient) {
         require(
-            _recipient != address(0) && _recipient != address(this) && _recipient != address(dllr),
-            "DLLR: Invalid address. Cannot transfer DLLR to the null address, DLLR or this contract."
+            _recipient != address(0) && _recipient != address(this) && _recipient != address(myntToken),
+            "Invalid address. Cannot transfer to the null address, myntToken or this contract."
         );
         _;
     }
@@ -86,15 +86,15 @@ contract DllrTransferWithPermit is OwnableUpgradeable, ERC1967UpgradeUpgradeable
     event TransferWithPermit(address _from, address _to, uint256 _amount);
 
     /** STORAGE */
-    IERC20PermitWithTransfer public immutable dllr;
+    IERC20PermitWithTransfer public immutable myntToken;
 
     /**
      * constructor
      *
-     * @param _dllrTokenAddress actual DLLR Token contract address.
+     * @param _myntTokenAddress actual mynt Token contract address.
      */
-    constructor(address payable _dllrTokenAddress) {
-        dllr = IERC20PermitWithTransfer(_dllrTokenAddress);
+    constructor(address payable _myntTokenAddress) {
+        myntToken = IERC20PermitWithTransfer(_myntTokenAddress);
     }
 
     /**
@@ -106,11 +106,11 @@ contract DllrTransferWithPermit is OwnableUpgradeable, ERC1967UpgradeUpgradeable
 
     /**
      *
-     * @dev This is the intermediary function of transferWithPermit (permit + transferFro) to the actual DLLR token contract address.
+     * @dev This is the intermediary function of transferWithPermit (permit + transferFro) to the actual mynt token contract address.
      *
      * @notice destination cannot be:
      * - zero (0x0) address.
-     * - actual dllr contract address.
+     * - actual mynt token contract address.
      *
      * @param _from Owner of the token.
      * @param _to Recipient of the token.
@@ -129,12 +129,12 @@ contract DllrTransferWithPermit is OwnableUpgradeable, ERC1967UpgradeUpgradeable
         bytes32 _r,
         bytes32 _s
     ) external requireValidRecipient(_to) {
-        if (dllr.allowance(_from, address(this)) < _amount) {
-            dllr.permit(_from, address(this), _amount, _deadline, _v, _r, _s);
+        if (myntToken.allowance(_from, address(this)) < _amount) {
+            myntToken.permit(_from, address(this), _amount, _deadline, _v, _r, _s);
         }
 
         require(
-            dllr.transferFrom(_from, _to, _amount),
+            myntToken.transferFrom(_from, _to, _amount),
             "MetaAssetToken::transferWithPermit: transfer failed"
         );
 
@@ -152,13 +152,13 @@ contract DllrTransferWithPermit is OwnableUpgradeable, ERC1967UpgradeUpgradeable
     }
 
     /**
-     * @dev Proxy function to get the actual Dllr balance
+     * @dev Proxy function to get the actual myntToken balance
      *
      * @param account account address
      *
      * @return balance amount of the account
      */
     function balanceOf(address account) external view  returns (uint256) {
-        return dllr.balanceOf(account);
+        return myntToken.balanceOf(account);
     }
 }
