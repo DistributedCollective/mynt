@@ -86,6 +86,13 @@ contract MassetManager is
     FeesVault private feesVault;
     FeesManager private feesManager;
 
+    /**
+     * @dev This mAssetTokenTransferWithPermit address is introduced in RSK network as the solution to fix the griefing attack issue in transferWithPermit function in DLLR contract.
+     * Because the DLLR contract is not upgradeable, so we introduced the intermediary contract as the solution.
+     *
+     * For the new chain deployment, as in the DLLR's griefing attack issue has been fixed, we're no longer need the intermediary contract as the solution.
+     * So, we can just set the actual DLLR contract as mAssetTokenTransferWithPermit here.
+     */
     address private mAssetTokenTransferWithPermit;
 
     // public
