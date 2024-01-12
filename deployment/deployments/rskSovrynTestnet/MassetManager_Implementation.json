@@ -1,5 +1,5 @@
 {
-  "address": "0x8870b8623191eb0b7e05b8fC062Ea0CeaE81d7b3",
+  "address": "0xb833a3ab428051e8A333DA88f67409b5f9ec2d6D",
   "abi": [
     {
       "anonymous": false,
@@ -44,6 +44,31 @@
         }
       ],
       "name": "Initialized",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "sender",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "oldMassetTokenTransferWithPermit",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "newMassetTokenTransferWithPermit",
+          "type": "address"
+        }
+      ],
+      "name": "MassetTokenTransferWithPermitChanged",
       "type": "event"
     },
     {
@@ -181,6 +206,19 @@
     {
       "inputs": [],
       "name": "getFeesVault",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getMAssetTokenTransferWithPermitAddress",
       "outputs": [
         {
           "internalType": "address",
@@ -370,6 +408,19 @@
     {
       "inputs": [],
       "name": "renounceOwnership",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_newMAssetTokenTransferWithPermit",
+          "type": "address"
+        }
+      ],
+      "name": "setMassetTokenTransferWithPermit",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"

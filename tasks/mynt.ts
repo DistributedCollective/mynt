@@ -1011,7 +1011,7 @@ task("mynt:setMassetTokenTransferWithPermit", "set mAsset token transfer with pe
   const owner = await massetManager.owner();
 
   if (await isMultisig(hre, owner)) {
-    const multisigAddress = (await get("MultisigWallet")).address;
+    const multisigAddress = (await get("MultiSigWallet")).address;
     const data = massetManager.interface.encodeFunctionData(
       "setMassetTokenTransferWithPermit",
       [dllrTransferWithPermitDeployment.address]

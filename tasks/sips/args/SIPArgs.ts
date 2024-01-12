@@ -86,16 +86,22 @@ const SIPSOV3564 = async (hre): Promise<ISipArgument> => {
   const mAssetManager = await ethers.getContract("MassetManager");
   const mocIntegrationProxy = await ethers.getContract("MocIntegration"); // MocIntegration
   const newMocIntegrationImpl = await ethers.getContract("MocIntegration_Implementation");
+  const newMassetManagerImpl = await ethers.getContract("MassetManager_Implementation");
   const myntAdminProxy = await ethers.getContract("MyntAdminProxy");
 
   const args: ISipArgument = {
     args: {
-      targets: [mocIntegrationProxy.address, mAssetManager.address],
-      values: [0,0],
-      signatures: ["upgrade(address,address)", "setMassetTokenTransferWithPermit(address)"],
-      data: [myntAdminProxy.interface.encodeFunctionData("upgrade", [
-        mocIntegrationProxy.address, newMocIntegrationImpl.address
-      ]), mAssetManager.interface.encodeFunctionData("setMassetTokenTransferWithPermit",[DllrTransferWithPermit.address])],
+      targets: [myntAdminProxy.address, myntAdminProxy.address, mAssetManager.address],
+      values: [0, 0, 0],
+      signatures: ["upgrade(address,address)", "upgrade(address,address)", "setMassetTokenTransferWithPermit(address)"],
+      data: [
+        myntAdminProxy.interface.encodeFunctionData("upgrade", [
+          mocIntegrationProxy.address, newMocIntegrationImpl.address
+        ]),
+        myntAdminProxy.interface.encodeFunctionData("upgrade", [
+          mAssetManager.address, newMassetManagerImpl.address
+        ]),
+        mAssetManager.interface.encodeFunctionData("setMassetTokenTransferWithPermit",[DllrTransferWithPermit.address])],
       /** @todo update SIP description */
       description: "SIP-SOV3564: "
     },

@@ -50,7 +50,7 @@ const func: DeployFunction = async (hre) => {
     });
 
     if (network.tags.testnet) {
-      targetOwner = (await get("MultisigWallet")).address;
+      targetOwner = (await get("MultiSigWallet")).address;
     } else if (network.tags.mainnet) {
       targetOwner = (await get("TimelockOwner")).address;
     } else {
@@ -64,7 +64,7 @@ const func: DeployFunction = async (hre) => {
     // DLLR
     log(`=== Transferring DllrTransferWithPermit ownership to: ${targetOwner} ===`);
     const DllrTransferWithPermit = await ethers.getContract("DllrTransferWithPermit");
-    transferOwnership(hre, DllrTransferWithPermit.address, targetOwner);
+    await transferOwnership(hre, DllrTransferWithPermit.address, targetOwner);
     log(`DllrTransferWithPermit ownership is transferred to: ${await DllrTransferWithPermit.owner()}`);
   }
 };
