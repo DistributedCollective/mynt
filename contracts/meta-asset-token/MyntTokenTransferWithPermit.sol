@@ -73,7 +73,9 @@ contract MyntTokenTransferWithPermit is OwnableUpgradeable, ERC1967UpgradeUpgrad
     /** MODIFIER */
     modifier requireValidRecipient(address _recipient) {
         require(
-            _recipient != address(0) && _recipient != address(this) && _recipient != address(myntToken),
+            _recipient != address(0) &&
+                _recipient != address(this) &&
+                _recipient != address(myntToken),
             "Invalid address. Cannot transfer to the null address, myntToken or this contract."
         );
         _;
@@ -129,14 +131,13 @@ contract MyntTokenTransferWithPermit is OwnableUpgradeable, ERC1967UpgradeUpgrad
         bytes32 _r,
         bytes32 _s
     ) external requireValidRecipient(_to) {
-        if (myntToken.allowance(_from, address(this)) < _amount) {
-            myntToken.permit(_from, address(this), _amount, _deadline, _v, _r, _s);
+        if (myntToken.allowance(_from, msg.sender) < _amount) {
+            myntToken.permit(_from, msg.sender, _amount, _deadline, _v, _r, _s);
         }
-
-        require(
-            myntToken.transferFrom(_from, _to, _amount),
-            "MetaAssetToken::transferWithPermit: transfer failed"
+        (bool success, ) = address(myntToken).delegatecall(
+            abi.encodeWithSignature("transferFrom(address,address,uint256)", _from, _to, _amount)
         );
+        require(success, "MetaAssetToken::transferWithPermit: transfer failed");
 
         emit TransferWithPermit(_from, _to, _amount);
     }
@@ -158,7 +159,7 @@ contract MyntTokenTransferWithPermit is OwnableUpgradeable, ERC1967UpgradeUpgrad
      *
      * @return balance amount of the account
      */
-    function balanceOf(address account) external view  returns (uint256) {
+    function balanceOf(address account) external view returns (uint256) {
         return myntToken.balanceOf(account);
     }
 }
