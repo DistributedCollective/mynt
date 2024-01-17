@@ -84,16 +84,6 @@ contract MocIntegration is OwnableUpgradeable, ERC1967UpgradeUpgradeable {
         ISignatureTransfer.SignatureTransferDetails memory transferDetails = _generateTransferDetails(thisAddress, _dllrAmount);
 
         permit2.permitTransferFrom(permit, transferDetails, msg.sender, _generatePermit2Signature(_permitParams.v, _permitParams.r, _permitParams.s));
-        // permit2.permitTransferFrom(permit, transferDetails, msg.sender, signature);
-        // dllr.transferWithPermit(
-        //     msg.sender,
-        //     thisAddress,
-        //     _dllrAmount,
-        //     _permitParams.deadline,
-        //     _permitParams.v,
-        //     _permitParams.r,
-        //     _permitParams.s
-        // );
 
         // redeem DoC from DLLR
         require(
