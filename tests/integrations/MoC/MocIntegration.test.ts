@@ -138,7 +138,7 @@ describe("MoC Integration", async () => {
 
             await dllr.connect(alice).approve(permit2.address, ethers.constants.MaxUint256);
 
-            const nonce = await mocIntegration.permit2Nonce();
+            const nonce = await mocIntegration.nonces(alice.address);
             const deadline = toDeadline(1000 * 60 * 60 * 30 /** 30 minutes */);
 
             const permitTransferFrom: PermitTransferFrom = {
@@ -191,7 +191,7 @@ describe("MoC Integration", async () => {
 
             expect((await dllr.balanceOf(alice.address)).toString()).eq("0");
             expect(await ethers.provider.getBalance(moc.address)).eq(expectedRbtcValue);
-            expect(await mocIntegration.permit2Nonce()).eq(nonce.add(1));
+            expect(await mocIntegration.nonces(alice.address)).eq(nonce.add(1));
         });
 
         it("should fail to redeem from DLLR Money on Chain DoC and then redeem RBTC from DoC if yet approved the permit2", async () => {
@@ -209,7 +209,7 @@ describe("MoC Integration", async () => {
                 .to.changeTokenBalance(dllr, alice.address, dllrAmount)
                 .to.changeTokenBalance(bAssetDoc, alice.address, `-${dllrAmount}`);
 
-            const nonce = await mocIntegration.permit2Nonce();
+            const nonce = await mocIntegration.nonces(alice.address);
             const deadline = toDeadline(1000 * 60 * 60 * 30 /** 30 minutes */);
 
             const permitTransferFrom: PermitTransferFrom = {
@@ -255,7 +255,7 @@ describe("MoC Integration", async () => {
                 mocIntegration.connect(alice).getDocFromDllrAndRedeemRBTC(dllrAmount, permitParams)
             ).to.be.revertedWith("TRANSFER_FROM_FAILED");
 
-            expect(await mocIntegration.permit2Nonce()).eq(nonce);
+            expect(await mocIntegration.nonces(alice.address)).eq(nonce);
         });
 
         it("should revert to redeem from DLLR Money on Chain DoC and then redeem RBTC from DoC through Permit2, with two transactions with invalid nonce", async () => {
@@ -276,7 +276,7 @@ describe("MoC Integration", async () => {
 
             await dllr.connect(alice).approve(permit2.address, ethers.constants.MaxUint256);
 
-            const nonce = await mocIntegration.permit2Nonce();
+            const nonce = await mocIntegration.nonces(alice.address);
             const deadline = toDeadline(1000 * 60 * 60 * 30 /** 30 minutes */);
             let dllrAmountToRedeem = new BN(dllrAmount).div(new BN(2)).toString();
 
@@ -332,7 +332,7 @@ describe("MoC Integration", async () => {
                 )
                 .to.changeTokenBalance(dllr, alice.address, `-${dllrAmountToRedeem}`);
 
-            expect(await mocIntegration.permit2Nonce()).eq(nonce.add(1));
+            expect(await mocIntegration.nonces(alice.address)).eq(nonce.add(1));
 
             const deadline2 = toDeadline(1000 * 60 * 60 * 30 /** 30 minutes */);
 
@@ -383,7 +383,7 @@ describe("MoC Integration", async () => {
 
             await dllr.connect(alice).approve(permit2.address, ethers.constants.MaxUint256);
 
-            const nonce = await mocIntegration.permit2Nonce();
+            const nonce = await mocIntegration.nonces(alice.address);
             const deadline = toDeadline(1000 * 60 * 60 * 30 /** 30 minutes */);
             let dllrAmountToRedeem = new BN(dllrAmount).div(new BN(2)).toString();
 
@@ -439,9 +439,9 @@ describe("MoC Integration", async () => {
                 )
                 .to.changeTokenBalance(dllr, alice.address, `-${dllrAmountToRedeem}`);
 
-            expect(await mocIntegration.permit2Nonce()).eq(nonce.add(1));
+            expect(await mocIntegration.nonces(alice.address)).eq(nonce.add(1));
 
-            const nonce2 = await mocIntegration.permit2Nonce();
+            const nonce2 = await mocIntegration.nonces(alice.address);
             const deadline2 = toDeadline(1000 * 60 * 60 * 30 /** 30 minutes */);
 
             const permitTransferFrom2: PermitTransferFrom = {
@@ -478,7 +478,7 @@ describe("MoC Integration", async () => {
 
             expect((await dllr.balanceOf(alice.address)).toString()).eq("0");
             expect(await ethers.provider.getBalance(moc.address)).eq(initialExpectedRbtcValue);
-            expect(await mocIntegration.permit2Nonce()).eq(nonce2.add(1));
+            expect(await mocIntegration.nonces(alice.address)).eq(nonce2.add(1));
         });
     });
 });

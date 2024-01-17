@@ -5,13 +5,16 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/ERC1967/ERC1967UpgradeUpgradeable.sol";
 import { IMocMintRedeemDoc } from "./IMoC.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/utils/Counters.sol";
 import "../../meta-asset-token/DLLR.sol";
 import "../../interfaces/IMassetManager.sol";
 import { IDLLR, PermitParams } from "../../interfaces/IDLLR.sol";
 import { IPermit2, ISignatureTransfer } from "../../permit2/interfaces/IPermit2.sol";
 
+
 /// @notice This contract provides compound functions with Money On Chain wrapping them in one transaction for convenience and to save on gas
 contract MocIntegration is OwnableUpgradeable, ERC1967UpgradeUpgradeable {
+    using Counters for Counters.Counter;
     // Money On Chain DoC redeem interface at MoC main contract address
     IMocMintRedeemDoc public immutable moc;
     // IERC20@[DoC token]
@@ -23,7 +26,7 @@ contract MocIntegration is OwnableUpgradeable, ERC1967UpgradeUpgradeable {
 
     IPermit2 public immutable permit2;
 
-    uint256 public permit2Nonce;
+    mapping(address => Counters.Counter) private _permit2Nonces;
 
     event GetDocFromDllrAndRedeemRBTC(address indexed from, uint256 fromDLLR, uint256 toRBTC);
     event MocVendorAccountSet(address newMocVendorAccount);
@@ -80,7 +83,7 @@ contract MocIntegration is OwnableUpgradeable, ERC1967UpgradeUpgradeable {
         // transfer _dllrAmount to this contract by permit (EIP-2612)
         address thisAddress = address(this);
 
-        ISignatureTransfer.PermitTransferFrom memory permit = _generateERC20PermitTransfer(_dllrAmount, _permitParams.deadline);
+        ISignatureTransfer.PermitTransferFrom memory permit = _generateERC20PermitTransfer(_dllrAmount, _permitParams.deadline, _useNonce(msg.sender));
         ISignatureTransfer.SignatureTransferDetails memory transferDetails = _generateTransferDetails(thisAddress, _dllrAmount);
 
         permit2.permitTransferFrom(permit, transferDetails, msg.sender, _generatePermit2Signature(_permitParams.v, _permitParams.r, _permitParams.s));
@@ -120,21 +123,36 @@ contract MocIntegration is OwnableUpgradeable, ERC1967UpgradeUpgradeable {
         return ERC1967UpgradeUpgradeable._getImplementation();
     }
 
-    function _generateERC20PermitTransfer(uint256 _amount, uint256 _deadline) private returns (ISignatureTransfer.PermitTransferFrom memory) {
+    /**
+     * @dev view function to construct PermiTransferFrom struct to be used by Permit2
+     *
+     * @param _amount amount of transfer
+     * @param _deadline signature deadline
+     * @param _nonce nonce
+     *
+     * @return PermitTransferFrom struct object 
+     */
+    function _generateERC20PermitTransfer(uint256 _amount, uint256 _deadline, uint256 _nonce) private view returns (ISignatureTransfer.PermitTransferFrom memory) {
         ISignatureTransfer.PermitTransferFrom memory permit = ISignatureTransfer.PermitTransferFrom({
             permitted: ISignatureTransfer.TokenPermissions({
                 token: address(dllr), 
                 amount: _amount
             }),
-            nonce: permit2Nonce,
+            nonce: _nonce,
             deadline: _deadline
         });
-
-        permit2Nonce++;
 
         return permit;
     }
 
+    /**
+     * @dev view function to construct SignatureTransferDetails struct to be used by Permit2
+     *
+     * @param _to ultimate recipient
+     * @param _amount amount of transfer
+     *
+     * @return SignatureTransferDetails struct object 
+     */
     function _generateTransferDetails(address _to, uint256 _amount) private view returns (ISignatureTransfer.SignatureTransferDetails memory) {
         ISignatureTransfer.SignatureTransferDetails memory transferDetails = ISignatureTransfer.SignatureTransferDetails({
             to: _to,
@@ -144,7 +162,39 @@ contract MocIntegration is OwnableUpgradeable, ERC1967UpgradeUpgradeable {
         return transferDetails;
     }
 
+    /**
+     * @dev view function to generate permit2 signature
+     *
+     * @param _v v component of ECDSA signature
+     * @param _r r component of ECDSA signature
+     * @param _s s component of ECDSA signature
+     *
+     * @return constructed signature
+     */
     function _generatePermit2Signature(uint8 _v, bytes32 _r, bytes32 _s) private pure returns (bytes memory) {
         return bytes.concat(_r, _s, bytes1(_v));
+    }
+
+    /**
+     * @dev "Consume a nonce": return the current value and increment.
+     *
+     * @param owner address of owner
+     *
+     * @return current nonce of the owner's address
+     */
+    function _useNonce(address owner) internal virtual returns (uint256 current) {
+        Counters.Counter storage nonce = _permit2Nonces[owner];
+        current = nonce.current();
+        nonce.increment();
+    }
+
+    /**
+     * @dev getter for currernt nonce
+     *
+     * @param owner address of owner
+     * @return current nonce of the owner's address
+     */
+    function nonces(address owner) public view returns (uint256) {
+        return _permit2Nonces[owner].current();
     }
 }
