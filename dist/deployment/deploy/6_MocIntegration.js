@@ -20,6 +20,7 @@ const func = async ({ deployments, getNamedAccounts }) => {
     MoC main contract address: ${mocAddress}
     DoC address: ${docAddress}`);
     const dllrAddress = (await get("DLLR")).address;
+    const permit2Address = (await get("Permit2")).address;
     const deploymentName = "MocIntegration";
     const deployment = await getOrNull(deploymentName);
     const massetManagerAddress = (await get("MassetManager")).address;
@@ -28,7 +29,7 @@ const func = async ({ deployments, getNamedAccounts }) => {
     }
     else {
         await deploy(deploymentName, {
-            args: [mocAddress, docAddress, dllrAddress, massetManagerAddress],
+            args: [mocAddress, docAddress, dllrAddress, massetManagerAddress, permit2Address],
             proxy: {
                 owner: deployer,
                 proxyContract: "OpenZeppelinTransparentProxy",

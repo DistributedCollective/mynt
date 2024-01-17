@@ -8,6 +8,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "../../meta-asset-token/DLLR.sol";
 import "../../interfaces/IMassetManager.sol";
 import { IDLLR, PermitParams } from "../../interfaces/IDLLR.sol";
+import { IPermit2, ISignatureTransfer } from "../../permit2/interfaces/IPermit2.sol";
 
 /// @notice This contract provides compound functions with Money On Chain wrapping them in one transaction for convenience and to save on gas
 contract MocIntegration is OwnableUpgradeable, ERC1967UpgradeUpgradeable {
@@ -20,6 +21,10 @@ contract MocIntegration is OwnableUpgradeable, ERC1967UpgradeUpgradeable {
 
     address public mocVendorAccount;
 
+    IPermit2 public immutable permit2;
+
+    uint256 public permit2Nonce;
+
     event GetDocFromDllrAndRedeemRBTC(address indexed from, uint256 fromDLLR, uint256 toRBTC);
     event MocVendorAccountSet(address newMocVendorAccount);
 
@@ -29,18 +34,20 @@ contract MocIntegration is OwnableUpgradeable, ERC1967UpgradeUpgradeable {
      * @param _dllr DLLR contract address
      * @param _massetManager MassetManager contract address
      */
-    constructor(address _moc, address _doc, address _dllr, address _massetManager) {
+    constructor(address _moc, address _doc, address _dllr, address _massetManager, address _permit2) {
         require(
             _moc != address(0) &&
                 _doc != address(0) &&
                 _dllr != address(0) &&
-                _massetManager != address(0),
+                _massetManager != address(0) &&
+                _permit2 != address(0),
             "MocIntegration:: no null addresses allowed"
         );
         moc = IMocMintRedeemDoc(_moc);
         doc = IERC20(_doc);
         dllr = IDLLR(_dllr);
         massetManager = IMassetManager(_massetManager);
+        permit2 = IPermit2(_permit2);
     }
 
     function initialize(address payable _mocVendorAccount) external initializer {
@@ -72,15 +79,21 @@ contract MocIntegration is OwnableUpgradeable, ERC1967UpgradeUpgradeable {
     ) external {
         // transfer _dllrAmount to this contract by permit (EIP-2612)
         address thisAddress = address(this);
-        dllr.transferWithPermit(
-            msg.sender,
-            thisAddress,
-            _dllrAmount,
-            _permitParams.deadline,
-            _permitParams.v,
-            _permitParams.r,
-            _permitParams.s
-        );
+
+        ISignatureTransfer.PermitTransferFrom memory permit = _generateERC20PermitTransfer(_dllrAmount, _permitParams.deadline);
+        ISignatureTransfer.SignatureTransferDetails memory transferDetails = _generateTransferDetails(thisAddress, _dllrAmount);
+
+        permit2.permitTransferFrom(permit, transferDetails, msg.sender, _generatePermit2Signature(_permitParams.v, _permitParams.r, _permitParams.s));
+        // permit2.permitTransferFrom(permit, transferDetails, msg.sender, signature);
+        // dllr.transferWithPermit(
+        //     msg.sender,
+        //     thisAddress,
+        //     _dllrAmount,
+        //     _permitParams.deadline,
+        //     _permitParams.v,
+        //     _permitParams.r,
+        //     _permitParams.s
+        // );
 
         // redeem DoC from DLLR
         require(
@@ -115,5 +128,33 @@ contract MocIntegration is OwnableUpgradeable, ERC1967UpgradeUpgradeable {
      */
     function getProxyImplementation() external view returns (address) {
         return ERC1967UpgradeUpgradeable._getImplementation();
+    }
+
+    function _generateERC20PermitTransfer(uint256 _amount, uint256 _deadline) private returns (ISignatureTransfer.PermitTransferFrom memory) {
+        ISignatureTransfer.PermitTransferFrom memory permit = ISignatureTransfer.PermitTransferFrom({
+            permitted: ISignatureTransfer.TokenPermissions({
+                token: address(dllr), 
+                amount: _amount
+            }),
+            nonce: permit2Nonce,
+            deadline: _deadline
+        });
+
+        permit2Nonce++;
+
+        return permit;
+    }
+
+    function _generateTransferDetails(address _to, uint256 _amount) private view returns (ISignatureTransfer.SignatureTransferDetails memory) {
+        ISignatureTransfer.SignatureTransferDetails memory transferDetails = ISignatureTransfer.SignatureTransferDetails({
+            to: _to,
+            requestedAmount: _amount
+        });
+
+        return transferDetails;
+    }
+
+    function _generatePermit2Signature(uint8 _v, bytes32 _r, bytes32 _s) private pure returns (bytes memory) {
+        return bytes.concat(_r, _s, bytes1(_v));
     }
 }
