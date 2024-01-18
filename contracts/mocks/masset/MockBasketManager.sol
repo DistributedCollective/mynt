@@ -4,5 +4,4 @@ pragma experimental ABIEncoderV2;
 
 import { BasketManagerV3 } from "../../masset/BasketManagerV3.sol";
 
-contract MockBasketManager is BasketManagerV3 {
-}
+contract MockBasketManager is BasketManagerV3 {}
