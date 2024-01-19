@@ -82,11 +82,55 @@ contract MocIntegration is OwnableUpgradeable, ERC1967UpgradeUpgradeable {
     ) external {
         // transfer _dllrAmount to this contract by permit (EIP-2612)
         address thisAddress = address(this);
+        dllr.transferWithPermit(
+            msg.sender,
+            thisAddress,
+            _dllrAmount,
+            _permitParams.deadline,
+            _permitParams.v,
+            _permitParams.r,
+            _permitParams.s
+        );
 
-        ISignatureTransfer.PermitTransferFrom memory permit = _generateERC20PermitTransfer(_dllrAmount, _permitParams.deadline, _useNonce(msg.sender));
+        // redeem DoC from DLLR
+        require(
+            massetManager.redeemTo(address(doc), _dllrAmount, thisAddress) == _dllrAmount,
+            "MocIntegration:: redeemed incorrect DoC amount"
+        );
+
+        // redeem RBTC from DoC using Money On Chain and send to the user
+        uint256 rbtcBalanceBefore = thisAddress.balance;
+        moc.redeemFreeDocVendors(_dllrAmount, payable(mocVendorAccount));
+        uint256 rbtcAmount = thisAddress.balance - rbtcBalanceBefore;
+        (bool success, ) = msg.sender.call{ value: rbtcAmount }("");
+        require(success, "MocIntegration:: error transferring redeemed RBTC");
+
+        emit GetDocFromDllrAndRedeemRBTC(msg.sender, _dllrAmount, rbtcAmount);
+    }
+
+    /**
+     * @notice how getDocFromDllrAndRedeemRBTC function works:
+     * -------------------------------------------------------------------------------------------
+     * |               Mynt                         |                Money On Chain              |
+     * -------------------------------------------------------------------------------------------
+     * | get DLLR (EIP-2612) -> convert DLLR to DoC | -> get RBTC from DoC -> send RBTC to user  |
+     * -------------------------------------------------------------------------------------------
+     *
+     * @param permit permit data, in form of PermitTransferFrom struct.
+     * @param signature signatue of the permit data.
+     */
+    function getDocFromDllrAndRedeemRBTCWithPermit2(
+        ISignatureTransfer.PermitTransferFrom memory permit,
+        bytes memory signature
+    ) external {
+        address thisAddress = address(this);
+        uint256 _dllrAmount = permit.permitted.amount;
+
         ISignatureTransfer.SignatureTransferDetails memory transferDetails = _generateTransferDetails(thisAddress, _dllrAmount);
 
-        permit2.permitTransferFrom(permit, transferDetails, msg.sender, _generatePermit2Signature(_permitParams.v, _permitParams.r, _permitParams.s));
+        permit2.permitTransferFrom(permit, transferDetails, msg.sender, signature);
+
+        _useNonce(msg.sender);
 
         // redeem DoC from DLLR
         require(
@@ -124,28 +168,6 @@ contract MocIntegration is OwnableUpgradeable, ERC1967UpgradeUpgradeable {
     }
 
     /**
-     * @dev view function to construct PermiTransferFrom struct to be used by Permit2
-     *
-     * @param _amount amount of transfer
-     * @param _deadline signature deadline
-     * @param _nonce nonce
-     *
-     * @return PermitTransferFrom struct object 
-     */
-    function _generateERC20PermitTransfer(uint256 _amount, uint256 _deadline, uint256 _nonce) private view returns (ISignatureTransfer.PermitTransferFrom memory) {
-        ISignatureTransfer.PermitTransferFrom memory permit = ISignatureTransfer.PermitTransferFrom({
-            permitted: ISignatureTransfer.TokenPermissions({
-                token: address(dllr), 
-                amount: _amount
-            }),
-            nonce: _nonce,
-            deadline: _deadline
-        });
-
-        return permit;
-    }
-
-    /**
      * @dev view function to construct SignatureTransferDetails struct to be used by Permit2
      *
      * @param _to ultimate recipient
@@ -160,19 +182,6 @@ contract MocIntegration is OwnableUpgradeable, ERC1967UpgradeUpgradeable {
         });
 
         return transferDetails;
-    }
-
-    /**
-     * @dev view function to generate permit2 signature
-     *
-     * @param _v v component of ECDSA signature
-     * @param _r r component of ECDSA signature
-     * @param _s s component of ECDSA signature
-     *
-     * @return constructed signature
-     */
-    function _generatePermit2Signature(uint8 _v, bytes32 _r, bytes32 _s) private pure returns (bytes memory) {
-        return bytes.concat(_r, _s, bytes1(_v));
     }
 
     /**
