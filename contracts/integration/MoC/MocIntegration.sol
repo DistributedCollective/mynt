@@ -11,7 +11,6 @@ import "../../interfaces/IMassetManager.sol";
 import { IDLLR, PermitParams } from "../../interfaces/IDLLR.sol";
 import { IPermit2, ISignatureTransfer } from "../../permit2/interfaces/IPermit2.sol";
 
-
 /// @notice This contract provides compound functions with Money On Chain wrapping them in one transaction for convenience and to save on gas
 contract MocIntegration is OwnableUpgradeable, ERC1967UpgradeUpgradeable {
     using Counters for Counters.Counter;
@@ -37,7 +36,13 @@ contract MocIntegration is OwnableUpgradeable, ERC1967UpgradeUpgradeable {
      * @param _dllr DLLR contract address
      * @param _massetManager MassetManager contract address
      */
-    constructor(address _moc, address _doc, address _dllr, address _massetManager, address _permit2) {
+    constructor(
+        address _moc,
+        address _doc,
+        address _dllr,
+        address _massetManager,
+        address _permit2
+    ) {
         require(
             _moc != address(0) &&
                 _doc != address(0) &&
@@ -117,7 +122,7 @@ contract MocIntegration is OwnableUpgradeable, ERC1967UpgradeUpgradeable {
      * -------------------------------------------------------------------------------------------
      *
      * @param permit permit data, in form of PermitTransferFrom struct.
-     * @param signature signatue of the permit data.
+     * @param signature of the permit data.
      */
     function getDocFromDllrAndRedeemRBTCWithPermit2(
         ISignatureTransfer.PermitTransferFrom memory permit,
@@ -126,7 +131,8 @@ contract MocIntegration is OwnableUpgradeable, ERC1967UpgradeUpgradeable {
         address thisAddress = address(this);
         uint256 _dllrAmount = permit.permitted.amount;
 
-        ISignatureTransfer.SignatureTransferDetails memory transferDetails = _generateTransferDetails(thisAddress, _dllrAmount);
+        ISignatureTransfer.SignatureTransferDetails
+            memory transferDetails = _generateTransferDetails(thisAddress, _dllrAmount);
 
         permit2.permitTransferFrom(permit, transferDetails, msg.sender, signature);
 
@@ -173,13 +179,14 @@ contract MocIntegration is OwnableUpgradeable, ERC1967UpgradeUpgradeable {
      * @param _to ultimate recipient
      * @param _amount amount of transfer
      *
-     * @return SignatureTransferDetails struct object 
+     * @return SignatureTransferDetails struct object
      */
-    function _generateTransferDetails(address _to, uint256 _amount) private pure returns (ISignatureTransfer.SignatureTransferDetails memory) {
-        ISignatureTransfer.SignatureTransferDetails memory transferDetails = ISignatureTransfer.SignatureTransferDetails({
-            to: _to,
-            requestedAmount: _amount
-        });
+    function _generateTransferDetails(
+        address _to,
+        uint256 _amount
+    ) private pure returns (ISignatureTransfer.SignatureTransferDetails memory) {
+        ISignatureTransfer.SignatureTransferDetails memory transferDetails = ISignatureTransfer
+            .SignatureTransferDetails({ to: _to, requestedAmount: _amount });
 
         return transferDetails;
     }
