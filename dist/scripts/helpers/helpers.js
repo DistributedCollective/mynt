@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.transferOwnership = exports.deployWithCustomProxy = exports.defaultValueMultisigOrSipFlag = exports.createProposal = exports.isMultisigOwner = exports.multisigRevokeConfirmation = exports.multisigRemoveOwner = exports.multisigAddOwner = exports.multisigCheckTx = exports.multisigExecuteTx = exports.signWithMultisig = exports.sendWithMultisig = exports.getParsedEventLogFromReceipt = exports.getEthersLog = exports.parseEthersLogToValue = exports.parseEthersLog = exports.getTxLog = void 0;
+exports.isSip = exports.isMultisig = exports.getAuthorizedDeployerKey = exports.transferOwnership = exports.deployWithCustomProxy = exports.defaultValueMultisigOrSipFlag = exports.createProposal = exports.isMultisigOwner = exports.multisigRevokeConfirmation = exports.multisigRemoveOwner = exports.multisigAddOwner = exports.multisigCheckTx = exports.multisigExecuteTx = exports.signWithMultisig = exports.sendWithMultisig = exports.getParsedEventLogFromReceipt = exports.getEthersLog = exports.parseEthersLogToValue = exports.parseEthersLog = exports.getTxLog = void 0;
 const node_logs_1 = __importDefault(require("node-logs"));
 const logger = new node_logs_1.default().showInConsole(true);
 const sendWithMultisig = async (hre, multisigAddress, contractAddress, data, sender, value = 0) => {
@@ -300,4 +300,33 @@ const transferOwnership = async (hre, contractAddress, newOwner, isMultisig = fa
     }
 };
 exports.transferOwnership = transferOwnership;
+const getAuthorizedDeployerKey = () => {
+    return {
+        multisig: "MultiSigWallet",
+        sip: {
+            timelockOwner: "TimelockOwner",
+            timelockAdmin: "TimelockAdmin"
+        }
+    };
+};
+exports.getAuthorizedDeployerKey = getAuthorizedDeployerKey;
+const isMultisig = async (hre, ownerAddress) => {
+    const { deployments: { get }, } = hre;
+    const deployerKey = getAuthorizedDeployerKey();
+    const multisigDeployment = await get(deployerKey["multisig"]);
+    if (ownerAddress.toLowerCase() == multisigDeployment.address.toLowerCase())
+        return true;
+    return false;
+};
+exports.isMultisig = isMultisig;
+const isSip = async (hre, ownerAddress) => {
+    const { deployments: { get }, } = hre;
+    const deployerKey = getAuthorizedDeployerKey();
+    const timelockOwnerDeployment = await get(deployerKey["sip"]["timelockOwner"]);
+    const timelockAdminDeployment = await get(deployerKey["sip"]["timelockAdmin"]);
+    if (ownerAddress.toLowerCase() == timelockOwnerDeployment.address.toLowerCase() || ownerAddress.toLowerCase() == timelockAdminDeployment.address.toLowerCase())
+        return true;
+    return false;
+};
+exports.isSip = isSip;
 //# sourceMappingURL=helpers.js.map

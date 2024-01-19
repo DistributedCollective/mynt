@@ -55,6 +55,7 @@ func.dependencies = [
     "MassetManager",
     "MyntAdminProxy",
     "DeployMockBAssets",
+    "Permit2",
 ];
 exports.default = func;
 //# sourceMappingURL=6_MocIntegration.js.map
