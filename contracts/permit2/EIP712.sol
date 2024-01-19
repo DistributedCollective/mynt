@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.17;
 
-import {IEIP712} from "./interfaces/IEIP712.sol";
+import { IEIP712 } from "./interfaces/IEIP712.sol";
 
 /// @notice EIP712 helpers for permit2
 /// @dev Maintains cross-chain replay protection in the event of a fork
@@ -24,13 +24,17 @@ contract EIP712 is IEIP712 {
     /// @notice Returns the domain separator for the current chain.
     /// @dev Uses cached version if chainid and address are unchanged from construction.
     function DOMAIN_SEPARATOR() public view override returns (bytes32) {
-        return block.chainid == _CACHED_CHAIN_ID
-            ? _CACHED_DOMAIN_SEPARATOR
-            : _buildDomainSeparator(_TYPE_HASH, _HASHED_NAME);
+        return
+            block.chainid == _CACHED_CHAIN_ID
+                ? _CACHED_DOMAIN_SEPARATOR
+                : _buildDomainSeparator(_TYPE_HASH, _HASHED_NAME);
     }
 
     /// @notice Builds a domain separator using the current chainId and contract address.
-    function _buildDomainSeparator(bytes32 typeHash, bytes32 nameHash) private view returns (bytes32) {
+    function _buildDomainSeparator(
+        bytes32 typeHash,
+        bytes32 nameHash
+    ) private view returns (bytes32) {
         return keccak256(abi.encode(typeHash, nameHash, block.chainid, address(this)));
     }
 

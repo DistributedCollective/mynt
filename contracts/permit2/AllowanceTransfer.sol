@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.17;
 
-import {ERC20} from "./ERC20.sol";
-import {SafeTransferLib} from "./libraries/SafeTransferLib.sol";
-import {PermitHash} from "./libraries/PermitHash.sol";
-import {SignatureVerification} from "./libraries/SignatureVerification.sol";
-import {EIP712} from "./EIP712.sol";
-import {IAllowanceTransfer} from "./interfaces/IAllowanceTransfer.sol";
-import {SignatureExpired, InvalidNonce} from "./PermitErrors.sol";
-import {Allowance} from "./libraries/Allowance.sol";
+import { ERC20 } from "./ERC20.sol";
+import { SafeTransferLib } from "./libraries/SafeTransferLib.sol";
+import { PermitHash } from "./libraries/PermitHash.sol";
+import { SignatureVerification } from "./libraries/SignatureVerification.sol";
+import { EIP712 } from "./EIP712.sol";
+import { IAllowanceTransfer } from "./interfaces/IAllowanceTransfer.sol";
+import { SignatureExpired, InvalidNonce } from "./PermitErrors.sol";
+import { Allowance } from "./libraries/Allowance.sol";
 
 contract AllowanceTransfer is IAllowanceTransfer, EIP712 {
     using SignatureVerification for bytes;
@@ -30,8 +30,13 @@ contract AllowanceTransfer is IAllowanceTransfer, EIP712 {
     }
 
     /// @inheritdoc IAllowanceTransfer
-    function permit(address owner, PermitSingle memory permitSingle, bytes calldata signature) external {
-        if (block.timestamp > permitSingle.sigDeadline) revert SignatureExpired(permitSingle.sigDeadline);
+    function permit(
+        address owner,
+        PermitSingle memory permitSingle,
+        bytes calldata signature
+    ) external {
+        if (block.timestamp > permitSingle.sigDeadline)
+            revert SignatureExpired(permitSingle.sigDeadline);
 
         // Verify the signer address from the signature.
         signature.verify(_hashTypedData(permitSingle.hash()), owner);
@@ -40,8 +45,13 @@ contract AllowanceTransfer is IAllowanceTransfer, EIP712 {
     }
 
     /// @inheritdoc IAllowanceTransfer
-    function permit(address owner, PermitBatch memory permitBatch, bytes calldata signature) external {
-        if (block.timestamp > permitBatch.sigDeadline) revert SignatureExpired(permitBatch.sigDeadline);
+    function permit(
+        address owner,
+        PermitBatch memory permitBatch,
+        bytes calldata signature
+    ) external {
+        if (block.timestamp > permitBatch.sigDeadline)
+            revert SignatureExpired(permitBatch.sigDeadline);
 
         // Verify the signer address from the signature.
         signature.verify(_hashTypedData(permitBatch.hash()), owner);
@@ -66,7 +76,12 @@ contract AllowanceTransfer is IAllowanceTransfer, EIP712 {
             uint256 length = transferDetails.length;
             for (uint256 i = 0; i < length; ++i) {
                 AllowanceTransferDetails memory transferDetail = transferDetails[i];
-                _transfer(transferDetail.from, transferDetail.to, transferDetail.amount, transferDetail.token);
+                _transfer(
+                    transferDetail.from,
+                    transferDetail.to,
+                    transferDetail.amount,
+                    transferDetail.token
+                );
             }
         }
     }
@@ -128,7 +143,11 @@ contract AllowanceTransfer is IAllowanceTransfer, EIP712 {
     /// @notice Sets the new values for amount, expiration, and nonce.
     /// @dev Will check that the signed nonce is equal to the current nonce and then incrememnt the nonce value by 1.
     /// @dev Emits a Permit event.
-    function _updateApproval(PermitDetails memory details, address owner, address spender) private {
+    function _updateApproval(
+        PermitDetails memory details,
+        address owner,
+        address spender
+    ) private {
         uint48 nonce = details.nonce;
         address token = details.token;
         uint160 amount = details.amount;
