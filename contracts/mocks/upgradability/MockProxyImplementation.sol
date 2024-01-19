@@ -10,11 +10,11 @@ contract MockDependency {
 abstract contract IMockImplementation {
     bool initialized;
 
-    function isInitialized() public view returns(bool) {
+    function isInitialized() public view returns (bool) {
         return initialized;
     }
 
-    function getVersion() external virtual pure returns(string memory);
+    function getVersion() external pure virtual returns (string memory);
 }
 
 contract MockProxyImplementation1 is IMockImplementation {
@@ -25,11 +25,11 @@ contract MockProxyImplementation1 is IMockImplementation {
         initialized = true;
     }
 
-    function getVersion() external override pure returns (string memory) {
+    function getVersion() external pure override returns (string memory) {
         return "1";
     }
 
-    function getDep () public view returns(address) {
+    function getDep() public view returns (address) {
         return address(dep);
     }
 }
@@ -37,15 +37,14 @@ contract MockProxyImplementation1 is IMockImplementation {
 contract MockProxyImplementation2 is IMockImplementation {
     MockDependency private dep;
 
-    function getVersion() external override pure returns (string memory) {
+    function getVersion() external pure override returns (string memory) {
         return "2";
     }
 
-    function getDep () public view returns(address) {
+    function getDep() public view returns (address) {
         return address(dep);
     }
 }
-
 
 contract MockProxyImplementationMetaAssetToken is IMockImplementation, ERC1967UpgradeUpgradeable {
     MockDependency private dep;
@@ -55,15 +54,15 @@ contract MockProxyImplementationMetaAssetToken is IMockImplementation, ERC1967Up
         initialized = true;
     }
 
-    function getVersion() external override pure returns (string memory) {
+    function getVersion() external pure override returns (string memory) {
         return "1";
     }
 
-    function getDep () public view returns(address) {
+    function getDep() public view returns (address) {
         return address(dep);
     }
 
-    function getProxyImplementation() external view returns(address) {
+    function getProxyImplementation() external view returns (address) {
         return ERC1967UpgradeUpgradeable._getImplementation();
     }
 
