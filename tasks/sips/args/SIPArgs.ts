@@ -173,6 +173,13 @@ const SIPSOV3564 = async (hre): Promise<ISipArgument> => {
   const newMocIntegrationImpl = await ethers.getContract("MocIntegration_Implementation");
   const myntAdminProxy = await ethers.getContract("MyntAdminProxy");
 
+  if (
+    (await myntAdminProxy.getProxyImplementation(mocIntegrationProxy.address)) === newMocIntegrationImpl.address
+  ) {
+    logger.error("New mocIntegration implementation is the same with the current implementation");
+    throw Error("^");
+  }
+
   const args: ISipArgument = {
     args: {
       targets: [myntAdminProxy.address],

@@ -175,7 +175,7 @@ contract MocIntegration is OwnableUpgradeable, ERC1967UpgradeUpgradeable {
      *
      * @return SignatureTransferDetails struct object 
      */
-    function _generateTransferDetails(address _to, uint256 _amount) private view returns (ISignatureTransfer.SignatureTransferDetails memory) {
+    function _generateTransferDetails(address _to, uint256 _amount) private pure returns (ISignatureTransfer.SignatureTransferDetails memory) {
         ISignatureTransfer.SignatureTransferDetails memory transferDetails = ISignatureTransfer.SignatureTransferDetails({
             to: _to,
             requestedAmount: _amount
@@ -187,12 +187,12 @@ contract MocIntegration is OwnableUpgradeable, ERC1967UpgradeUpgradeable {
     /**
      * @dev "Consume a nonce": return the current value and increment.
      *
-     * @param owner address of owner
+     * @param _address address of owner
      *
      * @return current nonce of the owner's address
      */
-    function _useNonce(address owner) internal virtual returns (uint256 current) {
-        Counters.Counter storage nonce = _permit2Nonces[owner];
+    function _useNonce(address _address) internal virtual returns (uint256 current) {
+        Counters.Counter storage nonce = _permit2Nonces[_address];
         current = nonce.current();
         nonce.increment();
     }
@@ -200,10 +200,10 @@ contract MocIntegration is OwnableUpgradeable, ERC1967UpgradeUpgradeable {
     /**
      * @dev getter for currernt nonce
      *
-     * @param owner address of owner
+     * @param _address address of owner
      * @return current nonce of the owner's address
      */
-    function nonces(address owner) public view returns (uint256) {
-        return _permit2Nonces[owner].current();
+    function getPermit2Nonce(address _address) public view returns (uint256) {
+        return _permit2Nonces[_address].current();
     }
 }
