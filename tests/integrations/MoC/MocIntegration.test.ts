@@ -173,7 +173,7 @@ describe("MoC Integration", async () => {
           });
         })
 
-        context("getDocFromDllrAndRedeemRBTCWithPermit2", async() => {
+        context("getDocFromDllrAndRedeemRbtcWithPermit2", async() => {
           it("should redeem from DLLR Money on Chain DoC and then redeem RBTC from DoC through Permit2, all in one transaction", async () => {
             const dllrAmount = ethers.utils.parseEther("500").toString();
 
@@ -223,10 +223,10 @@ describe("MoC Integration", async () => {
             // mocIntegration contract gets DLLR by permission from alice and calls
             // MocMock (MoC mock contract) redeem func to exchange DLLR to RBTC
 
-            // await mocIntegration.connect(alice).getDocFromDllrAndRedeemRBTCWithPermit2(dllrAmount, permit);
+            // await mocIntegration.connect(alice).getDocFromDllrAndRedeemRbtcWithPermit2(dllrAmount, permit);
 
             await expect(
-                mocIntegration.connect(alice).getDocFromDllrAndRedeemRBTCWithPermit2(permitTransferFrom, signature)
+                mocIntegration.connect(alice).getDocFromDllrAndRedeemRbtcWithPermit2(permitTransferFrom, signature)
             )
                 .to.changeEtherBalances(
                     [alice.address, moc.address],
@@ -293,10 +293,10 @@ describe("MoC Integration", async () => {
               // mocIntegration contract gets DLLR by permission from alice and calls
               // MocMock (MoC mock contract) redeem func to exchange DLLR to RBTC
 
-              // await mocIntegration.connect(alice).getDocFromDllrAndRedeemRBTCWithPermit2(dllrAmount, permit);
+              // await mocIntegration.connect(alice).getDocFromDllrAndRedeemRbtcWithPermit2(dllrAmount, permit);
 
               await expect(
-                  mocIntegration.connect(alice).getDocFromDllrAndRedeemRBTCWithPermit2(permitTransferFrom, signature)
+                  mocIntegration.connect(alice).getDocFromDllrAndRedeemRbtcWithPermit2(permitTransferFrom, signature)
               )
                   .to.changeEtherBalances(
                       [alice.address, moc.address],
@@ -326,7 +326,7 @@ describe("MoC Integration", async () => {
               var {v, r, s} = extractSignature(signature2);
 
               await expect(
-                  mocIntegration.connect(alice).getDocFromDllrAndRedeemRBTCWithPermit2(permitTransferFrom2, signature2)
+                  mocIntegration.connect(alice).getDocFromDllrAndRedeemRbtcWithPermit2(permitTransferFrom2, signature2)
               )
                   .to.changeEtherBalances(
                       [alice.address, moc.address],
@@ -385,10 +385,10 @@ describe("MoC Integration", async () => {
               // mocIntegration contract gets DLLR by permission from alice and calls
               // MocMock (MoC mock contract) redeem func to exchange DLLR to RBTC
 
-              // await mocIntegration.connect(alice).getDocFromDllrAndRedeemRBTCWithPermit2(dllrAmount, permit);
+              // await mocIntegration.connect(alice).getDocFromDllrAndRedeemRbtcWithPermit2(dllrAmount, permit);
 
               await expect(
-                  mocIntegration.connect(alice).getDocFromDllrAndRedeemRBTCWithPermit2(permitTransferFrom, signature)
+                  mocIntegration.connect(alice).getDocFromDllrAndRedeemRbtcWithPermit2(permitTransferFrom, signature)
               ).to.be.revertedWith("TRANSFER_FROM_FAILED");
 
               expect(await mocIntegration.getPermit2Nonce(alice.address)).eq(nonce);
@@ -442,10 +442,10 @@ describe("MoC Integration", async () => {
               // mocIntegration contract gets DLLR by permission from alice and calls
               // MocMock (MoC mock contract) redeem func to exchange DLLR to RBTC
 
-              // await mocIntegration.connect(alice).getDocFromDllrAndRedeemRBTCWithPermit2(dllrAmount, permit);
+              // await mocIntegration.connect(alice).getDocFromDllrAndRedeemRbtcWithPermit2(dllrAmount, permit);
 
               await expect(
-                  mocIntegration.connect(alice).getDocFromDllrAndRedeemRBTCWithPermit2(permitTransferFrom, signature)
+                  mocIntegration.connect(alice).getDocFromDllrAndRedeemRbtcWithPermit2(permitTransferFrom, signature)
               ).to.revertedWithCustomError(permit2, "InvalidSigner");
 
               expect(await mocIntegration.getPermit2Nonce(alice.address)).eq(nonce);
@@ -505,10 +505,10 @@ describe("MoC Integration", async () => {
               // mocIntegration contract gets DLLR by permission from alice and calls
               // MocMock (MoC mock contract) redeem func to exchange DLLR to RBTC
 
-              // await mocIntegration.connect(alice).getDocFromDllrAndRedeemRBTCWithPermit2(dllrAmount, permit);
+              // await mocIntegration.connect(alice).getDocFromDllrAndRedeemRbtcWithPermit2(dllrAmount, permit);
 
               await expect(
-                  mocIntegration.connect(alice).getDocFromDllrAndRedeemRBTCWithPermit2(permitTransferFrom, signature)
+                  mocIntegration.connect(alice).getDocFromDllrAndRedeemRbtcWithPermit2(permitTransferFrom, signature)
               )
                   .to.changeEtherBalances(
                       [alice.address, moc.address],
@@ -535,7 +535,7 @@ describe("MoC Integration", async () => {
               const signature2 = await alice._signTypedData(domain, types, values);
 
               await expect(
-                  mocIntegration.connect(alice).getDocFromDllrAndRedeemRBTCWithPermit2(permitTransferFrom2, signature2)
+                  mocIntegration.connect(alice).getDocFromDllrAndRedeemRbtcWithPermit2(permitTransferFrom2, signature2)
               ).to.revertedWithCustomError(permit2, "InvalidNonce");
                   
           });

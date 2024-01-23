@@ -124,7 +124,7 @@ contract MocIntegration is OwnableUpgradeable, ERC1967UpgradeUpgradeable {
      * @param permit permit data, in form of PermitTransferFrom struct.
      * @param signature of the permit data.
      */
-    function getDocFromDllrAndRedeemRBTCWithPermit2(
+    function getDocFromDllrAndRedeemRbtcWithPermit2(
         ISignatureTransfer.PermitTransferFrom memory permit,
         bytes memory signature
     ) external {
