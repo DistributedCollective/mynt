@@ -37,7 +37,7 @@ const func: DeployFunction = async ({ deployments, getNamedAccounts }) => {
       `${deploymentName}_Proxy`,
       "MyntAdminProxy",
       false,
-      [mocAddress, docAddress, dllrAddress, massetManagerAddress]
+      [mocAddress, docAddress, dllrAddress, massetManagerAddress, permit2Address]
     );
   } else {
     await deploy(deploymentName, {
