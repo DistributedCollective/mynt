@@ -25,8 +25,6 @@ contract MocIntegration is OwnableUpgradeable, ERC1967UpgradeUpgradeable {
 
     IPermit2 public immutable permit2;
 
-    mapping(address => Counters.Counter) private _permit2Nonces;
-
     event GetDocFromDllrAndRedeemRBTC(address indexed from, uint256 fromDLLR, uint256 toRBTC);
     event MocVendorAccountSet(address newMocVendorAccount);
 
@@ -136,8 +134,6 @@ contract MocIntegration is OwnableUpgradeable, ERC1967UpgradeUpgradeable {
 
         permit2.permitTransferFrom(permit, transferDetails, msg.sender, signature);
 
-        _useNonce(msg.sender);
-
         // redeem DoC from DLLR
         require(
             massetManager.redeemTo(address(doc), _dllrAmount, thisAddress) == _dllrAmount,
@@ -189,28 +185,5 @@ contract MocIntegration is OwnableUpgradeable, ERC1967UpgradeUpgradeable {
             .SignatureTransferDetails({ to: _to, requestedAmount: _amount });
 
         return transferDetails;
-    }
-
-    /**
-     * @dev "Consume a nonce": return the current value and increment.
-     *
-     * @param _address address of owner
-     *
-     * @return current nonce of the owner's address
-     */
-    function _useNonce(address _address) internal virtual returns (uint256 current) {
-        Counters.Counter storage nonce = _permit2Nonces[_address];
-        current = nonce.current();
-        nonce.increment();
-    }
-
-    /**
-     * @dev getter for currernt nonce
-     *
-     * @param _address address of owner
-     * @return current nonce of the owner's address
-     */
-    function getPermit2Nonce(address _address) public view returns (uint256) {
-        return _permit2Nonces[_address].current();
     }
 }

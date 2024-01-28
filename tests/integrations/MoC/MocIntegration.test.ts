@@ -24,12 +24,37 @@ function toDeadline(expiration: number): number {
     return Math.floor((Date.now() + expiration) / 1000)
 }
 
+function generateNonce() {
+  return new BN(Math.floor(Date.now() + Math.random() * 100));
+}
+
 function extractSignature(signature: string) {
     const r = signature.slice(0, 66);
     const s = '0x' + signature.slice(66, 130);
     const v = '0x' + signature.slice(130, 132);
 
     return {v, r, s};
+}
+
+function bitmapPositions(nonce) {
+  // Simulate logic to calculate wordPos and bitPos based on nonce
+  const wordPos = Math.floor(nonce / 256);
+  const bitPos = nonce % 256;
+  return { wordPos, bitPos };
+}
+
+async function isUsedNonce(permit2, from, nonce) {
+  const { wordPos, bitPos } = bitmapPositions(nonce);
+  const bit = BigInt(1) << BigInt(bitPos);
+
+  const nonceBitmapOnchain = BigInt((await permit2.nonceBitmap(from, wordPos)));
+  const flipped = nonceBitmapOnchain ^ bit;
+
+  if ((flipped & bit) === BigInt(0)) {
+    return true;
+  }
+
+  return false;
 }
 
 describe("MoC Integration", async () => {
@@ -192,7 +217,7 @@ describe("MoC Integration", async () => {
 
             await dllr.connect(alice).approve(permit2.address, ethers.constants.MaxUint256);
 
-            const nonce = await mocIntegration.getPermit2Nonce(alice.address);
+            const nonce = generateNonce();
             const deadline = toDeadline(1000 * 60 * 60 * 30 /** 30 minutes */);
 
             const permitTransferFrom: PermitTransferFrom = {
@@ -201,7 +226,7 @@ describe("MoC Integration", async () => {
                     amount: dllrAmount,
                 },
                 spender: mocIntegration.address.toLowerCase(),
-                nonce: nonce,
+                nonce: nonce.toNumber(),
                 deadline: deadline
             }
             const network = await ethers.provider.getNetwork();
@@ -225,6 +250,7 @@ describe("MoC Integration", async () => {
 
             // await mocIntegration.connect(alice).getDocFromDllrAndRedeemRbtcWithPermit2(dllrAmount, permit);
 
+            expect(await isUsedNonce(permit2, alice.address, nonce)).to.equal(false);
             await expect(
                 mocIntegration.connect(alice).getDocFromDllrAndRedeemRbtcWithPermit2(permitTransferFrom, signature)
             )
@@ -236,7 +262,8 @@ describe("MoC Integration", async () => {
 
             expect((await dllr.balanceOf(alice.address)).toString()).eq("0");
             expect(await ethers.provider.getBalance(moc.address)).eq(expectedRbtcValue);
-            expect(await mocIntegration.getPermit2Nonce(alice.address)).eq(nonce.add(1));
+            
+            expect(await isUsedNonce(permit2, alice.address, nonce)).to.equal(true);
           });
 
           it("should be able to redeem from DLLR Money on Chain DoC and then redeem RBTC from DoC through Permit2, with two transactions", async () => {
@@ -257,7 +284,8 @@ describe("MoC Integration", async () => {
 
               await dllr.connect(alice).approve(permit2.address, ethers.constants.MaxUint256);
 
-              const nonce = await mocIntegration.getPermit2Nonce(alice.address);
+              const nonce = generateNonce();
+              expect(await isUsedNonce(permit2, alice.address, nonce)).to.equal(false);
               const deadline = toDeadline(1000 * 60 * 60 * 30 /** 30 minutes */);
               let dllrAmountToRedeem = new BN(dllrAmount).div(new BN(2)).toString();
 
@@ -267,7 +295,7 @@ describe("MoC Integration", async () => {
                       amount: dllrAmountToRedeem,
                   },
                   spender: mocIntegration.address.toLowerCase(),
-                  nonce: nonce,
+                  nonce: nonce.toNumber(),
                   deadline: deadline
               }
               const network = await ethers.provider.getNetwork();
@@ -304,9 +332,9 @@ describe("MoC Integration", async () => {
                   )
                   .to.changeTokenBalance(dllr, alice.address, `-${dllrAmountToRedeem}`);
 
-              expect(await mocIntegration.getPermit2Nonce(alice.address)).eq(nonce.add(1));
-
-              const nonce2 = await mocIntegration.getPermit2Nonce(alice.address);
+              expect(await isUsedNonce(permit2, alice.address, nonce)).to.equal(true);
+              const nonce2 = generateNonce();
+              expect(await isUsedNonce(permit2, alice.address, nonce2)).to.equal(false);
               const deadline2 = toDeadline(1000 * 60 * 60 * 30 /** 30 minutes */);
 
               const permitTransferFrom2: PermitTransferFrom = {
@@ -315,7 +343,7 @@ describe("MoC Integration", async () => {
                       amount: dllrAmountToRedeem,
                   },
                   spender: mocIntegration.address.toLowerCase(),
-                  nonce: nonce2,
+                  nonce: nonce2.toNumber(),
                   deadline: deadline2
               }
 
@@ -336,7 +364,7 @@ describe("MoC Integration", async () => {
 
               expect((await dllr.balanceOf(alice.address)).toString()).eq("0");
               expect(await ethers.provider.getBalance(moc.address)).eq(initialExpectedRbtcValue);
-              expect(await mocIntegration.getPermit2Nonce(alice.address)).eq(nonce2.add(1));
+              expect(await isUsedNonce(permit2, alice.address, nonce2)).to.equal(true);
           });
 
           it("should revert to redeem from DLLR Money on Chain DoC and then redeem RBTC from DoC if yet approved the permit2", async () => {
@@ -354,7 +382,8 @@ describe("MoC Integration", async () => {
                   .to.changeTokenBalance(dllr, alice.address, dllrAmount)
                   .to.changeTokenBalance(bAssetDoc, alice.address, `-${dllrAmount}`);
 
-              const nonce = await mocIntegration.getPermit2Nonce(alice.address);
+              const nonce = generateNonce();
+              expect(await isUsedNonce(permit2, alice.address, nonce)).to.equal(false);
               const deadline = toDeadline(1000 * 60 * 60 * 30 /** 30 minutes */);
 
               const permitTransferFrom: PermitTransferFrom = {
@@ -363,7 +392,7 @@ describe("MoC Integration", async () => {
                       amount: dllrAmount,
                   },
                   spender: mocIntegration.address.toLowerCase(),
-                  nonce: nonce,
+                  nonce: nonce.toNumber(),
                   deadline: deadline
               }
               const network = await ethers.provider.getNetwork();
@@ -390,8 +419,7 @@ describe("MoC Integration", async () => {
               await expect(
                   mocIntegration.connect(alice).getDocFromDllrAndRedeemRbtcWithPermit2(permitTransferFrom, signature)
               ).to.be.revertedWith("TRANSFER_FROM_FAILED");
-
-              expect(await mocIntegration.getPermit2Nonce(alice.address)).eq(nonce);
+              expect(await isUsedNonce(permit2, alice.address, nonce)).to.equal(false);
           });
 
           it("should revert to redeem from DLLR Money on Chain DoC and then redeem RBTC from DoC if signature is assigned to wrong spender", async () => {
@@ -411,7 +439,8 @@ describe("MoC Integration", async () => {
 
               await dllr.connect(alice).approve(permit2.address, ethers.constants.MaxUint256);
 
-              const nonce = await mocIntegration.getPermit2Nonce(alice.address);
+              const nonce = generateNonce();
+              expect(await isUsedNonce(permit2, alice.address, nonce)).to.equal(false);
               const deadline = toDeadline(1000 * 60 * 60 * 30 /** 30 minutes */);
 
               const permitTransferFrom: PermitTransferFrom = {
@@ -420,7 +449,7 @@ describe("MoC Integration", async () => {
                       amount: dllrAmount,
                   },
                   spender: alice.address, // wrong spender contract here
-                  nonce: nonce,
+                  nonce: nonce.toNumber(),
                   deadline: deadline
               }
               const network = await ethers.provider.getNetwork();
@@ -447,8 +476,7 @@ describe("MoC Integration", async () => {
               await expect(
                   mocIntegration.connect(alice).getDocFromDllrAndRedeemRbtcWithPermit2(permitTransferFrom, signature)
               ).to.revertedWithCustomError(permit2, "InvalidSigner");
-
-              expect(await mocIntegration.getPermit2Nonce(alice.address)).eq(nonce);
+              expect(await isUsedNonce(permit2, alice.address, nonce)).to.equal(false);
           });
 
           it("should revert to redeem from DLLR Money on Chain DoC and then redeem RBTC from DoC through Permit2, with two transactions with invalid nonce", async () => {
@@ -469,7 +497,8 @@ describe("MoC Integration", async () => {
 
               await dllr.connect(alice).approve(permit2.address, ethers.constants.MaxUint256);
 
-              const nonce = await mocIntegration.getPermit2Nonce(alice.address);
+              const nonce = generateNonce();
+              expect(await isUsedNonce(permit2, alice.address, nonce)).to.equal(false);
               const deadline = toDeadline(1000 * 60 * 60 * 30 /** 30 minutes */);
               let dllrAmountToRedeem = new BN(dllrAmount).div(new BN(2)).toString();
 
@@ -479,7 +508,7 @@ describe("MoC Integration", async () => {
                       amount: dllrAmountToRedeem,
                   },
                   spender: mocIntegration.address.toLowerCase(),
-                  nonce: nonce,
+                  nonce: nonce.toNumber(),
                   deadline: deadline
               }
               const network = await ethers.provider.getNetwork();
@@ -516,8 +545,7 @@ describe("MoC Integration", async () => {
                   )
                   .to.changeTokenBalance(dllr, alice.address, `-${dllrAmountToRedeem}`);
 
-              expect(await mocIntegration.getPermit2Nonce(alice.address)).eq(nonce.add(1));
-
+              expect(await isUsedNonce(permit2, alice.address, nonce)).to.equal(true);
               const deadline2 = toDeadline(1000 * 60 * 60 * 30 /** 30 minutes */);
 
               const permitTransferFrom2: PermitTransferFrom = {
@@ -526,7 +554,7 @@ describe("MoC Integration", async () => {
                       amount: dllrAmountToRedeem,
                   },
                   spender: mocIntegration.address.toLowerCase(),
-                  nonce: nonce,
+                  nonce: nonce.toNumber(),
                   deadline: deadline2
               }
 
@@ -558,7 +586,8 @@ describe("MoC Integration", async () => {
 
               await dllr.connect(alice).approve(permit2.address, ethers.constants.MaxUint256);
 
-              const nonce = await mocIntegration.getPermit2Nonce(alice.address);
+              const nonce = generateNonce();
+              expect(await isUsedNonce(permit2, alice.address, nonce)).to.equal(false);
               const deadline = toDeadline(1000 * 60 * 60 * 30 /** 30 minutes */);
 
               const permitTransferFrom: PermitTransferFrom = {
@@ -567,7 +596,7 @@ describe("MoC Integration", async () => {
                       amount: dllrAmount,
                   },
                   spender: mocIntegration.address.toLowerCase(),
-                  nonce: nonce,
+                  nonce: nonce.toNumber(),
                   deadline: deadline
               }
 
@@ -589,6 +618,7 @@ describe("MoC Integration", async () => {
               
               await expect(dllr.connect(attacker).transferWithPermit(alice.address, attacker.address, dllrAmount, deadline, v, r, s)).to.revertedWith("ERC20Permit: invalid signature");
               await expect(permit2["permitTransferFrom(((address,uint256),uint256,uint256),(address,uint256),address,bytes)"](permitTransferFrom, transferDetails, alice.address, signature)).to.revertedWithCustomError(permit2, "InvalidSigner");
+              expect(await isUsedNonce(permit2, alice.address, nonce)).to.equal(false);
           });
         })
     });
