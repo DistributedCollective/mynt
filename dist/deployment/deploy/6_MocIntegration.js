@@ -25,7 +25,7 @@ const func = async ({ deployments, getNamedAccounts }) => {
     const deployment = await getOrNull(deploymentName);
     const massetManagerAddress = (await get("MassetManager")).address;
     if (deployment) {
-        await (0, deployment_1.upgradeWithTransparentUpgradableProxy)(deployer, deploymentName, "TransparentUpgradeableProxy", undefined, `${deploymentName}_Proxy`, "MyntAdminProxy", false, [mocAddress, docAddress, dllrAddress, massetManagerAddress]);
+        await (0, deployment_1.upgradeWithTransparentUpgradableProxy)(deployer, deploymentName, "TransparentUpgradeableProxy", undefined, `${deploymentName}_Proxy`, "MyntAdminProxy", false, [mocAddress, docAddress, dllrAddress, massetManagerAddress, permit2Address]);
     }
     else {
         await deploy(deploymentName, {
