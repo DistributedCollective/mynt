@@ -5,3 +5,4 @@ tmp
 temp
 coverage*
 gasReporterOutput.json
+contracts/permit2
