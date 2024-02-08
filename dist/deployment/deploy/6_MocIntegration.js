@@ -20,15 +20,16 @@ const func = async ({ deployments, getNamedAccounts }) => {
     MoC main contract address: ${mocAddress}
     DoC address: ${docAddress}`);
     const dllrAddress = (await get("DLLR")).address;
+    const permit2Address = (await get("Permit2")).address;
     const deploymentName = "MocIntegration";
     const deployment = await getOrNull(deploymentName);
     const massetManagerAddress = (await get("MassetManager")).address;
     if (deployment) {
-        await (0, deployment_1.upgradeWithTransparentUpgradableProxy)(deployer, deploymentName, "TransparentUpgradeableProxy", undefined, `${deploymentName}_Proxy`, "MyntAdminProxy", false, [mocAddress, docAddress, dllrAddress, massetManagerAddress]);
+        await (0, deployment_1.upgradeWithTransparentUpgradableProxy)(deployer, deploymentName, "TransparentUpgradeableProxy", undefined, `${deploymentName}_Proxy`, "MyntAdminProxy", false, [mocAddress, docAddress, dllrAddress, massetManagerAddress, permit2Address]);
     }
     else {
         await deploy(deploymentName, {
-            args: [mocAddress, docAddress, dllrAddress, massetManagerAddress],
+            args: [mocAddress, docAddress, dllrAddress, massetManagerAddress, permit2Address],
             proxy: {
                 owner: deployer,
                 proxyContract: "OpenZeppelinTransparentProxy",
@@ -54,6 +55,7 @@ func.dependencies = [
     "MassetManager",
     "MyntAdminProxy",
     "DeployMockBAssets",
+    "Permit2",
 ];
 exports.default = func;
 //# sourceMappingURL=6_MocIntegration.js.map

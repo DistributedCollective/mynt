@@ -167,11 +167,44 @@ const sip0072 = async (
   return args;
 };
 
+const SIPSOV3564 = async (hre): Promise<ISipArgument> => {
+  const { ethers } = hre;
+  const mocIntegrationProxy = await ethers.getContract("MocIntegration"); // MocIntegration
+  const newMocIntegrationImpl = await ethers.getContract("MocIntegration_Implementation");
+  const myntAdminProxy = await ethers.getContract("MyntAdminProxy");
+
+  if (
+    (await myntAdminProxy.getProxyImplementation(mocIntegrationProxy.address)) === newMocIntegrationImpl.address
+  ) {
+    logger.error("New mocIntegration implementation is the same with the current implementation");
+    throw Error("^");
+  }
+
+  const args: ISipArgument = {
+    args: {
+      targets: [myntAdminProxy.address],
+      values: [0],
+      signatures: ["upgrade(address,address)"],
+      data: [
+        myntAdminProxy.interface.encodeFunctionData("upgrade", [
+          mocIntegrationProxy.address, newMocIntegrationImpl.address
+        ]),
+      ],
+      /** @todo update SIP description */
+      description: "SIP-SOV3564: "
+    },
+    governorName: "GovernorOwner",
+  }
+
+  return args;
+};
+
 const sipArgs = {
   SampleSIP01,
   SIPSetMassetManagerProxy,
   SIPSetBasketManagerProxy,
   sip0072,
+  SIPSOV3564
 };
 
 export default sipArgs;

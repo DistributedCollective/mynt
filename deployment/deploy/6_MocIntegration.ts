@@ -23,6 +23,7 @@ const func: DeployFunction = async ({ deployments, getNamedAccounts }) => {
     DoC address: ${docAddress}`);
 
   const dllrAddress = (await get("DLLR")).address;
+  const permit2Address = (await get("Permit2")).address;
 
   const deploymentName = "MocIntegration";
   const deployment = await getOrNull(deploymentName);
@@ -36,11 +37,11 @@ const func: DeployFunction = async ({ deployments, getNamedAccounts }) => {
       `${deploymentName}_Proxy`,
       "MyntAdminProxy",
       false,
-      [mocAddress, docAddress, dllrAddress, massetManagerAddress]
+      [mocAddress, docAddress, dllrAddress, massetManagerAddress, permit2Address]
     );
   } else {
     await deploy(deploymentName, {
-      args: [mocAddress, docAddress, dllrAddress, massetManagerAddress],
+      args: [mocAddress, docAddress, dllrAddress, massetManagerAddress, permit2Address],
       proxy: {
         owner: deployer,
         proxyContract: "OpenZeppelinTransparentProxy",
@@ -67,6 +68,7 @@ func.dependencies = [
   "MassetManager",
   "MyntAdminProxy",
   "DeployMockBAssets",
+  "Permit2",
 ];
 
 export default func;
