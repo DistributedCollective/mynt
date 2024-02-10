@@ -1,5 +1,4 @@
-import { HardhatUserConfig } from "hardhat/types";
-import { task } from "hardhat/config";
+import { HardhatUserConfig, task, extendEnvironment } from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox";
 
 import * as dotenv from "dotenv";
@@ -18,11 +17,13 @@ import "hardhat-contract-sizer";
 import "@openzeppelin/hardhat-upgrades";
 import "@nomiclabs/hardhat-solhint";
 
-import "tasks/contractsInteraction";
-import "tasks/metaAssetTokenInteraction";
-import "tasks/upgradeContract";
-import "tasks/transferOwnership";
-import "tasks/sips/createSIP";
+import {
+  HardhatRuntimeEnvironment,
+  HttpNetworkUserConfig,
+} from "hardhat/types";
+
+import "./tasks";
+import "node_modules/sovrynsmartcontracts/hardhat/tasks/multisig";
 
 /*
  * Test hardhat forking with patched hardhat
@@ -36,6 +37,7 @@ import "tasks/sips/createSIP";
  *
  * Then the forking doesn't work correctly (ie. hardhat was not properly patched)
  */
+
 task("check-fork-patch", "Check Hardhat Fork Patch by Rainer").setAction(
   async (taskArgs, hre) => {
     await hre.network.provider.request({
@@ -43,7 +45,7 @@ task("check-fork-patch", "Check Hardhat Fork Patch by Rainer").setAction(
       params: [
         {
           forking: {
-            jsonRpcUrl: "https://mainnet4.sovryn.app/rpc",
+            jsonRpcUrl: "https://mainnet-dev.sovryn.app/rpc",
             blockNumber: 4272658,
           },
         },
@@ -62,21 +64,32 @@ task("check-fork-patch", "Check Hardhat Fork Patch by Rainer").setAction(
 );
 
 dotenv.config();
+require("cryptoenv").parse();
 
 const testnetAccounts: any = process.env.TESTNET_DEPLOYER_PRIVATE_KEY
   ? [
       process.env.TESTNET_DEPLOYER_PRIVATE_KEY,
       process.env.TESTNET_SIGNER_PRIVATE_KEY,
+      process.env.TESTNET_SIGNER_PRIVATE_KEY_2,
     ]
   : [];
 const mainnetAccounts: any = process.env.MAINNET_DEPLOYER_PRIVATE_KEY
-  ? [process.env.MAINNET_DEPLOYER_PRIVATE_KEY]
+  ? [
+      process.env.MAINNET_DEPLOYER_PRIVATE_KEY,
+      process.env.PROPOSAL_CREATOR_PRIVATE_KEY,
+    ]
   : [];
 
 const config: HardhatUserConfig = {
   namedAccounts: {
     deployer: {
       default: 0,
+    },
+    signer: {
+      default: 1,
+    },
+    signerShared: {
+      default: 2,
     },
   },
   networks: {
@@ -93,6 +106,11 @@ const config: HardhatUserConfig = {
       blockGasLimit: 6800000,
       allowUnlimitedContractSize: true,
       initialBaseFeePerGas: 0,
+      gas: 6800000,
+      gasPrice: 660000010, // ~66GWei,
+    },
+    localhost: {
+      timeout: 1e6,
     },
     rskDev: {
       from: "0xcd2a3d9f938e13cd947ec05abc7fe734df8dd826",
@@ -119,6 +137,7 @@ const config: HardhatUserConfig = {
       tags: ["testnet"],
     },
     rskForkedTestnet: {
+      // npx hardhat node --fork https://testnet.sovryn.app/rpc --no-deploy --fork-block-number 3495000
       accounts: testnetAccounts,
       url: "http://127.0.0.1:8545/",
       gas: 6800000,
@@ -127,11 +146,10 @@ const config: HardhatUserConfig = {
     rskSovrynMainnet: {
       chainId: 30,
       accounts: mainnetAccounts,
-      url: "https://mainnet4.sovryn.app/rpc",
+      url: "https://mainnet-dev.sovryn.app/rpc ",
       gasPrice: 66000010, // ~66GWei,
       blockGasLimit: 6800000,
-
-      timeout: 1e9,
+      timeout: 1e6,
       tags: ["mainnet"],
     },
     rskMainnet: {
@@ -140,16 +158,18 @@ const config: HardhatUserConfig = {
       url: "https://public-node.rsk.co/",
       gasPrice: 66000010, // ~66GWei,
       blockGasLimit: 6800000,
-
-      timeout: 1e9,
+      timeout: 1e6,
       tags: ["mainnet"],
     },
     rskForkedMainnet: {
+      // npx hardhat node --fork https://mainnet-dev.sovryn.app/rpc --no-deploy --fork-block-number 4929553
       chainId: 31337,
-      accounts: mainnetAccounts,
+      accounts: mainnetAccounts.length !== 0 ? mainnetAccounts : "remote",
       url: "http://127.0.0.1:8545",
       gas: 6800000,
+      gasPrice: 660000010, // ~66GWei,
       tags: ["mainnet", "forked"],
+      timeout: 1e6,
     },
     coverage: {
       url: "http://127.0.0.1:7546",
@@ -223,8 +243,10 @@ const config: HardhatUserConfig = {
     ],
   },
   paths: {
-    deployments: "./deployments",
     sources: "./contracts",
+    tests: "./tests",
+    deploy: "./deployment/deploy",
+    deployments: "./deployment/deployments",
   },
   gasReporter: {
     currency: "USD",
@@ -244,6 +266,10 @@ const config: HardhatUserConfig = {
         artifacts: "external/artifacts/*.sol/!(*.dbg.json)",
         // deploy: "node_modules/@cartesi/arbitration/export/deploy",
       },
+      {
+        artifacts: "external/artifacts",
+        // deploy: "node_modules/@cartesi/arbitration/export/deploy",
+      },
       /* {
         artifacts: "node_modules/someotherpackage/artifacts",
       }, */
@@ -252,20 +278,20 @@ const config: HardhatUserConfig = {
       rskSovrynTestnet: ["external/deployments/rskTestnet"],
       rskTestnet: [
         "external/deployments/rskTestnet",
-        "deployments/rskSovrynTestnet",
+        "deployment/deployments/rskSovrynTestnet",
       ],
       rskForkedTestnet: [
         "external/deployments/rskTestnet",
-        "deployments/rskSovrynTestnet",
+        "deployment/deployments/rskSovrynTestnet",
       ],
       rskSovrynMainnet: ["external/deployments/rskMainnet"],
       rskMainnet: [
         "external/deployments/rskMainnet",
-        "deployments/rskSovrynMainnet",
+        "deployment/deployments/rskSovrynMainnet",
       ],
       rskForkedMainnet: [
         "external/deployments/rskMainnet",
-        "deployments/rskSovrynMainnet",
+        "deployment/deployments/rskSovrynMainnet",
       ],
     },
   },

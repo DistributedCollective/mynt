@@ -1,0 +1,401 @@
+{
+  "address": "0x36C6f1B5E9de57A59B41778A36f3DD9ed1851832",
+  "abi": [
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "depositFee",
+          "type": "uint256"
+        }
+      ],
+      "name": "DepositFeeChanged",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint8",
+          "name": "version",
+          "type": "uint8"
+        }
+      ],
+      "name": "Initialized",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "previousOwner",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "OwnershipTransferred",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "withdrawalFee",
+          "type": "uint256"
+        }
+      ],
+      "name": "WithdrawalFeeChanged",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "PRECISION",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_massetAmount",
+          "type": "uint256"
+        }
+      ],
+      "name": "calculateDepositFee",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_massetAmount",
+          "type": "uint256"
+        }
+      ],
+      "name": "calculateRedeemFee",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getDepositFee",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getWithdrawalFee",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_depositFee",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_withdrawalFee",
+          "type": "uint256"
+        }
+      ],
+      "name": "initialize",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "owner",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "renounceOwnership",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "setDepositFee",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "setWithdrawalFee",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "transferOwnership",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "numDeployments": 2,
+  "bytecode": "0x608060405234801561001057600080fd5b5061068d806100206000396000f3fe608060405234801561001057600080fd5b50600436106100a95760003560e01c80638da5cb5b116100715780638da5cb5b14610108578063aaf5eb6814610123578063ac1e50251461012c578063d8e159f81461013f578063e4a3011614610147578063f2fde38b1461015a57600080fd5b80630de705b5146100ae578063247d284b146100c5578063490ae210146100d8578063715018a6146100ed5780637f0c6010146100f5575b600080fd5b6065545b6040519081526020015b60405180910390f35b6100b26100d33660046105ac565b61016d565b6100eb6100e63660046105ac565b610181565b005b6100eb610211565b6100b26101033660046105ac565b610225565b6033546040516001600160a01b0390911681526020016100bc565b6100b261271081565b6100eb61013a3660046105ac565b610233565b6067546100b2565b6100eb6101553660046105c5565b6102b7565b6100eb6101683660046105e7565b6103dc565b600061017b82606554610455565b92915050565b610189610474565b6127108111156101d55760405162461bcd60e51b81526020600482015260126024820152711a5b9d985b1a590819995948185b5bdd5b9d60721b60448201526064015b60405180910390fd5b60658190556040518181527f2a6f1084651542f3142c70f4c43c096d016a8b517c063660b146268f646ea43a906020015b60405180910390a150565b610219610474565b61022360006104ce565b565b600061017b82606754610455565b61023b610474565b6127108111156102825760405162461bcd60e51b81526020600482015260126024820152711a5b9d985b1a590819995948185b5bdd5b9d60721b60448201526064016101cc565b60678190556040518181527ffc1353e6b18ce07b5a979c8edf77a87455939a17a9eebbb084dcde5bfb3b19ac90602001610206565b600054610100900460ff16158080156102d75750600054600160ff909116105b806102f15750303b1580156102f1575060005460ff166001145b6103545760405162461bcd60e51b815260206004820152602e60248201527f496e697469616c697a61626c653a20636f6e747261637420697320616c72656160448201526d191e481a5b9a5d1a585b1a5e995960921b60648201526084016101cc565b6000805460ff191660011790558015610377576000805461ff0019166101001790555b61037f610520565b61038883610181565b61039182610233565b80156103d7576000805461ff0019169055604051600181527f7f26b83ff96e1f2b6a682f133852f6798a09c465da95921460cefb38474024989060200160405180910390a15b505050565b6103e4610474565b6001600160a01b0381166104495760405162461bcd60e51b815260206004820152602660248201527f4f776e61626c653a206e6577206f776e657220697320746865207a65726f206160448201526564647265737360d01b60648201526084016101cc565b610452816104ce565b50565b600061046d6127106104678585610594565b906105a0565b9392505050565b6033546001600160a01b031633146102235760405162461bcd60e51b815260206004820181905260248201527f4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e657260448201526064016101cc565b603380546001600160a01b038381166001600160a01b0319831681179093556040519116919082907f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e090600090a35050565b600054610100900460ff1661058b5760405162461bcd60e51b815260206004820152602b60248201527f496e697469616c697a61626c653a20636f6e7472616374206973206e6f74206960448201526a6e697469616c697a696e6760a81b60648201526084016101cc565b610223336104ce565b600061046d8284610610565b600061046d8284610635565b6000602082840312156105be57600080fd5b5035919050565b600080604083850312156105d857600080fd5b50508035926020909101359150565b6000602082840312156105f957600080fd5b81356001600160a01b038116811461046d57600080fd5b808202811582820484141761017b57634e487b7160e01b600052601160045260246000fd5b60008261065257634e487b7160e01b600052601260045260246000fd5b50049056fea2646970667358221220c83b8f5aaa4df3e3393881610c7dc528283fcddd66a8f37a757477b8baae8f4b64736f6c63430008110033",
+  "deployedBytecode": "0x608060405234801561001057600080fd5b50600436106100a95760003560e01c80638da5cb5b116100715780638da5cb5b14610108578063aaf5eb6814610123578063ac1e50251461012c578063d8e159f81461013f578063e4a3011614610147578063f2fde38b1461015a57600080fd5b80630de705b5146100ae578063247d284b146100c5578063490ae210146100d8578063715018a6146100ed5780637f0c6010146100f5575b600080fd5b6065545b6040519081526020015b60405180910390f35b6100b26100d33660046105ac565b61016d565b6100eb6100e63660046105ac565b610181565b005b6100eb610211565b6100b26101033660046105ac565b610225565b6033546040516001600160a01b0390911681526020016100bc565b6100b261271081565b6100eb61013a3660046105ac565b610233565b6067546100b2565b6100eb6101553660046105c5565b6102b7565b6100eb6101683660046105e7565b6103dc565b600061017b82606554610455565b92915050565b610189610474565b6127108111156101d55760405162461bcd60e51b81526020600482015260126024820152711a5b9d985b1a590819995948185b5bdd5b9d60721b60448201526064015b60405180910390fd5b60658190556040518181527f2a6f1084651542f3142c70f4c43c096d016a8b517c063660b146268f646ea43a906020015b60405180910390a150565b610219610474565b61022360006104ce565b565b600061017b82606754610455565b61023b610474565b6127108111156102825760405162461bcd60e51b81526020600482015260126024820152711a5b9d985b1a590819995948185b5bdd5b9d60721b60448201526064016101cc565b60678190556040518181527ffc1353e6b18ce07b5a979c8edf77a87455939a17a9eebbb084dcde5bfb3b19ac90602001610206565b600054610100900460ff16158080156102d75750600054600160ff909116105b806102f15750303b1580156102f1575060005460ff166001145b6103545760405162461bcd60e51b815260206004820152602e60248201527f496e697469616c697a61626c653a20636f6e747261637420697320616c72656160448201526d191e481a5b9a5d1a585b1a5e995960921b60648201526084016101cc565b6000805460ff191660011790558015610377576000805461ff0019166101001790555b61037f610520565b61038883610181565b61039182610233565b80156103d7576000805461ff0019169055604051600181527f7f26b83ff96e1f2b6a682f133852f6798a09c465da95921460cefb38474024989060200160405180910390a15b505050565b6103e4610474565b6001600160a01b0381166104495760405162461bcd60e51b815260206004820152602660248201527f4f776e61626c653a206e6577206f776e657220697320746865207a65726f206160448201526564647265737360d01b60648201526084016101cc565b610452816104ce565b50565b600061046d6127106104678585610594565b906105a0565b9392505050565b6033546001600160a01b031633146102235760405162461bcd60e51b815260206004820181905260248201527f4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e657260448201526064016101cc565b603380546001600160a01b038381166001600160a01b0319831681179093556040519116919082907f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e090600090a35050565b600054610100900460ff1661058b5760405162461bcd60e51b815260206004820152602b60248201527f496e697469616c697a61626c653a20636f6e7472616374206973206e6f74206960448201526a6e697469616c697a696e6760a81b60648201526084016101cc565b610223336104ce565b600061046d8284610610565b600061046d8284610635565b6000602082840312156105be57600080fd5b5035919050565b600080604083850312156105d857600080fd5b50508035926020909101359150565b6000602082840312156105f957600080fd5b81356001600160a01b038116811461046d57600080fd5b808202811582820484141761017b57634e487b7160e01b600052601160045260246000fd5b60008261065257634e487b7160e01b600052601260045260246000fd5b50049056fea2646970667358221220c83b8f5aaa4df3e3393881610c7dc528283fcddd66a8f37a757477b8baae8f4b64736f6c63430008110033",
+  "implementation": "0xccCa715033DC18240bd30D4A99d084D3329e9B73",
+  "devdoc": {
+    "details": "Contract is responsible for fees calculations.",
+    "events": {
+      "DepositFeeChanged(uint256)": {
+        "details": "Emitted when deposit fee has changed.",
+        "params": {
+          "depositFee": "Amount of the fee."
+        }
+      },
+      "WithdrawalFeeChanged(uint256)": {
+        "details": "Emitted when withdrawal fee has changed.",
+        "params": {
+          "withdrawalFee": "Amount of the fee."
+        }
+      }
+    },
+    "kind": "dev",
+    "methods": {
+      "calculateDepositFee(uint256)": {
+        "details": "Calculate and return deposit fee amount based on massetAmount.",
+        "params": {
+          "_massetAmount": "Amount of masset to deposit."
+        },
+        "returns": {
+          "_0": "fee           Calculated fee amount."
+        }
+      },
+      "calculateRedeemFee(uint256)": {
+        "details": "Calculate and return redeem fee amount based on massetAmount.",
+        "params": {
+          "_massetAmount": "Amount of masset."
+        },
+        "returns": {
+          "_0": "fee           Calculated fee amount."
+        }
+      },
+      "initialize(uint256,uint256)": {
+        "details": "Contract initializer.",
+        "params": {
+          "_depositFee": "Amount of deposit fee in promils.",
+          "_withdrawalFee": "Amount of redeem fee in promils."
+        }
+      },
+      "owner()": {
+        "details": "Returns the address of the current owner."
+      },
+      "renounceOwnership()": {
+        "details": "Leaves the contract without owner. It will not be possible to call `onlyOwner` functions anymore. Can only be called by the current owner. NOTE: Renouncing ownership will leave the contract without an owner, thereby removing any functionality that is only available to the owner."
+      },
+      "transferOwnership(address)": {
+        "details": "Transfers ownership of the contract to a new account (`newOwner`). Can only be called by the current owner."
+      }
+    },
+    "stateVariables": {
+      "PRECISION": {
+        "details": "Factor of fees."
+      }
+    },
+    "title": "FeesManager",
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {
+      "PRECISION()": {
+        "notice": "a value of 10000 means that 223 equals 2.23% and 10000 equals 100%"
+      }
+    },
+    "version": 1
+  },
+  "storageLayout": {
+    "storage": [
+      {
+        "astId": 534,
+        "contract": "contracts/masset/FeesManager.sol:FeesManager",
+        "label": "_initialized",
+        "offset": 0,
+        "slot": "0",
+        "type": "t_uint8"
+      },
+      {
+        "astId": 537,
+        "contract": "contracts/masset/FeesManager.sol:FeesManager",
+        "label": "_initializing",
+        "offset": 1,
+        "slot": "0",
+        "type": "t_bool"
+      },
+      {
+        "astId": 1094,
+        "contract": "contracts/masset/FeesManager.sol:FeesManager",
+        "label": "__gap",
+        "offset": 0,
+        "slot": "1",
+        "type": "t_array(t_uint256)50_storage"
+      },
+      {
+        "astId": 10,
+        "contract": "contracts/masset/FeesManager.sol:FeesManager",
+        "label": "_owner",
+        "offset": 0,
+        "slot": "51",
+        "type": "t_address"
+      },
+      {
+        "astId": 130,
+        "contract": "contracts/masset/FeesManager.sol:FeesManager",
+        "label": "__gap",
+        "offset": 0,
+        "slot": "52",
+        "type": "t_array(t_uint256)49_storage"
+      },
+      {
+        "astId": 7334,
+        "contract": "contracts/masset/FeesManager.sol:FeesManager",
+        "label": "depositFee",
+        "offset": 0,
+        "slot": "101",
+        "type": "t_uint256"
+      },
+      {
+        "astId": 7336,
+        "contract": "contracts/masset/FeesManager.sol:FeesManager",
+        "label": "DEPRECATED_depositBridgeFee",
+        "offset": 0,
+        "slot": "102",
+        "type": "t_uint256"
+      },
+      {
+        "astId": 7338,
+        "contract": "contracts/masset/FeesManager.sol:FeesManager",
+        "label": "withdrawalFee",
+        "offset": 0,
+        "slot": "103",
+        "type": "t_uint256"
+      },
+      {
+        "astId": 7340,
+        "contract": "contracts/masset/FeesManager.sol:FeesManager",
+        "label": "DEPRECATED_withdrawalBridgeFee",
+        "offset": 0,
+        "slot": "104",
+        "type": "t_uint256"
+      }
+    ],
+    "types": {
+      "t_address": {
+        "encoding": "inplace",
+        "label": "address",
+        "numberOfBytes": "20"
+      },
+      "t_array(t_uint256)49_storage": {
+        "base": "t_uint256",
+        "encoding": "inplace",
+        "label": "uint256[49]",
+        "numberOfBytes": "1568"
+      },
+      "t_array(t_uint256)50_storage": {
+        "base": "t_uint256",
+        "encoding": "inplace",
+        "label": "uint256[50]",
+        "numberOfBytes": "1600"
+      },
+      "t_bool": {
+        "encoding": "inplace",
+        "label": "bool",
+        "numberOfBytes": "1"
+      },
+      "t_uint256": {
+        "encoding": "inplace",
+        "label": "uint256",
+        "numberOfBytes": "32"
+      },
+      "t_uint8": {
+        "encoding": "inplace",
+        "label": "uint8",
+        "numberOfBytes": "1"
+      }
+    }
+  }
+}

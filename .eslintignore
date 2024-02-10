@@ -6,4 +6,21 @@ dist
 coverage
 # no generated types
 types/generated
+scripts/helpers/**/*.js
+hardhat/tasks/**/*.js
 test-utils/env_setup.ts
+
+artifacts
+build
+cache
+types
+reports
+tmp
+deployment/deployments
+.eslintrc.js
+docs
+
+#@todo remove when adapted to ethers typechain tyings 
+test-utils
+scripts/utils
+tests

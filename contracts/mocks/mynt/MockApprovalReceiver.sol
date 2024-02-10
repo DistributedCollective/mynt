@@ -7,7 +7,6 @@ import "../../interfaces/IApproveAndCall.sol";
  * @dev Interfaces are used to cast a contract address into a callable instance.
  */
 contract MockApprovalReceiver is IApproveAndCall {
-
     address public sender;
     uint256 public amount;
     address public token;

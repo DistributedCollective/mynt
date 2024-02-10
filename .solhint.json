@@ -1,8 +1,11 @@
 {
-  "extends": "solhint:recommended",
-  "rules": {
-    "compiler-version": ["error", "^0.8.0"],
-    "func-visibility": ["warn", { "ignoreConstructors": true }],
-    "indent": "off"
-  }
+    "extends": "solhint:recommended",
+    "rules": {
+        "prettier/prettier": "error",
+        "max-line-length": ["warn", 140],
+        "compiler-version": ["warn", "^0.8.0"],
+        "no-global-import": "warn",
+        "func-visibility": ["warn", { "ignoreConstructors": true }],
+        "indent": "off"
+    }
 }

@@ -39,13 +39,6 @@ Here is the list of available scripts:
 -    "fork:rsk-mainnet": "hardhat node --fork https://mainnet4.sovryn.app/rpc"
 -    "fork:rsk-testnet": "hardhat node --fork https://testnet.sovryn.app/rpc"
 
-## 3. Governance migration
-
-##### Here are the steps needed to properly deploy and integrate a governance system:
--   Run contracts migrations: `yarn migrate-governance` (this script will queue the transferAdmin call)
--   To set the proper admin you need to execute the "transferAdmin" task after sufficient time delay. `yarn hardhat transferAdmin`
--   Integrate governance system by changing owner of selected contracts by executing `yarn hardhat run scripts/governanceIntegration.ts`
-
 ## 4. How do fees work
 
 Fees are currently disabled. But if they are ever enabled, here is how they will work:

@@ -1,5 +1,8 @@
 node_modules
 artifacts
 cache
+tmp
+temp
 coverage*
 gasReporterOutput.json
+contracts/permit2
