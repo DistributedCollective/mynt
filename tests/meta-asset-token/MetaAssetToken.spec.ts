@@ -727,6 +727,79 @@ contract("MetaAssetToken", async (accounts) => {
           ownerInitialBalance.sub(new BN(amount)).toString()
         );
       });
+
+      it("permit should not be performed if Owner already have the allowance", async () => {
+        const oldAssetProxyAddress = massetManagerProxy;
+        const deadline = MAX_UINT256;
+        const initialOwnerBalance = toWei("1000000");
+        const amount = toWei("100");
+        const nonce = await token.nonces(ownerPermit);
+        const data = buildData(
+          chainId,
+          token.address,
+          ownerPermit,
+          spender,
+          amount,
+          nonce,
+          deadline
+        ) as any;
+        const signature = signTypedMessage(ownerWallet.getPrivateKey(), {
+          data,
+        });
+        const { v } = fromRpcSig(signature);
+        const { r, s }: any = fromRpcSig(signature);
+
+        await network.provider.request({
+          method: "hardhat_impersonateAccount",
+          params: [spender],
+        });
+        massetManagerProxy = newMassetManagerProxy;
+        await token.setMassetManagerProxy(massetManagerProxy);
+        await token.mint(ownerPermit, initialOwnerBalance, {
+          from: massetManagerProxy,
+        });
+
+        await token.setMassetManagerProxy(oldAssetProxyAddress);
+
+        const userInitialBalance = await token.balanceOf(user);
+        const ownerInitialBalance = await token.balanceOf(ownerPermit);
+        const spenderInitialAllowance = await token.allowance(
+          ownerPermit,
+          spender
+        );
+        expect(userInitialBalance.toString()).to.equal("0");
+        expect(spenderInitialAllowance.toString()).to.equal("0");
+
+        const account = await ethers.provider.getSigner(spender);
+        const tokenInstance = await ethers.getContractAt(
+          "MetaAssetToken",
+          token.address,
+          account
+        );
+
+        await tokenInstance.permit(ownerPermit, spender, amount, deadline.toString(), v, r, s)
+        await tokenInstance.transferWithPermit(
+          ownerPermit,
+          user,
+          amount,
+          deadline.toString(),
+          v,
+          r,
+          s
+        );
+
+        const userLatestBalance = await token.balanceOf(user);
+        const ownerLatestBalance = await token.balanceOf(ownerPermit);
+        const spenderLatestAllowance = await token.allowance(
+          ownerPermit,
+          spender
+        );
+        expect(userLatestBalance.toString()).to.equal(amount);
+        expect(spenderLatestAllowance.toString()).to.equal("0");
+        expect(ownerLatestBalance.toString()).to.equal(
+          ownerInitialBalance.sub(new BN(amount)).toString()
+        );
+      });
     });
   });
 
