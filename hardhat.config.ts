@@ -17,13 +17,12 @@ import "hardhat-contract-sizer";
 import "@openzeppelin/hardhat-upgrades";
 import "@nomiclabs/hardhat-solhint";
 
-import {
-  HardhatRuntimeEnvironment,
-  HttpNetworkUserConfig,
-} from "hardhat/types";
-
 import "./tasks";
-import "node_modules/sovrynsmartcontracts/hardhat/tasks/multisig";
+
+//@todo - resolve conflicts in "sovrynsmartcontracts": "git+https://github.com/DistributedCollective/Sovryn-smart-contracts.git"
+// install the package
+// uncomment the line below to use multisig scripts from the core repo
+// import "node_modules/sovrynsmartcontracts/hardhat/tasks/multisig";
 
 /*
  * Test hardhat forking with patched hardhat

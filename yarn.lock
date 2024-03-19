@@ -10773,10 +10773,6 @@ source-map@~0.2.0:
   dependencies:
     amdefine ">=0.0.4"
 
-"sovrynsmartcontracts@git+https://github.com/DistributedCollective/Sovryn-smart-contracts.git":
-  version "1.0.0"
-  resolved "git+https://github.com/DistributedCollective/Sovryn-smart-contracts.git#422222087c11e79d47fa1431bd461e6c4bba13b5"
-
 spdx-correct@^3.0.0:
   version "3.2.0"
   resolved "https://registry.yarnpkg.com/spdx-correct/-/spdx-correct-3.2.0.tgz#4f5ab0668f0059e34f9c00dce331784a12de4e9c"
