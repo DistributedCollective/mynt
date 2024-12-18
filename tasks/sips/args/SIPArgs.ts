@@ -199,96 +199,12 @@ const SIPSOV3564 = async (hre): Promise<ISipArgument> => {
   return args;
 };
 
-const sip0086 = async (
-  hre: HardhatRuntimeEnvironment
-): Promise<ISipArgument> => {
-  // Replace BasketManagerV3, MassetManager, FeesManager
-  const {
-    ethers,
-    deployments: { get },
-    network,
-  } = hre;
-
-  const proxyAdmin = await ethers.getContract("MyntAdminProxy");
-
-  const targetContractsList = [
-    "BasketManagerV3",
-  ];
-
-  const deploymentProxies = await Promise.all(
-    targetContractsList.map(async (val) => {
-      return (await get(val)).address;
-    })
-  );
-
-  const deploymentImplementations = await Promise.all(
-    targetContractsList.map(async (val) => {
-      return (await get(val)).implementation;
-    })
-  );
-
-  const targetsProxyAdmin = Array(deploymentProxies.length).fill(
-    proxyAdmin.address
-  );
-
-  // VALIDATE DEPLOYMENTS
-  const errorLog: string[] = [];
-  await Promise.all(
-    deploymentProxies.map(async (proxyAddress, index) => {
-      if (
-        (await proxyAdmin.getProxyImplementation(proxyAddress)) ===
-        deploymentImplementations[index]
-      ) {
-        errorLog.push(
-          `Implementation ${targetContractsList[index]} has not changed: ${deploymentImplementations[index]}`
-        );
-      }
-    })
-  );
-  if (errorLog.length > 0) {
-    logger.error(errorLog);
-    if (
-      (network.tags.mainnet || network.tags.testnet) &&
-      !network.tags["forked"]
-    ) {
-      throw Error("^");
-    }
-  }
-
-  // CALC SIP ARGS
-  const datas = deploymentProxies.map((val, index) => {
-    return ethers.utils.defaultAbiCoder.encode(
-      ["address", "address"],
-      [deploymentProxies[index], deploymentImplementations[index]]
-    );
-  });
-
-  const signatures = Array(deploymentProxies.length).fill(
-    "upgrade(address,address)"
-  );
-
-  const args: ISipArgument = {
-    args: {
-      targets: targetsProxyAdmin,
-      values: Array(deploymentProxies.length).fill(0),
-      signatures: signatures,
-      data: datas,
-      description:
-        "SIP-0086: Update removeBasset function in BasketManager Mynt, Details: , sha256: ", // @todo update the description
-    },
-    governorName: "GovernorOwner",
-  };
-
-  return args;
-};
-
 const sipArgs = {
   SampleSIP01,
   SIPSetMassetManagerProxy,
   SIPSetBasketManagerProxy,
   sip0072,
-  SIPSOV3564,
-  sip0086,
+  SIPSOV3564
 };
 
 export default sipArgs;
