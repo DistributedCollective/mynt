@@ -373,14 +373,19 @@ contract BasketManagerV3 is OwnableUpgradeable, ERC1967UpgradeUpgradeable {
         factorMap[_basset] = 0;
 
         uint256 index;
+        bool found = false;
         for (uint256 i = 0; i < bassetsArray.length - 1; i++) {
             if (bassetsArray[i] == _basset) {
                 index = i;
+                found = true;
                 break;
             }
         }
 
-        bassetsArray[index] = bassetsArray[bassetsArray.length - 1];
+        if(found) {
+            bassetsArray[index] = bassetsArray[bassetsArray.length - 1];
+        }
+
         bassetsArray.pop();
 
         emit BassetRemoved(_basset);

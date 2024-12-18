@@ -696,8 +696,16 @@ contract("BasketManagerV3", async (accounts) => {
         from: owner,
       });
 
+      mockToken2 = await MockERC20.new("", "", 18, sa.dummy1, tokens(1000), {
+        from: owner,
+      });
+
       await basketManager.initialize(massetManagerMock, { from: owner });
       await basketManager.addBasset(mockToken1.address, 1, 10, 100, false, {
+        from: owner,
+      });
+      
+      await basketManager.addBasset(mockToken2.address, 1, 10, 100, false, {
         from: owner,
       });
     });
@@ -728,7 +736,10 @@ contract("BasketManagerV3", async (accounts) => {
 
     context("should succeed", async () => {
       it("with all valid params", async () => {
-        const bassetToRemove = mockToken1.address;
+        const allCurrentlyActiveBassets = await basketManager.getBassets();
+        const initialBassetLength = allCurrentlyActiveBassets.length;
+
+        const bassetToRemove = allCurrentlyActiveBassets[0];
 
         const bassetsListBefore = await basketManager.getBassets();
         expect(bassetsListBefore).to.contain(bassetToRemove);
@@ -743,7 +754,83 @@ contract("BasketManagerV3", async (accounts) => {
         const bassetsListAfter = await basketManager.getBassets();
         expect(bassetsListAfter).not.to.contain(bassetToRemove);
 
+        const latestBassetLength = bassetsListAfter.length;
+        expect(latestBassetLength + 1).to.equal(initialBassetLength);
+
         await expectEvent(receipt, "BassetRemoved", { basset: bassetToRemove });
+      });
+
+      it("successfully removed the last index of basset", async () => {
+        const allCurrentlyActiveBassets = await basketManager.getBassets();
+        const initialBassetLength = allCurrentlyActiveBassets.length;
+
+        expect(allCurrentlyActiveBassets)
+
+        const bassetToRemove = allCurrentlyActiveBassets[allCurrentlyActiveBassets.length - 1];
+
+        const bassetsListBefore = await basketManager.getBassets();
+        expect(bassetsListBefore).to.contain(bassetToRemove);
+
+        const { receipt } = await basketManager.removeBasset(bassetToRemove, {
+          from: owner,
+        });
+
+        const isValid = await basketManager.isValidBasset(bassetToRemove);
+        expect(isValid).to.equal(false);
+
+        const bassetsListAfter = await basketManager.getBassets();
+        expect(bassetsListAfter).not.to.contain(bassetToRemove);
+
+        const latestBassetLength = bassetsListAfter.length;
+        expect(latestBassetLength + 1).to.equal(initialBassetLength);
+
+        await expectEvent(receipt, "BassetRemoved", { basset: bassetToRemove });
+      });
+
+      it("successfully removed the last index of basset with 1 basset list only", async () => {
+        const allCurrentlyActiveBassets = await basketManager.getBassets();
+        const initialBassetLength = allCurrentlyActiveBassets.length;
+
+        expect(allCurrentlyActiveBassets)
+
+        const bassetToRemove = allCurrentlyActiveBassets[allCurrentlyActiveBassets.length - 1];
+
+        const bassetsListBefore = await basketManager.getBassets();
+        expect(bassetsListBefore).to.contain(bassetToRemove);
+
+        const tx = await basketManager.removeBasset(bassetToRemove, {
+          from: owner,
+        });
+
+        let isValid = await basketManager.isValidBasset(bassetToRemove);
+        expect(isValid).to.equal(false);
+
+        let bassetsListAfter = await basketManager.getBassets();
+        expect(bassetsListAfter).not.to.contain(bassetToRemove);
+
+        let latestBassetLength = bassetsListAfter.length;
+        expect(latestBassetLength + 1).to.equal(initialBassetLength);
+
+        await expectEvent(tx.receipt, "BassetRemoved", { basset: bassetToRemove });
+
+
+        /** remove last basset */
+        const lastActiveBassets = await basketManager.getBassets();
+        expect(lastActiveBassets.length).to.equal(1);
+        const tx2 = await basketManager.removeBasset(lastActiveBassets[0], {
+          from: owner,
+        });
+
+        isValid = await basketManager.isValidBasset(lastActiveBassets[0]);
+        expect(isValid).to.equal(false);
+
+        bassetsListAfter = await basketManager.getBassets();
+        expect(bassetsListAfter).not.to.contain(lastActiveBassets[0]);
+
+        latestBassetLength = bassetsListAfter.length;
+        expect(latestBassetLength).to.equal(0);
+
+        await expectEvent(tx2.receipt, "BassetRemoved", { basset: lastActiveBassets[0] });
       });
     });
   });
